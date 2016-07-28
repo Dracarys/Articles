@@ -1,6 +1,6 @@
 # Swift中与C API的交互（Swift 3 beta）
 
-_本文是《Using Swift with Cocoa and Objective-C》一书，R_
+_本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C APIs一章的中文翻译，初次翻译，受限于个人知识水平，难免有词不达意，甚至错误的地方，望斧正。_
 
 作为与Objective-C 交互的一部分，Swift对C语言的类型和特性也提供了良好的兼容。Swift还提供了相应的交互方式，以便在需要时可以在代码中使用常见的C结构模式。
 
