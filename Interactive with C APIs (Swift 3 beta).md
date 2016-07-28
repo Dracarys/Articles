@@ -1,11 +1,13 @@
-# Swift中与C API的交互（Swift 3 beta）
+# Swift中与 C API的交互（Swift 3 beta）
 
-_本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C APIs一章的中文翻译，初次翻译，受限于个人知识水平，难免有词不达意，甚至错误的地方，望斧正。_
+_本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C APIs一章的中文翻译。初次翻译，受限于个人知识水平，难免有词不达意，甚至错误的地方，望斧正。_
 
-作为与Objective-C 交互的一部分，Swift对C语言的类型和特性也提供了良好的兼容。Swift还提供了相应的交互方式，以便在需要时可以在代码中使用常见的C结构模式。
+作为与Objective-C交互的一部分，Swift对C语言的类型和特性也提供了良好的兼容。Swift还提供了相应的交互方式，以便在需要时可以在代码中使用常见的C结构模式。
 
-### 主要类型
-Swift提供了与C char，int，float和double等基本类型相应的类型，但这些类型与Swift核心类型之间不能进行隐式转换。除非代码中有明确需求，否则都应该使用Int而不是int。
+### 基本类型
+
+虽然Swift提供了与 C 语言中 char，int，float和double等基本类型相应的类型，但这些类型与Swift核心类型之间不能进行隐式转换。除非代码中有明确需求，否则都应该使用Int而不是int。
+
 
 |C|Swift|
 |:-----|:-----|
@@ -26,22 +28,23 @@ Swift提供了与C char，int，float和double等基本类型相应的类型，�
 |float|CFloat|
 |double|CDouble|
 
-###全局常量
-定义在C和Objective－C源文件中的全局常量，会被Swift编译器以全局常量自动导入。
+### 全局常量
+定义在 C 和Objective－C源文件中的全局常量，会自动被Swift编译器导入为全局常量。
 
-####常量的导入
-在Objective－C中，常量通常被用来为属性和函数参数提供一组可选值。你用通过NS_STRING_ENUM或者NS_EXTENSIBLE_STRING_ENUM宏标记一个Ojbective－C的typedef声明，来让Swift把它们作为普通类型的成员导入。
+#### 常量的导入
 
-通过向表示一组固定值的常量添加NS_STRING_ENUM宏标记，可使其作为枚举（enumeration）被导入.例如，下面这段关于TraficLightColor的字符串常量声明：
+在Objective－C中，常量通常被用来为属性和函数参数提供一组可选值。通过使用NS_STRING_ENUM或者NS_EXTENSIBLE_STRING_ENUM宏标注一个Ojbective－C的typedef声明，来让Swift把它们以普通类型的成员的方式导入。
 
-``` C
+表示一组可用值的常量，可以通过添加NS_STRING_ENUM宏，来使其导入为枚举。例如，下面这段关于TraficLightColor的Objective-C字符串常量声明：
+
+``` Objective-C
 	typedef NSString * TrafficLightColor NS_STRING_ENUM;
 	TrafficLightColor const TraficLightColorRed;
 	TrafficLightColor const TraficLightColorYellow;
 	TrafficLightColor const TraficLightColorGreen;
 ```
 
-下面是Swift导入后的代码:
+下面展示了SWift是如何导入的这段代码:
 
 ``` Swift
 	enum TrafficLightColor: String {
@@ -51,16 +54,16 @@ Swift提供了与C char，int，float和double等基本类型相应的类型，�
 	}
 ```
 	
-通过向表示一组可扩展的常量添加NS_EXTENSIBLE_STRING_ENUM宏标记，可使其作为结构体（Structure）被导入。例如，下面这段StateOfMatter的字符串常量声明：
+对于呈现一组可扩展的可用常量值来说，可通过添加NS_EXTENSIBLE_STRING_ENUM宏标注，来使其以结构体的形式被导入。例如，下面这段关于StateOfMatter的Objective-C字符串常量声明：
 
-``` C
-	typedef NSString *StateOfMatter NS_EXTENSIBLE_STRING_ENUM;
+``` Objective-C
+	typedef NSString * StateOfMatter NS_EXTENSIBLE_STRING_ENUM;
 	StateOfMatter const StateOfMatterSolid;
 	StateOfMatter const StateOfMatterLiquid;
 	StateOfMatter const StateOfMatterGas;
 ```
 
-下面是Swfit导入后的代码：
+下面展示了SWift是如何导入的这段代码:
 
 ``` Swift
 	struct StateOfMatter: RawRepresentable {
@@ -75,19 +78,19 @@ Swift提供了与C char，int，float和double等基本类型相应的类型，�
 	}
 ```
 	
-通过NS_EXTENSIBLE_STRING_ENUM宏标记被导入的常量，在Swift代码中可以通过扩展添加新值。
+通过NS_EXTENSIBLE_STRING_ENUM宏被导入的常量，在Swift代码中可以扩展添加新值。
 
 ``` Swift
 	extension StateOfMatter {
 		static var plasma: StateOfMatter {
-			return StateOfMatter(rawValue: "plasm")
+			return StateOfMatter(rawValue: "plasma")
 		}
 	}
 ```
 	
 ###函数
 
-Swift可以把任何声明在C头文件中的函数作为全局函数导入。例如，下面这单C函数声明：
+Swift可以把任何声明在C头文件中的函数作为全局函数导入。例如，下面的 C 函数声明：
 
 ``` C
 	int product(int multiper, int multiplicand);
@@ -97,7 +100,7 @@ Swift可以把任何声明在C头文件中的函数作为全局函数导入。�
 	float distance(struct Point2D from, struct Point2D to);
 ```
 
-下面是Swift的导入：
+下面展示了SWift是如何导入的这段代码:
 	
 ``` Swift
 	func product(_ multiplier: Int32, _ multiplicand: Int32) -> Int32
@@ -107,10 +110,10 @@ Swift可以把任何声明在C头文件中的函数作为全局函数导入。�
 	func distance(_ from: Point2D, _ to: Point2D) -> Float
 ```
 	
-####变长函数(不固定参数函数)
-在Swift中，可以通过getValist(\_:)或者withValist(\_:_:)来调用C中诸如vaspritf的变长函数. getValist(\_:)函数通过接收一个CVarArg值的数组，来返回一个CVaListPointer，而withValist(\_:\_:)则通过接收一个闭包参数来实现。之后返回值CVaListPointer在传给C变长函数的va_lsit参数。
+#### 可变参数函数(Variadic Functions)
+在Swift中，可以通过getValist(\_:)或者withValist(\_:_:)来调用 C 中诸如vaspritf的可变参数函数. getValist(\_:)函数通过接收一个CVarArg值的数组，来返回一个CVaListPointer，相对于直接反回withValist(\_:\_:)则通过接受一个闭包来实现。接下来返回值CVaListPointer在传递给 C 可变参数函数的va_lsit参数。
 
-示例，下面的代码展示了如何在Swift中调用vasprintf函数：
+例如，下面的代码展示了如何在Swift中调用vasprintf函数：
 
 ``` Swift
 	func swiftprintf(format: String, argument: CVarArg...) -> String? {
@@ -130,8 +133,10 @@ Swift可以把任何声明在C头文件中的函数作为全局函数导入。�
 	// Prints "√2 ≅ 1.41421"
 ```
 
-#### _注意_
-	可选类型指针不能传入withVaList(\_:invoke:)函数，（未完成）
+	注意
+	可选类型指针不能传入withVaList(_:invoke:)函数，
+	可以通过Int.init(bitPattern:)构造函数，来将可选类型指针转为Int，
+	Which has the same C variadic calling conventions as pointer on all supported platforms(？？？ 尚待完善)。
 	
 ### 结构体
 Swift可以把任何头文件中声明的C结构体导入为Swift结构体，导入后的结构体会为每一个原C结构体成员生成一个存储型属性和一个逐一成员构造器。如果被导入的成员均有默认值，那么Swift同时会生成一个无参数的默认构造器。例如下面这个C结构体：
