@@ -29,11 +29,11 @@ _本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C 
 |double|CDouble|
 
 ### 全局常量
-定义在 C 和Objective－C源文件中的全局常量，会自动被Swift编译器引入为全局常量。
+定义在 C 和Objective-C源文件中的全局常量，会自动被Swift编译器引入为全局常量。
 
 #### 常量的引入
 
-在Objective－C中，常量通常用来为属性和函数参数提供一组可选值。使用NS\_STRING\_ENUM和NS\_EXTENSIBLE\_STRING\_ENUM宏标注一个Ojbective－C的typedef声明，可让Swift以普通类型的成员的方式引入它们。
+在Objective-C中，常量通常用来为属性和函数参数提供一组可选值。使用NS\_STRING\_ENUM和NS\_EXTENSIBLE\_STRING\_ENUM宏标注一个Ojbective－C的typedef声明，可让Swift以普通类型的成员的方式引入它们。
 
 表示一组可用值的常量，可以通过添加NS\_STRING\_ENUM宏，来将其引入为枚举。例如，下面这段关于TraficLightColor的Objective-C字符串常量声明：
 
@@ -44,7 +44,7 @@ _本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C 
 	TrafficLightColor const TraficLightColorGreen;
 ```
 
-下面展示了SWift如何引入它们:
+下面展示了Swift如何引入它们:
 
 ``` Swift
 	enum TrafficLightColor: String {
@@ -63,7 +63,7 @@ _本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C 
 	StateOfMatter const StateOfMatterGas;
 ```
 
-下面展示了SWift如何引入它们:
+下面展示了Swift如何引入它们:
 
 ``` Swift
 	struct StateOfMatter: RawRepresentable {
@@ -100,7 +100,7 @@ Swift可以把任何声明在C头文件中的函数作为全局函数引入。�
 	float distance(struct Point2D from, struct Point2D to);
 ```
 
-下面展示了SWift如何引入它们:
+下面展示了Swift如何引入它们:
 	
 ``` Swift
 	func product(_ multiplier: Int32, _ multiplicand: Int32) -> Int32
@@ -116,7 +116,7 @@ Swift可以把任何声明在C头文件中的函数作为全局函数引入。�
 例如，下面的代码展示了如何在Swift中调用vasprintf函数：
 
 ``` Swift
-	func swiftprintf(format: String, argument: CVarArg...) -> String? {
+	func Swiftprintf(format: String, argument: CVarArg...) -> String? {
 		return withValist(arguments) { va_list in
 			var buffer: UnsafeMutablePointer<Int8>? = nil
 			return format.withCstring { CString in 
@@ -129,7 +129,7 @@ Swift可以把任何声明在C头文件中的函数作为全局函数引入。�
 		}
 	}
 	
-	print(swiftprintf(format: "√2 ≅ %g", arguments: sqrt(2.0))!)
+	print(Swiftprintf(format: "√2 ≅ %g", arguments: sqrt(2.0))!)
 	// Prints "√2 ≅ 1.41421"
 ```
 
@@ -164,24 +164,24 @@ Swift可以把任何头文件中声明的 C 结构体引入为Swift结构体，�
 
 #### 将函数引入为类型成员
 
-CoreFoundation框架中的 C API，大都提供了用于创建、存取、或者修改 C 结构体的函数。可以通过在代码添加CF\_SWIFT\_NAME宏，来让Swift将这些 C 函数引入为结构体的成员函数。例如，下面这段C函数声明：
+CoreFoundation框架中的 C API，大都提供了用于创建、存取、或者修改 C 结构体的函数。可以通过在代码添加CF\_Swift\_NAME宏，来让Swift将这些 C 函数引入为结构体的成员函数。例如，下面这段C函数声明：
 
 ``` C
 	Color ColorCreateWithCMYK(float c, float m, float y, float k) CF_SWFIT_NAME(Color.init(c:m:y:k:));
 
-	float ColorGetHue(Color color) CF_SWIFT_NAME(getter:Color.hue(self:));
+	float ColorGetHue(Color color) CF_Swift_NAME(getter:Color.hue(self:));
 
-	void ColorSetHue(Color color, float hue) CF_SWIFT_NAME(setter:Color.hue(self:newvalue));
+	void ColorSetHue(Color color, float hue) CF_Swift_NAME(setter:Color.hue(self:newvalue));
 
-	Color ColorDarkenColor(Color color, flaot amout) CF_SWIFT_NAME(Color.Darken(self:amount:));
+	Color ColorDarkenColor(Color color, flaot amout) CF_Swift_NAME(Color.Darken(self:amount:));
 
-	extern const Color ColorBondiBlue CF_SWIFT_NAME(Color.boundiBlue);
+	extern const Color ColorBondiBlue CF_Swift_NAME(Color.boundiBlue);
 
-	Color ColorGetCalibrationColor(void) CF_SWIFT_NAME(getter:Color.calibration());
+	Color ColorGetCalibrationColor(void) CF_Swift_NAME(getter:Color.calibration());
 
-	Color ColorSetCalibrationColor(Color color) CF_SWIFT_NAME(setter:Color.calibration(newValue:));
+	Color ColorSetCalibrationColor(Color color) CF_Swift_NAME(setter:Color.calibration(newValue:));
 ```
-下面展示了SWift如何将它们以类型成员的方式引入：
+下面展示了Swift如何将它们以类型成员的方式引入：
 
 ``` Swift
 	extension color {
@@ -197,12 +197,12 @@ CoreFoundation框架中的 C API，大都提供了用于创建、存取、或者
 	}
 ```
 
-传入CF\_SWIFT\_NAME宏的参数语法与#selector表达式相同。CF\_SWIFT\_NAME宏中的self，表示接收该方法的实例对象。
+传入CF\_Swift\_NAME宏的参数语法与#selector表达式相同。CF\_Swift\_NAME宏中的self，表示接收该方法的实例对象。
 
 	注意
-	使用CF_SWIFT_NAME宏时不能改变被引入成员函数的参数顺序和数量。
+	使用CF_Swift_NAME宏时不能改变被引入成员函数的参数顺序和数量。
 	如果想更Swift点，可以重写一个Swift函数，然后在其内部再调用所需的 C 函数
-	（译者：用swift再做一层封装）
+	（译者：用Swift再做一层封装）
 
 ### 枚举
 Swift可以把任何NS\_ENUM标记的 C 枚举引入为Int类型的Swift枚举。无论是系统框架还是其它代码，引入后的枚举都会自动移除原命名前缀，
@@ -263,7 +263,7 @@ Swift会自动为引入的C枚举类型适配Equaltable协议。
 
 #### 选项型枚举（Option sets）
 Swift同样可以把NS\_OPTIONS宏标注的 C 选项型枚举引入为Swift的选项（Option set）。与先前枚举的引入类似，选项值的命名前缀也会被移除。
-例如，下面这个Objective－C声明的选项：
+例如，下面这个Objective-C声明的选项：
 
 ``` Objective-C
 	typedef NS_OPTIONS(NSUInteger, UIViewAutoresizing){
@@ -277,7 +277,7 @@ Swift同样可以把NS\_OPTIONS宏标注的 C 选项型枚举引入为Swift的�
 	};
 ```
 
-在SWift中会被引入为以下形式：
+在Swift中会被引入为以下形式：
 
 ``` Swift
 	public struct UIViewAutoresizing : OptionSet {
@@ -291,7 +291,7 @@ Swift同样可以把NS\_OPTIONS宏标注的 C 选项型枚举引入为Swift的�
 		public static var flexibleBottomMargin: UIViewAutoresizing { get }
 	}
 ```
-在Objective－C中，选项型枚举实际上是整型位掩码。可通过位或操作符（｜）来组合可选值，也可以通过位与操作符（&)检查选项值。通过常量或表达式来创建选项型枚举，空选项型枚举用常量零（0）表示。
+在Objective-C中，选项型枚举实际上是整型位掩码。可通过位或操作符（｜）来组合可选值，也可以通过位与操作符（&)检查选项值。通过常量或表达式来创建选项型枚举，空选项型枚举用常量零（0）表示。
 在Swift中，选项是以一个遵从OptionSet协议的结构体来实现，每个选项值都有一个静态变量。与枚举类似，可通过（.）语法获取一个选项值，也可以通过字面量数组来创建一个选项值。一个空的选项既可以通过字面量空数组（［］）来创建，也可以通过其默认构造函数创建。
 
 	注意
@@ -310,7 +310,7 @@ Swift同样可以把NS\_OPTIONS宏标注的 C 选项型枚举引入为Swift的�
 ```
 
 #### 联合体（Unions）
-Swift仅部分支持 C 联合体类型，对于引入的 C 联合体，Swift无法存取不支持的域（fields）。但那些使用联合体作为参数或返回值的 C 和Objective－C API，可以被Swift正确调用。
+Swift仅部分支持 C 联合体类型，对于引入的 C 联合体，Swift无法存取不支持的域（fields）。但那些使用联合体作为参数或返回值的 C 和Objective-C API，可以被Swift正确调用。
 
 #### 位域（Bit Fields）
 Swift可以把结构体中的位域，诸如Foundation中的NSDecimal类型，引入为计算型存储属性。在对其进行读取时，Swift会自动将其值转换为Swift兼容类型。
@@ -363,7 +363,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 
 例如，这样一个函数：
 
-``` SWift
+``` Swift
 	func takesAPointer(_ p: UnsafePointer<Float>!) {
 		// ...
 	}
@@ -380,7 +380,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 
 例如下面这个函数：
 
-``` SWift
+``` Swift
 	func takesAVoidPointer(_ p: UnsafePointer<Void>!) {
 		// ...
 	}
@@ -405,7 +405,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 
 例如下面这个函数：
 
-``` SWift
+``` Swift
 	func takesAMutablePointer(_ p: UnsafeMutablePointer<Float>!) {
 		// ...
 	}
@@ -424,7 +424,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 
 例如下面这个函数：
 
-``` SWift
+``` Swift
 	func takesAMutableVoidPointer(_ p: UnsafeMutablePointer<Void>!) {
 		// ...
 	}
@@ -451,7 +451,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 
 例如下面这个函数：
 
-``` SWift
+``` Swift
 	func takesAnAutoreleasingPointer(_ p: AutoreleasingUnsafeMutablePointer<NSDate?>!) {
 		// ...
 	}
@@ -467,7 +467,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 指针所指的类型不会被桥接转换。例如，NSString \*\* 会被Swift引入为AutoreleasingUnsafeMutablePointer<NSString?>，而不是AutoreleasingUnsafeMutablePointer<String?>。
 
 #### 函数指针
-通过@convention(c)关键字标示来C函数指针调用转换作为闭包引入到SWift中（？？？不通顺）。例如，一个int (x) (void)类型的C函数指针，可以以@convertion(c) () -> Int32 形式引入。当调用你个接受函数指针参数的函数时，可以直接传入SWift函数，闭包或nil。You can also pass a closure property of a generic type or a generic method as long as no generic type parameters are reference in the closure's argument lis or body. 例如，Core Foundation中的CFArrayCreateMutable(\_:\_:\_:)函数。CFArrayCreateMutable(\_:\_:\_:)函数，接受一个初始化为函数指针的CFArrayCallBacks结构体：
+通过@convention(c)标注，Swift会根据 C 函数指针调用规则将其引入为结构体。例如，一个int (x) (void)类型的 C 函数指针，会以 @convertion(c) () -> Int32 的形式引入Swift。当调用一个接受函数指针类型参数的函数时，可以直接传入一个顶级的Swift函数，一个字面量闭包，或者nil。还可以传入一个泛型闭包属性，或者一个闭包参数列表和者闭包体中都没有引用泛型参数的泛型函数。例如，Core Foundation中的CFArrayCreateMutable(\_:\_:\_:)函数。CFArrayCreateMutable(\_:\_:\_:)函数，接受一个初始化为函数指针的CFArrayCallBacks结构体：
 
 ``` Swift
 	func customCopyDescription(_ p: UnsafePointer<Void>!) -> Unmanaged<CFString>! {
@@ -490,7 +490,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 上面的例子中，CFArrayCallBacks在初始化时，分别把nil赋值给retain和release，把customCopyDescription(_:)函数作为参数赋给copyDescription，并把一个闭包体作为参数赋值equal。
 
 #### 空指针
-在Objective－C中，指针类型的声明可以通过_Nullable和_Nonnull表示表明是否可以接受空值nil或NULL。在SWift中，空指针通过nil值或这个可选指针类型来实现。通过接受一个表示内存地址的整型初始化指针，是可失败的。一个非可选的指针类型不能被赋值为nil。
+在Objective-C中，指针类型的声明可以通过标注\_Nullable和\_Nonnull来表明是否可以接受空值nil或NULL。在Swift中，空指针是通过一个值为nil的可选类型指针来实现。透过一个整数内存地址来构造指针，是可失败的。一个非可选的指针类型不能被赋值为nil。
 
 对应关系如下：
 
@@ -505,26 +505,23 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 	将现有代码迁移至Swift最新版本时，可能需要手动修改所有通过nil初始化的指针为可选类型。
 	
 #### 指针运算
-当处理未知数据类型时，可能会涉及不安全的指针操作。在Swift中，可以通过对一个指针的值进行位运算来创建一个指定偏移量的新指针。
+当处理未知数据类型时，可能会用到不安全的指针操作。在Swift中，可通过运算符对一个指针的值进行位运算，以此来创建一个指定偏移量的新指针。
 
-``` SWift
+``` Swift
 	let pointer: UnsafePointer<Int>
 	let offsetPointer = pointer + 24
 	// offsetPointer 是一个相对向前偏移了24位的新指针
 ```
 
-	注意
-	关于Swift中如何对取类型和值的内存空间大小，请转至_数据类型空间计算_(Ddata Type Size Calculation)部分。
-
-#### 类型空间计算
-在C语言中，通过sizeof来获取各种变量或数据类型的空间大小，在SWift中，通过sizeof(\_:)来获取指定类型的空间大小，或通过 sizeofValue(\_:)来获取指定值所占空间大小。然而与C语言中的sizeof不同，Swift中的sizeof(\_:)和sizeofValue(\_:)函数未将因内存对齐而增加的额外空间计算在内。例如，在Darwin中通过C来获取timeval结构体的空间是16字节，而通过SWift获取则是12字节。
+#### 数据类型空间计算
+在 C 语言中，通过sizeof操作符来获取各种变量或数据类型的空间大小，而Swift则分别通过sizeof(\_:)和sizeofValue(\_:)来获取指特定类型或值所占的内存空间大小。然而与 C 语言中的sizeof不同，Swift中的sizeof(\_:)和sizeofValue(\_:)函数未将因内存对齐而增加的额外空间计算在内。例如，在Darwin中以 C 方式来获取timeval结构体的空间是16字节，而通过Swift获取则是12字节。
 
 ``` Swift
 	printf(sizeof(timeval.self))
 	// Prints "12"
 ```
 
-可以trideof(\_:) strideofValue(\_:)函数来代替，这两个函数返回的内存空间大小与C的sizeof返回想同。
+类似功能由trideof(\_:)和strideofValue(\_:)函数代替，这两个函数返回的内存空间大小与 C 的sizeof返回相同。
 
 ``` Swift
 	printf(strideof(timeval.self))
@@ -543,23 +540,24 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 ```
 
 	注意
-	Only Swfit function types with C function reference calling convertion may be user for function pointer arguments. Like a C funcion pointer, a Swift function type with the @convertion(c) attribute does not capture the context of its surrounding scope.
-	For more information, see Type Attributes in _The SWift Programming Language (Swift 3).
+	仅有哪些符合 C 函数调用规则的Swift函数类型可以作为函数指针参数。
+	与 C 函数指针相同，带有@convertion(c)属性的Swift函数类型不会捕获其周边的代码环境。
+	更多内容，请至《Swift编程语言》（Swift 3）中类型属性一章。
 
 ### 单次初始化
-在C语言中，POSIX的pthread_once()函数和 Grand Central Dispatch中的dipatch_once()、dispatch_once_f()函数都可以保证代码仅被初始化一次（？？？这里不准确）。在SWift中，全局常量和存储型属性即使被多个线程同时交替存取，也能保证仅初始化一次。这是有语言自身特点来实现的。相应功能的POSIX和Grand Central Dispatch C函数不能在Swift中调用。
+在 C 语言中，POSIX的pthread_once()函数和 Grand Central Dispatch中的dipatch_once()、dispatch_once_f()函数都有保证代码仅被初始化一次的机制。在Swift中，全局常量和存储型属性即使被多个线程同时交替存取，也能保证仅初始化一次。这是由语言自身特点来实现的。相应的POSIX和Grand Central Dispatch C 函数不能在Swift中调用。
 
 ### 预处理命令
 Swift没有预处理程序。相应地，它通过编译属性，条件编译block，和语言特性来实现相同功能。因此，预处理命令不会被引入到Swift中。
 
 ### 简单宏命令
-在Swift中通过使用全局常量来代替，在C和Objective－C中由#define定义的常量。例如，#define FADE_ANNOTATION_DURATION 0.35常量，可以在SWift中被更好的表示为 let FADE_ANNOTATION_DURATION = 0.35。由于简单常量宏定义可以被直接映射为SWift的全局变量，所以编译器会自动引入那些定在C和Objective—C源文件中的简单宏定义。
+在Swift中可通过全局常量来代替，在 C 和Objective-C中由#define定义的常量。例如，#define FADE\_ANNOTATION\_DURATION 0.35，可以在Swift中被更好的表示为 let FADE\_ANNOTATION\_DURATION = 0.35。由于宏定义的常量可以被直接映射为Swift的全局变量，所以编译器会自动引入那些定在 C 和Objective—C源文件中的简单宏定义。
 
 ### 复杂宏命令
-Swift不支持C或者Objective－C中的复杂宏命令，这里的复杂宏是指那些带有括号，与函数类似，却未定义常量的宏。C和Objective－C中的复杂宏命令通常被用来规避类型检查限制，或者充当大量使用的代码模板。与此同时宏也让debuging和重构变困难。Swfit中可以通过函数和generics不必妥协地达到相同目的。综上，C和Objective－C中底复杂宏命令在Swift代码中是无效。
+Swift不支持 C 或者Objective-C中的复杂宏命令，这里的复杂宏是指那些带有括号，与函数类似，却未用于定义常量的宏。C 和Objective-C中的复杂宏命令通常被用来规避类型检查限制，或者充当被大量使用的代码的模板。与此同时宏也让debuging和重构变困难。Swfit中可以通过函数和泛型来更好地达到这一目的。综上，C 和Objective-C中的复杂宏命令在Swift代码中是无效。
 
 ### 条件编译Block
-Swift和Objective－C通过不同的方式实现了条件编译。SWift通过_条件编译Block_来实现。例如，
+Swift和Objective-C通过不同的方式实现了条件编译。Swift通过_条件编译block_来实现。例如，
 
 ``` Swift
 	#if DEBUG_LOGGING
@@ -578,11 +576,11 @@ Swift和Objective－C通过不同的方式实现了条件编译。SWift通过_�
 	注意
 	通过arch(arm)来判断ARM 64设备，不会返回true。当代码以32位iOS模拟器为目标编译时，arch(i386)会返回true。
 	
-通过逻辑与 && 和逻辑或 || 符号可以混合判断条件，通过逻辑否 ！可以做假条件判断，还可以通过 #elseif 和 #else 来添加条件判断分支，此外在一个选择编译Block中还能嵌套另一个Block。
+通过逻辑与 && 和逻辑或 || 符号可以混合判断条件，通过逻辑否 ！可以做假条件判断，还可以通过 #elseif 和 #else 来添加条件判断分支，此外在一个选择编译block中还能嵌套另一个选择编译block。
 
 ``` Swift
 	#if arch(arm) || arch(arm64)
-	#if swift(>=3.0)
+	#if Swift(>=3.0)
 	print("Using Swift 3 ARM code")
 		#else
 		print("Using Swift 2.2 ARM code")
@@ -594,8 +592,8 @@ Swift和Objective－C通过不同的方式实现了条件编译。SWift通过_�
 	#endif
 ```
 
-与 C 语言的预编译不同，Swift的条件编译block必须完整且语法正确，这是因为SWift代码即使尚未被编译，也会进行语法检查。
-特例，如果条件编译block包含 swift()  判断，那么这个表达式仅在 Swift 版本与判断条件相匹配的时候才会去解析该表达式。这是为了确保旧版编译器不会去尝试解析由较新版本的Swift语法。
+与 C 语言的预编译不同，Swift的条件编译block必须完整且语法正确，这是因为Swift代码即使尚未被编译，也会进行语法检查。
+特例，如果条件编译block包含swift()判断，那么这个表达式仅在Swift版本与判断条件相匹配的时候才会去解析该表达式。这是为了确保旧版编译器不会去尝试解析较新版本的Swift语法。
 
 
 
