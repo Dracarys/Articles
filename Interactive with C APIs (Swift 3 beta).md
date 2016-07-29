@@ -338,23 +338,23 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 
 |C Syntax|Swift Syntax|
 |:------|:----------|
-|const Type \*|UnsafePointer<Type>|
-|Type \*|UnsafeMutablePointer<Type|
+|const Type \*|UnsafePointer\<Type\>|
+|Type \*|UnsafeMutablePointer\<Type\>|
 
 类类型指针对照关系如下：
 
 |C Syntax|Swift Syntax|
 |:------|:----------|
-|Type \* const \*|UnsafePointer<Type>|
-|Type \* __strong *|UnsafeMutablePointer<Type|
-|Type \*\*|AutoreleasingUnsafeMutablePointer<Type|
+|Type \* const \*|UnsafePointer\<Type\>|
+|Type \* __strong *|UnsafeMutablePointer\<Type\>|
+|Type \*\*|AutoreleasingUnsafeMutablePointer\<Type\>|
 
 如果Swift中没有与 C 指针所指内容相应的类型，例如，一个不完全的结构体类型，那么这个指针会被引入为OpaquePointer。
 
 #### 常量指针
-一个接受UnsafePointer<Type>类型参数的函数，同样可以接受下列类型参数：
+一个接受UnsafePointer\<Type\>类型参数的函数，同样可以接受下列类型参数：
 
-- 一个UnsafePointer<Type>，UnsafeMutalbePointer<Type>，或AutoreleasingUnsafeMutablePointer<Type>类型的值，如有必要它会被转换为UnsafePointer<Type>类型。
+- 一个UnsafePointer\<Type\>，UnsafeMutalbePointer\<Type\>，或AutoreleasingUnsafeMutablePointer\<Type\>类型的值，如有必要它会被转换为UnsafePointer\<Type\>类型。
 - 如果Type是Int8或UInt8，则可接受一个String类型的值。该字符串会自动被转换为一个UTF8字符缓存，随之指向该缓存的指针被传入函数。
 - 一个包含一个或多个变量、属性、Type类型下标引用的in-out表达式。表达式会以指向左起首位参数内存地址的指针形式被传入。
 - ［Type］（一个含有Type类型元素的数组）,会以指向数组首地址的指针形式传入。
@@ -376,7 +376,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 	takesAPointer([1.0, 2.0, 3.0])
 ```
 
-一个接受UnsafePointer<Void>类型参数的函数，可以接受指向任意Type的UnsafePointer<Type>类型的指针。
+一个接受UnsafePointer\<Void\>类型参数的函数，可以把任意Type类型操作数以UnsafePointer\<Type\>形式接受。
 
 例如下面这个函数：
 
@@ -397,9 +397,9 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 ```
 
 #### 可变指针（Mutable Pointers）
-一个接受UnsafeMutablePointer<Type>类型参数的函数，同样可以接受下列类型参数：
+一个接受UnsafeMutablePointer\<Type\>类型参数的函数，同样可以接受下列类型参数：
 
-- 一个UnsafeMutablePointer<Type>类型的值
+- 一个UnsafeMutablePointer\<Type\>类型的值
 - 一个含有一个或多个变量、属性、Type类型下标引用的in-out表达式。表达式会以指向左起首位参数内存地址的指针形式被传入。
 - inout［Type］的值，会以指向数组首地址的指针形式传入，与此同时其生命周期会被延长，持续于整个函数调用期间。
 
@@ -420,7 +420,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 	takesAMutablePointer(&a)
 ```	
 
-一个接受UnsafeMutablePointer<Void>类型参数的函数，可以接受指向任意Type的UnsafeMutablePointer<Type>类型的指针。
+一个接受UnsafeMutablePointer\<Void\>类型参数的函数，可以把任意Type类型操作数以UnsafeMutablePointer\<Type\>形式接受
 
 例如下面这个函数：
 
@@ -442,9 +442,9 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 ```	
 
 #### 自释放指针（autoreleasing Pointers）
-一个接受AutoreleasingUnsafeMutablePointer<Type>类型参数的函数，同样可以接受下列类型参数：
+一个接受AutoreleasingUnsafeMutablePointer\<Type\>类型参数的函数，同样可以接受下列类型参数：
 
-- 一个AutoreleasingUnsafeMutablePointer<Type>类型的值
+- 一个AutoreleasingUnsafeMutablePointer\<Type\>类型的值
 - 一个含有一个或多个变量、属性、Type类型下标引用的in-out表达式，它会被按位拷贝到一个不持有的临时缓存，随之指向该缓存的指针会被传入，并且在返回时，缓存中的值会被加载，保持，并赋值到操作数中。
 
 注意：上表与之前不同，_不包含数组_。
@@ -464,7 +464,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 	AutoreleasingUnsafeMutablePointer(&x)
 ```	
 
-指针所指的类型不会被桥接转换。例如，NSString \*\* 会被Swift引入为AutoreleasingUnsafeMutablePointer<NSString?>，而不是AutoreleasingUnsafeMutablePointer<String?>。
+指针所指的类型不会被桥接转换。例如，NSString \*\* 会被Swift引入为AutoreleasingUnsafeMutablePointer\<NSString?\>，而不是AutoreleasingUnsafeMutablePointer\<String?\>。
 
 #### 函数指针
 通过@convention(c)标注，Swift会根据 C 函数指针调用规则将其引入为结构体。例如，一个int (x) (void)类型的 C 函数指针，会以 @convertion(c) () -> Int32 的形式引入Swift。当调用一个接受函数指针类型参数的函数时，可以直接传入一个顶级的Swift函数，一个字面量闭包，或者nil。还可以传入一个泛型闭包属性，或者一个闭包参数列表和者闭包体中都没有引用泛型参数的泛型函数。例如，Core Foundation中的CFArrayCreateMutable(\_:\_:\_:)函数。CFArrayCreateMutable(\_:\_:\_:)函数，接受一个初始化为函数指针的CFArrayCallBacks结构体：
