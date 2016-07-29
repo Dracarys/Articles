@@ -1,8 +1,8 @@
 # Swift与 C API的交互（Swift 3 beta）
 
-_本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C APIs一章的中文翻译。初次翻译，受限于个人知识水平，难免有词不达意，甚至错误的地方，望斧正。_
+_本文是《Using Swift with Cocoa and Objective-C》书中Interacting with C APIs一章的中文翻译。初次翻译，受限于个人知识水平，难免有词不达意，甚至错误的地方，望斧正。_
 
-作为与Objective-C交互的一部分，Swift对C语言的类型和特性也提供了良好的兼容。Swift还提供了相应的交互方式，以便在需要时可以在代码中使用常见的C结构模式。
+作为与Objective-C交互的一部分，Swift对 C 语言的类型和特性也提供了良好的兼容。Swift还提供了相应的交互方式，以便在需要时可以在代码中使用常见的 C 结构模式。
 
 ### 基本类型
 
@@ -33,7 +33,7 @@ _本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C 
 
 #### 常量的引入
 
-在Objective-C中，常量通常用来为属性和函数参数提供一组可选值。使用NS\_STRING\_ENUM和NS\_EXTENSIBLE\_STRING\_ENUM宏标注一个Ojbective－C的typedef声明，可让Swift以普通类型的成员的方式引入它们。
+在Objective-C中，常量通常用来为属性和函数参数提供一组可选值。使用NS\_STRING\_ENUM和NS\_EXTENSIBLE\_STRING\_ENUM宏标注的Ojbective-C的typedef声明，可被Swift以普通类型的成员的方式引入。
 
 表示一组可用值的常量，可以通过添加NS\_STRING\_ENUM宏，来将其引入为枚举。例如，下面这段关于TraficLightColor的Objective-C字符串常量声明：
 
@@ -90,7 +90,7 @@ _本文是《Using Swift with Cocoa and Objective-C》书中Interactiing with C 
 	
 ###函数
 
-Swift可以把任何声明在C头文件中的函数作为全局函数引入。例如，下面的 C 函数声明：
+Swift可以把任何声明在 C 头文件中的函数作为全局函数引入。例如，下面的 C 函数声明：
 
 ``` C
 	int product(int multiper, int multiplicand);
@@ -235,7 +235,7 @@ Swift可以把任何NS\_ENUM标记的 C 枚举引入为Int类型的Swift枚举�
 
 	注意
 	Swift引入的 C 枚举，在构造时即使入参与声明不一致，也不会导致构造失败。
-	这么处理是为了与C兼容，因为C枚举允许任意类型的值，即使这个值没有暴露在头文件中，
+	这么处理是为了与 C 兼容，因为 C 枚举允许任意类型的值，即使这个值没有暴露在头文件中，
 	而仅仅是供内部使用。
 	
 那些未通过NS\_ENUM和NS\_OPTIONS宏声明的 C 枚举会被引入为Swift结构体。C 枚举中的每个成员都会被引入为一个与结构体类型相同的全局只读计算型属性，而非结构体成员属性。
@@ -291,7 +291,7 @@ Swift同样可以把NS\_OPTIONS宏标注的 C 选项型枚举引入为Swift的�
 		public static var flexibleBottomMargin: UIViewAutoresizing { get }
 	}
 ```
-在Objective-C中，选项型枚举实际上是整型位掩码。可通过位或操作符（｜）来组合可选值，也可以通过位与操作符（&)检查选项值。通过常量或表达式来创建选项型枚举，空选项型枚举用常量零（0）表示。
+在Objective-C中，选项型枚举实际上是整型位掩码。可通过位或运算符（｜）来组合可选值，也可以通过位与运算符（&)检查选项值。通过常量或表达式来创建选项型枚举，空选项型枚举用常量零（0）表示。
 在Swift中，选项是以一个遵从OptionSet协议的结构体来实现，每个选项值都有一个静态变量。与枚举类似，可通过（.）语法获取一个选项值，也可以通过字面量数组来创建一个选项值。一个空的选项既可以通过字面量空数组（［］）来创建，也可以通过其默认构造函数创建。
 
 	注意
