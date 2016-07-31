@@ -464,7 +464,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 	AutoreleasingUnsafeMutablePointer(&x)
 ```	
 
-指针所指的类型不会被桥接转换。例如，NSString \*\* 会被Swift引入为AutoreleasingUnsafeMutablePointer\<NSString?\>，而不是AutoreleasingUnsafeMutablePointer\<String?\>。
+引入时，指针所指的类型不会被等价转换（bridged）。例如，NSString \*\* 会被Swift引入为AutoreleasingUnsafeMutablePointer\<NSString?\>，而不是AutoreleasingUnsafeMutablePointer\<String?\>。
 
 #### 函数指针
 通过@convention(c)标注，Swift会根据 C 函数指针调用规则将其引入为结构体。例如，一个int (x) (void)类型的 C 函数指针，会以 @convertion(c) () -> Int32 的形式引入Swift。当调用一个接受函数指针类型参数的函数时，可以直接传入一个顶级的Swift函数，一个字面量闭包，或者nil。还可以传入一个泛型闭包属性，或者一个闭包参数列表和者闭包体中都没有引用泛型参数的泛型函数。例如，Core Foundation中的CFArrayCreateMutable(\_:\_:\_:)函数。CFArrayCreateMutable(\_:\_:\_:)函数，接受一个初始化为函数指针的CFArrayCallBacks结构体：
