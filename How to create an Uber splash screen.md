@@ -425,8 +425,9 @@ override init(frame: CGRect) {
   }
 ```
 
-shouldEnableRipple是个布尔值，用于控制何时将形变动画和位置动画添加到我们刚刚创建的数组中。 Its value is set to true for all the TileViews that are not on the perimeter of the TileGridView. This logic is already done for you when the TileViews are created in the renderTileViews() method of TileGridView.
-Add an opacity animation:
+shouldEnableRipple是个布尔值，用于控制何时将形变动画和位置动画添加到我们刚刚创建的数组中。 所有未处在TileGridView外围边缘的TileView，在通过renderTileViews()方法被创建时，就已将shouldEnableRipple设为true。
+
+添加一个不透明动画:
 
 ``` Swift
   // Opacity
@@ -438,7 +439,8 @@ Add an opacity animation:
   animations.append(opacityAnimation)
 ```
 
-This is a pretty self-explanatory animation with some very specific keyTimes.
+该动画简单明了无需说明，只是设置了一些非常特殊的的keyTime。
+
 现在将这些动画添加到一个动画组中:
 
 ``` Swift
@@ -455,8 +457,9 @@ This is a pretty self-explanatory animation with some very specific keyTimes.
   layer.addAnimation(groupAnimation, forKey: "ripple")
 ```
 
-This will add groupAnimation to the instance of TileView. Note that the group animation could either have one or three animations in the group, depending on the value of shouldEnableRipple.
-现在我们已经为每一个TileView实现了动画, 接下来将在TileGridView中调用它们. 打开TileGridView.swift文件将以下代码添加到startAnimatingWithBeginTime\(\_\:\)方法中:
+将groupAnimation添加到TileView实例。注意，动画组会因shouldEnableRipple值的不同可能包含一个或三个动画。
+
+现在我们已经为每一个TileView实现了动画, 接下来将在TileGridView中调用它们. 打开**TileGridView.swift**文件将以下代码添加到`startAnimatingWithBeginTime(_:)`方法中:
 
 ``` Swift 
 private func startAnimatingWithBeginTime(beginTime: NSTimeInterval) {
@@ -506,7 +509,7 @@ private func distanceFromCenterViewWithView(view: UIView)->CGFloat {
 
 The best way to do this is to whip out your high-school math (don’t cringe—it will be over before you know it) and normalize the vector based upon the distance of the TileView from the center.
 
-在distanceFromCenterViewWithView(\_\:\)函数下面添加如下函数:
+在`distanceFromCenterViewWithView(\_\:\)`函数下面添加如下函数:
 
 ``` Swift
 private func normalizedVectorFromCenterViewToView(view: UIView)->CGPoint {
