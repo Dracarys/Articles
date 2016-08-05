@@ -1,4 +1,4 @@
-# Swift与 C API的交互（Swift 3 beta）
+# ［翻译］Swift与 C API的交互（Swift 3 beta）
 
 _本文是《Using Swift with Cocoa and Objective-C》书中Interacting with C APIs一章的中文翻译。初次翻译，受限于个人知识水平，难免有词不达意，甚至错误的地方，望斧正。_
 
