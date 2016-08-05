@@ -1,14 +1,14 @@
 # \[翻译]如何制作一个类似Uber的溅落式启动屏
 
-_本文翻译自_ [How To Create an Uber Splash Screen](https://www.raywenderlich.com/133224/how-to-create-an-uber-splash-screen)， _由 [Derek Selander](https://www.raywenderlich.com/u/lolgrep) 发表于Raywenderlich_ 。
+*本文翻译自 [How To Create an Uber Splash Screen](https://www.raywenderlich.com/133224/how-to-create-an-uber-splash-screen)*， *由 [Derek Selander](https://www.raywenderlich.com/u/lolgrep) 发表于Raywenderlich*。
 
-_受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至翻译错误的地方，还望不吝赐教予以指正_ 。
+*受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至翻译错误的地方，还望不吝赐教予以指正* 。
 
 一个好的溅落式启动页（别被毫无动画效果的静态启动页迷惑），使开发人员有机会在展示动画期间，从后段获取必要的数据。同时它在应用启动期间让用户始终保持高昂兴趣方面也发挥了重要作用。
 
 虽然溅落式启动页已广泛存在，但是你很难找到一个如Uber这般出色的。在2016年的首季，Uber释出一个由CEO领导的品牌重塑战略，品牌重塑的成果之一，便是一个非常炫酷的溅落式启动页。
 
-本文以仿制Uber启动动画为目标。其中运用了大量的**CAlayer**和**CAAnimation**类，及其相应子类。相对于概念介绍，本文更着重于如何运用这些类去实现一个产品级的动画效果。如需了解动画背后的相关知识，请访问 _Marin Todorov_ 的系列视频教程：
+本文以仿制Uber启动动画为目标。其中运用了大量的**CAlayer**和**CAAnimation**类，及其相应子类。相对于概念介绍，本文更着重于如何运用这些类去实现一个产品级的动画效果。如需了解动画背后的相关知识，请访问 *Marin Todorov* 的系列视频教程：
 [**Intermediate iOS Animation**](https://www.raywenderlich.com/u/icanzilb)
 
 ## 开始
@@ -69,7 +69,7 @@ override init(frame: CGRect) {
 }
 ```
 
-找到`generateCircleLayer()`方法，了解下圆形是如何被创建的。其实只是简单地通过 _UIBezierPath_ 创建了一个 _CAShapeLayer_ (图层)。 注意看这行代码:
+找到`generateCircleLayer()`方法，了解下圆形是如何被创建的。其实只是简单地通过 *UIBezierPath* 创建了一个 *CAShapeLayer* (图层)。 注意看这行代码:
 
 ``` Swift
 layer.path = UIBezierPath(arcCenter: CGPointZero, 
@@ -79,7 +79,7 @@ layer.path = UIBezierPath(arcCenter: CGPointZero,
                           clockwise: true).CGPath
 ```
 
-向 _startAngle_ 传入 0 或使用默认值, 弧线会从右侧（3点钟位置）开始。传入 **-M\_PI\_2** 即 -90度, 则会从顶部开始，如果 _endAngle_ 恰好是270度即 **3 * M\_PI\_2**，弧线则再次回到顶点（形成一个圆形）。注意为了绘制的动画效果，我们使用圆形的半径作为**lineWidth**。
+向 *startAngle* 传入 0 或使用默认值, 弧线会从右侧（3点钟位置）开始。传入 **-M\_PI\_2** 即 -90度, 则会从顶部开始，如果 *endAngle* 恰好是270度即 **3 * M\_PI\_2**，弧线则再次回到顶点（形成一个圆形）。注意为了绘制的动画效果，我们使用圆形的半径作为**lineWidth**。
 
 **circleLayer**的动画需要三个**CAAnimation**子类来实现：一个作用于**stokeEnd**的**CAKeyframeAnimation**动画，一个作用于**transform**的**CABasicAnimation**动画，和一个负责将两部分动画组合起来的**CAAnimationGroup**。这将一次性同时创建所有动画。
 
@@ -94,9 +94,9 @@ layer.path = UIBezierPath(arcCenter: CGPointZero,
   strokeEndAnimation.keyTimes = [0.0, 1.0]
 ```
 
-通过向动画的**Values**属性提供的 0.0 和 1.0，我们便透过Core Animation框架生成了一个从 _startAngle_ 到 _endAngle_ 沿顺时针旋转的动画。随着 _strokeEnd_ 属性值的增加，弧线沿着圆周慢慢伸展，圆形也渐渐被"填满"。在这个例子中，如果我们将**values**属性的值设为[0.0, 0.5]，则仅会画半个圆，这是因为 _StrokeEnd_ 在动画结束时刚达好到圆周的一半。
+通过向动画的**Values**属性提供的 0.0 和 1.0，我们便透过Core Animation框架生成了一个从 *startAngle* 到 *endAngle* 沿顺时针旋转的动画。随着 *strokeEnd* 属性值的增加，弧线沿着圆周慢慢伸展，圆形也渐渐被"填满"。在这个例子中，如果我们将**values**属性的值设为[0.0, 0.5]，则仅会画半个圆，这是因为 *StrokeEnd* 在动画结束时刚达好到圆周的一半。
 
-> 译者注：“圆形也渐渐被‘填满’”一句的填满是引起来的，并不是真的被填满，而是描边的 _lineWidth_ 与圆形半径相同，从而产生了填满的视觉效果。可参考`generateCircleLayer()`方法中`layer.fillColor = UIColor.clear.cgColor`这段代码，事实上填充色被设置为透明，
+> 译者注：“圆形也渐渐被‘填满’”一句的填满是引起来的，并不是真的被填满，而是描边的 *lineWidth* 与圆形半径相同，从而产生了填满的视觉效果。可参考`generateCircleLayer()`方法中`layer.fillColor = UIColor.clear.cgColor`这段代码，事实上填充色被设置为透明，
 
 现在添加形变（transform）动画:
 
