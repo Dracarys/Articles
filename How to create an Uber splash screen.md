@@ -4,18 +4,18 @@ _本文翻译自_ [How To Create an Uber Splash Screen](https://www.raywenderlic
 
 _受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至翻译错误的地方，还望不吝赐教予以指正_ 。
 
-一个好的溅落式启动页（别被毫无动画效果的静态启动页迷惑），使开发人员有机会在展示动画期间，从后段获取必要的数据。同时它也在应用启动期间让用户始终保持高昂兴趣方面也发挥了重要作用。
+一个好的溅落式启动页（别被毫无动画效果的静态启动页迷惑），使开发人员有机会在展示动画期间，从后段获取必要的数据。同时它在应用启动期间让用户始终保持高昂兴趣方面也发挥了重要作用。
 
 虽然溅落式启动页已广泛存在，但是你很难找到一个如Uber这般出色的。在2016年的首季，Uber释出一个由CEO领导的品牌重塑战略，品牌重塑的成果之一，便是一个非常炫酷的溅落式启动页。
 
 本文以仿制Uber启动动画为目标。其中运用了大量的**CAlayer**和**CAAnimation**类，及其相应子类。相对于概念介绍，本文更着重于如何运用这些类去实现一个产品级的动画效果。如需了解动画背后的相关知识，请访问 _Marin Todorov_ 的系列视频教程：
 [**Intermediate iOS Animation**](https://www.raywenderlich.com/u/icanzilb)
 
-### 开始吧
+## 开始
 
-鉴于本文涉及的动画众多，这里提供一个已为后续动画创建好所有CALayer的起始工程。 [点此下载](https://cdn2.raywenderlich.com/wp-content/uploads/2016/06/Fuber-starter.zip).
+鉴于本文涉及的动画众多，这里提供一个已为后续动画创建好所有CALayer的[起始工程](https://cdn2.raywenderlich.com/wp-content/uploads/2016/06/Fuber-starter.zip)。
 
-起始工程是一个叫做Fuber的应用，Fuber提供驾乘共享服务，乘客可请求一位Segway驾驶员，搭载自己抵达城市的任何地方。Fuber发展迅速，已在60多个国家为用户提供服务，但也面临众多国家的反对和工会要求其必须与司机签订合同的问题。:](原作者卖萌了)
+起始工程是一个叫做Fuber的应用，Fuber提供（Segway）驾乘共享服务，乘客通过向Segway驾驶员发出请求，来邀请搭载自己抵达城市的任何地方。Fuber发展迅速，已在60多个国家为用户提供服务，但也面临众多国家的反对和工会要求其必须与司机签订合同的问题。:](原作者卖萌了)
 
 <center>![Splash screen](https://cdn1.raywenderlich.com/wp-content/uploads/2016/05/fuber\_logo-480x161.png)</center>
 
@@ -25,14 +25,14 @@ _受限于译者英语水平及翻译经验，译文容难免有词不达意，�
 
 打开并运行起始工程，简单浏览一下工程结构。
 
-首先从视图控制器开始，应用通过负责子视图切入切出任务的**RootContainerViewController**加载**SplashViewController**. 父视图控制器从启动页开始运行，直至应用的所有准备工作全部完成。这期间应用会连接到后段，获取后续所需数据。需要指出的是，在这个简单的项目中启动页被设计成一个独立的模块。
+首先从视图控制器开始，应用通过负责子视图（切入）切出任务的**RootContainerViewController**加载**SplashViewController**。父视图控制器从启动页开始运行，直至应用的所有准备工作全部完成。这期间应用会连接到后段，获取后续所需数据。需要指出的是，在这个简单的项目中启动页被设计成了一个独立的模块。
 
 在**RootContainerViewController**中已经实现好了两个方法：`showSplashViewController()`和 `showSplashViewControllerNoPing()`。 
-由于教程中大部分时间，都在调用`showSplashViewControllerNoPing()`方法调试启动动画，所以我们先将精力放在**SplashViewController**的子视图动画创建上，然后在通过`showSplashViewController()`模拟一个访问API的延迟效果，并随之跳转到主视图控制器。
+由于教程中大部分时间，都在调用`showSplashViewControllerNoPing()`方法（调试启动动画），所以我们先将精力放在**SplashViewController**的子视图动画创建上，然后在通过`showSplashViewController()`模拟一个访问API的延迟效果，并随即跳转到主视图控制器。
 
-### 溅落式启动页视图及其图层结构
+## 溅落式启动页视图及其图层结构
 
-**SplashViewController**的视图（view）包含两个子视图（subview）。 第一个子视图是用于构成波纹网格背景的**TileGridview**，它包含了一系列按网格排列的**TileView**实例。另一个子视图由一个名为**AnimatedULogoView**的 U 字型动画图标构成。
+**SplashViewController**的视图（view）包含两个子视图（subview）。 第一个子视图是用于构成波纹网格背景的**TileGridview**，它包含了一系列按网格排列的**TileView**实例。另一个子视图名为**AnimatedULogoView**，它构成了 U 字型的动画图标。
 
 <center>![Splash Screen](https://cdn5.raywenderlich.com/wp-content/uploads/2016/05/Fuber-View-Hierarchy-1.png)</center>
 
@@ -41,17 +41,17 @@ _受限于译者英语水平及翻译经验，译文容难免有词不达意，�
 - **circleLayer** 用于实现字母 U 的白色背景
 - **lineLayer** 用于实现从**circleLayer**的中心到边缘的一条线段
 - **squareLayer** 用于实现位于**circleLayer**中心位置的方块
-- **maskLayer** 作为视图遮罩，通过改变其**bounds**的动画效果，来将其它所有图层的动画效果混合起来。
+- **maskLayer** 用作视图遮罩，通过改变其**bounds**的动画效果，来将其它所有图层的动画效果整齐划一地混合起来。
 
 通过组合这几个**CAShaperLayer**动画，共同实现了**Fuber**中字母 **U** 的动画效果。
 
 <center>![RiderIconView](https://cdn2.raywenderlich.com/wp-content/uploads/2016/05/RiderIconView.gif)</center>
 
-了解了这些图层的构成之后，接下来我们就添加一些动画来让**AnimatedULogoView**动起来吧。
+了解了这些图层的构成之后，接下来我们就来添加一些动画让**AnimatedULogoView**动起来吧。
 
-### 让圆形动起来
+## 让圆形动起来
 
-创建复杂动画的关键，就在于排除视觉干扰专注于我们正在实现的部分。 打开**AnimatedULogoView.swift**文件. 找到`init(frame:)`方法, 注释掉除**circleLayer**外其它向视图中添加子图层（sublayer）的方法，完成动画后会再将其全部添加回来。注释完成后的代码如下:
+创建复杂动画的关键，在于排除视觉干扰专注于我们正在实现的部分。 打开**AnimatedULogoView.swift**文件。找到`init(frame:)`方法，注释掉除**circleLayer**外其它向视图中添加子图层（sublayer）的方法，完成动画后会再将其全部添加回来。注释完成后的代码如下:
 
 ``` Swift
 override init(frame: CGRect) {
@@ -69,7 +69,7 @@ override init(frame: CGRect) {
 }
 ```
 
-找到**generateCircleLayer()**方法，了解下圆形是如何被创建的。其实只是简单地通过 _UIBezierPath_ 创建了一个 _CAShapeLayer_ 。 注意这行代码:
+找到`generateCircleLayer()`方法，了解下圆形是如何被创建的。其实只是简单地通过 _UIBezierPath_ 创建了一个 _CAShapeLayer_ (图层)。 注意看这行代码:
 
 ``` Swift
 layer.path = UIBezierPath(arcCenter: CGPointZero, 
@@ -81,7 +81,7 @@ layer.path = UIBezierPath(arcCenter: CGPointZero,
 
 向 _startAngle_ 传入 0 或使用默认值, 弧线会从右侧（3点钟位置）开始。传入 **-M\_PI\_2** 即 -90度, 则会从顶部开始，如果 _endAngle_ 恰好是270度即 **3 * M\_PI\_2**，弧线则再次回到顶点（形成一个圆形）。注意为了绘制的动画效果，我们使用圆形的半径作为**lineWidth**。
 
-**circleLayer**的动画需要三个**CAAnimation**类来实现：一个作用于**stokeEnd**的**CAKeyframeAnimation**动画，一个作用于**transform**的**CABasicAnimation**动画，和一个负责将两部分动画组合起来的**CAAnimationGroup**。这些动画效果将一次性创建完毕（You'll create these animations one at a time）。
+**circleLayer**的动画需要三个**CAAnimation**子类来实现：一个作用于**stokeEnd**的**CAKeyframeAnimation**动画，一个作用于**transform**的**CABasicAnimation**动画，和一个负责将两部分动画组合起来的**CAAnimationGroup**。这将一次性同时创建所有动画。
 
 在事先写好的`animateCircleLayer()`方法中添加如下代码:
 
@@ -94,7 +94,7 @@ layer.path = UIBezierPath(arcCenter: CGPointZero,
   strokeEndAnimation.keyTimes = [0.0, 1.0]
 ```
 
-通过向动画的**Values**属性提供的 0.0 和 1.0，我们便偷过Core Animation框架生成了一个从 _startAngle_ 到 _endAngle_ 顺时针旋转的动画。随着 _strokeEnd_ 属性值的增加，弧线沿着圆慢慢伸展，圆形也渐渐被"填满"(并不是真的被填满，而是描边的弧线宽度恰好等于半径，产生了填满的视觉效果)。在这个例子中，如果我们将**values**属性的值设为[0.0, 0.5]，则仅会画半个圆，这是因为 _StrokeEnd_ 在动画结束时刚达到圆周的一半。
+通过向动画的**Values**属性提供的 0.0 和 1.0，我们便透过Core Animation框架生成了一个从 _startAngle_ 到 _endAngle_ 沿顺时针旋转的动画。随着 _strokeEnd_ 属性值的增加，弧线沿着圆周慢慢伸展，圆形也渐渐被"填满"。在这个例子中，如果我们将**values**属性的值设为[0.0, 0.5]，则仅会画半个圆，这是因为 _StrokeEnd_ 在动画结束时刚达好到圆周的一半。
 
 > 译者注：“圆形也渐渐被‘填满’”一句的填满是引起来的，并不是真的被填满，而是描边的 _lineWidth_ 与圆形半径相同，从而产生了填满的视觉效果。可参考`generateCircleLayer()`方法中`layer.fillColor = UIColor.clear.cgColor`这段代码，事实上填充色被设置为透明，
 
@@ -112,9 +112,9 @@ layer.path = UIBezierPath(arcCenter: CGPointZero,
   transformAnimation.toValue = NSValue(CATransform3D: CATransform3DIdentity)
 ```
 
-该动画同时实现了放大和沿 Z 轴旋转的两个形变。这使得圆形在顺时针旋转45度的同时逐渐变大。这里的旋转很重要，因为圆形的旋转要与**lineLayer**和其它图层一块动起来时的位置和速度保持一致。
+该动画同时实现了放大和沿 Z 轴旋转的两个形变。这使得圆形在沿顺时针旋转45度的同时逐渐变大。这里的旋转很重要，因为圆形的旋转要与**lineLayer**和其它图层一块动起来时的位置和速度保持一致。
 
-最后在`animateCircleLayer()`方法的最下面添加一个**CAAnimationGroup**。这个动画组将包含之前的两个动画，如此我们仅向**circleLayer**图层添加一次动画即可。
+最后在`animateCircleLayer()`方法的最下面添加一个**CAAnimationGroup**。这个动画组将包含之前的两个动画，这样我们仅向**circleLayer**图层添加一次动画即可。
 
 ``` Swift
   // Group
@@ -128,21 +128,21 @@ layer.path = UIBezierPath(arcCenter: CGPointZero,
   circleLayer.addAnimation(groupAnimation, forKey: "looping")
 ```
 
-这里我们修改了CAAnimationGroup的两个重要属性：**beginTime** 和 **timeOffset**。如果你对其中任何一个不熟悉，那么你都可以在[这里](http://ronnqvi.st/controlling-animation-timing/)找到该属性的介绍和使用说明。
+这里我们修改了CAAnimationGroup的两个重要属性：**beginTime** 和 **timeOffset**。如果你对其中任何一个不熟悉，那么你都可以在[这里](http://ronnqvi.st/controlling-animation-timing/)找到关于该属性的介绍和使用说明。
 将 **groupAnimation** 的 **beginTime** 设置为与父视图相同。
 
-对timeOffeset的设置是必要的，因为动画首次运行时实际上是从一半开始的。当完成更多动画效果后，你可以试着改变**startTimeOffset**的值，并观察动画在视觉效果上的不同。 
+对**timeOffeset**的设置是必要的，因为动画首次运行时实际上是从一半开始的。当完成更多动画效果后，你可以试着改变**startTimeOffset**的值，并观察动画在视觉效果上的不同。 
 
 将动画组添加到**circleLayer**之后，编译并运行应用，检查下动画效果.
 
 <center>![Splash Screen CircleIn Animation](https://cdn4.raywenderlich.com/wp-content/uploads/2016/05/CircleIn-Animation.gif)</center>
 
->注意: 试着删除**groupAnimation.animations**数组中的**strokeEndAnimation**或**transformAnimation**，以确认每个动画具体实现了哪些视觉效果. 像这样再验证一下文中的其它动画，你会惊讶于，仅仅改变动画的组合方式就可以产生令人难以预料的独特视觉效果.
+>注意: 试着删除**groupAnimation.animations**数组中的**strokeEndAnimation**或**transformAnimation**，以确认每个动画具体实现了哪些视觉效果. 可以按该方法再去验证一下文中的其它动画，你会惊讶于，仅仅改变动画的组合方式就可以产生如此令人难以预料的独特视觉效果.
 
 
-### 让线段动起来
+## 让线段动起来
 
-完成了**circleLayer**的动画, 接下来我们再来完成**lineLayer**动画。还是在 **AnimatedULogoView.swift**文件中, 找到**startAnimating()**方法并注释掉除**animateLineLayer()**外的所有动画调用。注释后的代码如下:
+完成了**circleLayer**的动画, 接下来我们再来完成**lineLayer**动画。还是在 **AnimatedULogoView.swift**文件中, 找到`startAnimating()`方法并注释掉除`animateLineLayer()`外的所有动画调用。注释后的代码如下:
 
 ``` Swift
 public func startAnimating() {
@@ -174,7 +174,7 @@ override init(frame: CGRect) {
 }
 ```
 
-注释掉图层和动画后, 转到**animateLineLayer()**方法并实现下面这组动画:
+注释掉图层和动画后, 转到`animateLineLayer()`方法并实现下面这组动画:
 
 ``` Swift
   // lineWidth
@@ -204,7 +204,7 @@ override init(frame: CGRect) {
                                NSValue(CATransform3D: CATransform3DMakeScale(0.15, 0.15, 1.0))]
 ```
 
-与circleLayer的形变动画非常相似, 这里我们定义了个一个沿 Z 轴顺时针旋转的动画。 此外我们还为线段添加了一个先缩小到25%，再恢复到原有尺寸，最后再缩小到15%的形变动画.
+与**circleLayer**的形变动画非常相似, 这里我们定义了个一个沿 Z 轴顺时针旋转的动画。 此外我们还为线段添加了一个先缩小到25%，再恢复到原有尺寸，最后再缩小到15%的形变动画.
 
 通过**CAAnimationGroup**将动画组合起来，并添加到**lineLayer**上：
 
@@ -225,13 +225,13 @@ override init(frame: CGRect) {
 
 <center>![Splash Screen Knockoutline Animation](https://cdn5.raywenderlich.com/wp-content/uploads/2016/05/Knockoutline-Animation.gif)</center>
 
-注意我们设置了相同的初始形变值**-M\_PI\_4**，以便线段（line）和圆形（circle）在绘制时能对齐。为此我们还将**keyTimes** 设置为`[0.0, 1.0-kAnimationDurationDelay/kAnimationDuration, 1.0]`。 数组中首尾两个元素是确定: 0 代表动画开始那一刻，1.0 代表动画结束那一刻，然后通过计算来获取圆形绘制刚刚结束、第二部分的动画即将开始时的那一刻。由于它时一个延迟的动画效果，所以我们还需要从 1.0 中减去通过**kAnimationDurationDelay**除以**kAnimationDuration**而得到的确切百分比，这是因为我们想让动画在结束后的延迟过程中再返回到起点。（译者：形成一个循环动画，否则会出现跳跃，造致使动画不连贯）
+注意我们设置了相同的初始形变值**-M\_PI\_4**，以便线段（line）和圆形（circle）在绘制时能对齐。为此我们还将**keyTimes** 设置为`[0.0, 1.0-kAnimationDurationDelay/kAnimationDuration, 1.0]`。 数组中首尾两个元素是确定的: 0 代表动画开始那一刻，1.0 代表动画结束那一刻，然后通过计算来获取圆形绘制刚刚结束、第二部分的动画即将开始时的那一刻。由于它是一个延迟的动画效果，所以我们还需要从 1.0 中减去通过**kAnimationDurationDelay**除以**kAnimationDuration**而得到的确切百分比，这是因为我们想让动画在结束后的延迟过程中再返回到起点。（译者：形成一个循环动画，否则会出现跳跃，致使动画不连贯）
 
-**circleLayer**和**lineLayer**动画都已经完成，接下来我们该完成中间的方块动画了。
+**circleLayer**和**lineLayer**动画都已完成，接下来我们该完成中间的方块动画了。
 
-### 让方块动起来
+## 让方块动起来
 
-与之前类似。 在**startAnimating()**函数中注释掉除**animateSquareLayer()**外的其它动画方法调用。然后在像下面这样修改`init(frame:)`方法的代码：
+与之前类似。 在`startAnimating()`函数中注释掉除`animateSquareLayer`外的其它动画方法调用。然后在像下面这样修改`init(frame:)`方法的代码：
 
 ``` Swift
 override init(frame: CGRect) {
@@ -249,7 +249,7 @@ override init(frame: CGRect) {
 }
 ```
 
-完成后转到**animateSquareLayer()**方法实现如下动画代码:
+完成后转到`animateSquareLayer()`方法实现如下动画代码:
 
 ``` Swift
   // bounds
@@ -301,31 +301,37 @@ override init(frame: CGRect) {
 
 现在将所有的动画组合起来看看效果如何！
 
->注意: 在电脑的GPU完成对iOS设备的模拟任务前，模拟器上的动画可能会有那么一点小抽疯。如果你的电脑带不动动画，可以试着将模拟器窗口调小或者转到真机开发。
+>注意: 在电脑的GPU完成对iOS设备的模拟任务前，模拟器上的动画可能会有那么一点小抽。如果你的电脑带不动动画，可以试着将模拟器窗口调小或者转到真机开发。
 
-### 遮罩
+## 遮罩
 
 首先，取消`init(frame:)`方法中对所有添加图层方法的注释，以及`startAnimating()`方法中对所有动画调用的注释.
 
-随着所有动画效果的组合，再次编译并运行。
+组合好所有动画后，再次编译并运行。
 
 <center>![PreMask Animation](https://cdn1.raywenderlich.com/wp-content/uploads/2016/05/PreMask-Animation.gif)</center>
 
-看着还是有点怪怪的，是不是？圆形在缩小时，它的边缘会有一个小跳跃。幸运地是, 遮罩动画可以解决该问题, 让所有子图动画变整齐划一.
+看上去还是有点怪怪的，是不是？圆形在缩小时，它的边缘会有一个小跳跃。幸运地是, 遮罩动画可以解决该问题，让所有子图动画平滑整齐划一.
 
-转到**animateMaskLayer()**方法并添加如下代码:
+转到｀animateMaskLayer()｀方法并添加如下代码:
 
 ``` Swift
   // bounds
   let boundsAnimation = CABasicAnimation(keyPath: "bounds")
-  boundsAnimation.fromValue = NSValue(CGRect: CGRect(x: 0.0, y: 0.0, width: radius * 2.0, height: radius * 2))
-  boundsAnimation.toValue = NSValue(CGRect: CGRect(x: 0.0, y: 0.0, width: 2.0/3.0 * squareLayerLength, height: 2.0/3.0 * squareLayerLength))
+  boundsAnimation.fromValue = NSValue(CGRect: CGRect(x: 0.0, 
+                                                     y: 0.0, 
+                                                 width: radius * 2.0, 
+                                                height: radius * 2))
+  boundsAnimation.toValue = NSValue(CGRect: CGRect(x: 0.0, 
+                                                   y: 0.0, 
+                                               width: 2.0/3.0 * squareLayerLength,
+                                              height: 2.0/3.0 * squareLayerLength))
   boundsAnimation.duration = kAnimationDurationDelay
   boundsAnimation.beginTime = kAnimationDuration - kAnimationDurationDelay
   boundsAnimation.timingFunction = circleLayerTimingFunction
 ```
 
-这是一个边界(bounds)动画。记住，由于这是一个应用于所有子图层的遮罩，当边界发生变化时, 整个**AnimatedULogoView**都将消失。
+这是一个边界(bounds)动画。记住，由于这是一个应用于所有子图层的遮罩，当边界发生变化时, 整个**AnimatedULogoView**都将消失，直至遮罩被应用到所有子图层。
 
 现在在添加一个让方块变圆的圆角动画:
 
@@ -339,7 +345,7 @@ override init(frame: CGRect) {
   cornerRadiusAnimation.timingFunction = circleLayerTimingFunction
 ```
 
-将这两个动画添加到一个CAAnimationGroup中，以完成这个图层（的所有动画）：
+将这两个动画添加到一个**CAAnimationGroup**中，以完成这个图层（的所有动画）：
 
 ``` Swift
   // Group
@@ -360,9 +366,9 @@ override init(frame: CGRect) {
 
 看起来好多了！
 
-### 网格
+## 网格
 
-试想一下有一群以**TileGridView**实例的方式来移动的 _UIView_。 它们看起来会是什么样呢，呃。。。这里就不引用[创](https://zh.wikipedia.org/wiki/創：光速戰記)了并展开说明了！（译者：《创》是一部科幻电影。这里翻译的不好，见谅！）
+试想一下有一系列以**TileGridView**实例的方式来移动的 _UIView_。 它们看起来会是什么样呢？呃。。。这里就不引用[创](https://zh.wikipedia.org/wiki/創：光速戰記)并展开说明了！（译者：《创》是一部科幻电影。这里翻译的不好，见谅！）
 
 网格背景由一些列附加到**TileGridView**类的**TileView**组成。为了便于从视觉上理解这个概念, 我们打开**TileView.swift**文件，找到`init(frame:)`方法，在方法的最后添加如下代码:
 
@@ -374,11 +380,11 @@ layer.borderWidth = 2.0
 
 <center>![Fuber-Grid-View](https://cdn3.raywenderlich.com/wp-content/uploads/2016/05/Fuber-Grid-View-180x320.png)</center>
 
-如果你所见，*TileView*被整齐地排成一张网格。整个创建逻辑都集中在**TileGridView.swift**文件的`renderTileViews()`方法内。幸运的是，我们所需的布局逻辑（起始工程）已经实现好。接下来要做的就是让它动起来!
+如果你所见，**TileView**被整齐地排成一张网格。整个创建逻辑都集中在**TileGridView.swift**文件的`renderTileViews()`方法内。幸运的是，我们所需的布局逻辑（起始工程）已经实现好。接下来要做的就是让它动起来!
 
-### 让瓦片视图（TileView）动起来
+## 让瓦片视图（TileView）动起来
 
-**TileGridView**仅有一个直接的子视图（subview），**containerView**. 它负责添加所有的**TileView**。 此外，还有一个名为**tileViewRows**的属性, 它是一个二维数组，包含所有添加到containerView中的**TileView**。
+**TileGridView**仅有一个直接的子视图（subview）**containerView**。它负责添加所有的**TileView**。 此外，还有一个名为**tileViewRows**的属性, 它是一个二维数组，包含所有添加到containerView中的**TileView**。
 
 回到**TileView**中的`init(frame:)`方法. 删除我们刚才添加的用于显示边界的代码，并取消向图层中添加**chimeSplashImage**方法的注释。完成后的方法如下:
 
@@ -416,7 +422,10 @@ override init(frame: CGRect) {
     let scaleAnimation = CAKeyframeAnimation(keyPath: "transform.scale")
     scaleAnimation.values = [1, 1, 1.05, 1, 1]
     scaleAnimation.keyTimes = TileView.rippleAnimationKeyTimes
-    scaleAnimation.timingFunctions = [linearFunction, timingFunction, timingFunction, linearFunction]
+    scaleAnimation.timingFunctions = [linearFunction, 
+                                      timingFunction, 
+                                      timingFunction, 
+                                      linearFunction]
     scaleAnimation.beginTime = 0.0
     scaleAnimation.duration = duration
     animations.append(scaleAnimation)
@@ -424,16 +433,23 @@ override init(frame: CGRect) {
     // Position
     let positionAnimation = CAKeyframeAnimation(keyPath: "position")
     positionAnimation.duration = duration
-    positionAnimation.timingFunctions = [linearFunction, timingFunction, timingFunction, linearFunction]
+    positionAnimation.timingFunctions = [linearFunction, 
+                                         timingFunction, 
+                                         timingFunction, 
+                                         linearFunction]
     positionAnimation.keyTimes = TileView.rippleAnimationKeyTimes
-    positionAnimation.values = [zeroPointValue, zeroPointValue, NSValue(CGPoint:rippleOffset), zeroPointValue, zeroPointValue]
+    positionAnimation.values = [zeroPointValue, 
+                                zeroPointValue, 
+                                NSValue(CGPoint:rippleOffset), 
+                                zeroPointValue, 
+                                zeroPointValue]
     positionAnimation.additive = true
  
     animations.append(positionAnimation)
   }
 ```
 
-**shouldEnableRipple**是个布尔值，用于控制何时将形变动画和位置动画添加到我们刚刚创建的数组中。所有未处在**TileGridView**外围边缘的**TileView**，在通过`renderTileViews()`方法被创建时，就已将**shouldEnableRipple**设为**true**。
+**shouldEnableRipple**是个布尔值，用于控制何时将形变动画和位置动画添加到我们刚刚创建的数组中。在通过`renderTileViews()`方法创建时，所有未处在**TileGridView**外围边缘的**TileView**，就已将**shouldEnableRipple**设为**true**。
 
 添加一个不透明动画:
 
@@ -441,7 +457,11 @@ override init(frame: CGRect) {
   // Opacity
   let opacityAnimation = CAKeyframeAnimation(keyPath: "opacity")
   opacityAnimation.duration = duration
-  opacityAnimation.timingFunctions = [easeInOutTimingFunction, timingFunction, timingFunction, easeOutFunction, linearFunction]
+  opacityAnimation.timingFunctions = [easeInOutTimingFunction, 
+                                      timingFunction, 
+                                      timingFunction, 
+                                      easeOutFunction, 
+                                      linearFunction]
   opacityAnimation.keyTimes = [0.0, 0.61, 0.7, 0.767, 0.95, 1.0]
   opacityAnimation.values = [0.0, 1.0, 0.45, 0.6, 0.0, 0.0]
   animations.append(opacityAnimation)
@@ -465,7 +485,7 @@ override init(frame: CGRect) {
   layer.addAnimation(groupAnimation, forKey: "ripple")
 ```
 
-这会将**groupAnimation**添加到**TileView**实例上。注意，动画组会因**shouldEnableRipple**值的不同而包含一个或三个动画。
+这会将**groupAnimation**添加到**TileView**实例上。注意，动画组会因**shouldEnableRipple**值的不同而可能包含一个或三个动画。
 
 现在我们已经为每一个**TileView**实现了动画, 接下来需要在**TileGridView**中去调用它们。打开**TileGridView.swift**文件将以下代码添加到`startAnimatingWithBeginTime(_:)`方法中:
 
@@ -473,7 +493,9 @@ override init(frame: CGRect) {
 private func startAnimatingWithBeginTime(beginTime: NSTimeInterval) {
   for tileRows in tileViewRows {
     for view in tileRows {
-      view.startAnimatingWithDuration(kAnimationDuration, beginTime: beginTime, rippleDelay: 0, rippleOffset: CGPointZero)
+      view.startAnimatingWithDuration(kAnimationDuration, beginTime: beginTime, 
+      						                                 rippleDelay: 0, 
+      						                                rippleOffset: CGPointZero)
     }
   }
 }
@@ -544,9 +566,13 @@ private func startAnimatingWithBeginTime(beginTime: NSTimeInterval) {
       let distance = self.distanceFromCenterViewWithView(view)
       var vector = self.normalizedVectorFromCenterViewToView(view)
  
-      vector = CGPoint(x: vector.x * kRippleMagnitudeMultiplier * distance, y: vector.y * kRippleMagnitudeMultiplier * distance)
+      vector = CGPoint(x: vector.x * kRippleMagnitudeMultiplier * distance, 
+                       y: vector.y * kRippleMagnitudeMultiplier * distance)
  
-      view.startAnimatingWithDuration(kAnimationDuration, beginTime: beginTime, rippleDelay: kRippleDelayMultiplier * NSTimeInterval(distance), rippleOffset: vector)
+      view.startAnimatingWithDuration(kAnimationDuration, 
+                                      beginTime: beginTime, 
+                                      rippleDelay: kRippleDelayMultiplier * NSTimeInterval(distance), 
+                                      rippleOffset: vector)
     }
   }
 }
@@ -558,7 +584,7 @@ private func startAnimatingWithBeginTime(beginTime: NSTimeInterval) {
 
 <center>![Grid-3](https://cdn5.raywenderlich.com/wp-content/uploads/2016/05/Grid-3.gif)</center>
 
-太棒了! 接下来是点睛之笔：添加一个方法的效果，这个放大的动画效果要刚好在遮罩边界（bounds）发生改变之前。
+太棒了! 接下来是点睛之笔：添加一个放大的效果，这个放大的动画效果要刚好在遮罩边界（bounds）发生改变之前。
 
 在`startAnimatingWithBeginTime(_:)`函数的开始位置，添加如下代码：
 
@@ -566,7 +592,9 @@ private func startAnimatingWithBeginTime(beginTime: NSTimeInterval) {
   let linearTimingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
   
   let keyframe = CAKeyframeAnimation(keyPath: "transform.scale")
-  keyframe.timingFunctions = [linearTimingFunction, CAMediaTimingFunction(controlPoints: 0.6, 0.0, 0.15, 1.0), linearTimingFunction]
+  keyframe.timingFunctions = [linearTimingFunction, 
+                              CAMediaTimingFunction(controlPoints: 0.6, 0.0, 0.15, 1.0), 
+                              linearTimingFunction]
   keyframe.repeatCount = Float.infinity;
   keyframe.duration = kAnimationDuration
   keyframe.removedOnCompletion = false
@@ -594,7 +622,7 @@ private func startAnimatingWithBeginTime(beginTime: NSTimeInterval) {
 
 给自己点个赞吧，这是一个非常炫酷的溅落式启动页。
 
-### 接下来
+## 接下来
 
 可以在这下载到[最终的Fuber工程](https://cdn1.raywenderlich.com/wp-content/uploads/2016/06/Fuber-final.zip).
 
