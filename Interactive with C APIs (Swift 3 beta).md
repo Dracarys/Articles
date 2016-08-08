@@ -6,7 +6,7 @@ _本文是《Using Swift with Cocoa and Objective-C》书中Interacting with C A
 
 ### 基本类型
 
-虽然Swift提供了与 C 语言中char，int，float和double等基本类型等价的类型，但这些类型，诸如Int，不能与Swift核心类型进行隐式转换。因此除非代码中有明确要求（使用等价的 C 类型），否则都应使用Int（等Swift核心类型）。
+虽然Swift提供了与 C 语言中char，int，float和double等基本类型等价的类型。但这些类型，诸如Int，不能与Swift核心类型进行隐式转换。因此除非代码中有明确要求（使用等价的 C 类型），否则都应使用Int（等Swift核心类型）。
 
 
 |C|Swift|
