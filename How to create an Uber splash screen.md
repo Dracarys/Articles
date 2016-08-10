@@ -4,7 +4,7 @@
 
 *受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至翻译错误的地方，还望不吝赐教予以指正* 。
 
-一个好的溅落式启动页（别被毫无动画效果的静态启动页迷惑），使开发人员有机会在展示动画期间，从后段获取必要的数据。同时它在应用启动期间让用户始终保持高昂兴趣方面也发挥了重要作用。
+一个好的溅落式启动页（别被毫无动画效果的静态启动页迷惑），使开发人员有机会在展示动画期间，从后端获取必要的数据。同时它在应用启动期间让用户始终保持高昂兴趣方面也发挥了重要作用。
 
 虽然溅落式启动页已广泛存在，但是你很难找到一个如Uber这般出色的。在2016年的首季，Uber释出一个由CEO领导的品牌重塑战略，品牌重塑的成果之一，便是一个非常炫酷的溅落式启动页。
 
@@ -15,17 +15,17 @@
 
 鉴于本文涉及的动画众多，这里提供一个已为后续动画创建好所有CALayer的[起始工程](https://cdn2.raywenderlich.com/wp-content/uploads/2016/06/Fuber-starter.zip)。
 
-起始工程是一个叫做Fuber的应用，Fuber提供（Segway）驾乘共享服务，乘客通过向Segway驾驶员发出请求，来邀请搭载自己抵达城市的任何地方。Fuber发展迅速，已在60多个国家为用户提供服务，但也面临众多国家的反对和工会要求其必须与司机签订合同的问题。:](原作者卖萌了)
+起始工程是一个叫做Fuber的应用，Fuber提供（Segway）驾乘共享服务，乘客通过向Segway驾驶员发出请求，来邀请其搭载自己抵达城市的任何地方。Fuber发展迅速，已在60多个国家为用户提供服务，但也面临众多国家的反对和工会要求其必须与司机签订合同的问题。:](原作者卖萌了)
 
 <center>![Splash screen](https://cdn1.raywenderlich.com/wp-content/uploads/2016/05/fuber\_logo-480x161.png)</center>
 
-最终，我们会创建一个如下图的非常炫酷的溅落式启动页:
+最终，我们会创建一个如下的非常炫酷的溅落式启动页:
 
 <center>![Fuber Animation](https://cdn2.raywenderlich.com/wp-content/uploads/2016/05/Fuber-Animation.gif)</center>
 
 打开并运行起始工程，简单浏览一下工程结构。
 
-首先从视图控制器开始，应用通过负责子视图（切入）切出任务的**RootContainerViewController**加载**SplashViewController**。父视图控制器从启动页开始运行，直至应用的所有准备工作全部完成。这期间应用会连接到后段，获取后续所需数据。需要指出的是，在这个简单的项目中启动页被设计成了一个独立的模块。
+首先从视图控制器开始，应用通过负责子视图（切入）切出任务的**RootContainerViewController**加载**SplashViewController**。父视图控制器从启动页开始运行，直至应用的所有准备工作全部完成。这期间应用会连接到后端，获取后续所需数据。需要指出的是，在这个简单的项目中启动页被设计成了一个独立的模块。
 
 在**RootContainerViewController**中已经实现好了两个方法：`showSplashViewController()`和 `showSplashViewControllerNoPing()`。 
 由于教程中大部分时间，都在调用`showSplashViewControllerNoPing()`方法（调试启动动画），所以我们先将精力放在**SplashViewController**的子视图动画创建上，然后在通过`showSplashViewController()`模拟一个访问API的延迟效果，并随即跳转到主视图控制器。
@@ -47,7 +47,7 @@
 
 <center>![RiderIconView](https://cdn2.raywenderlich.com/wp-content/uploads/2016/05/RiderIconView.gif)</center>
 
-了解了这些图层的构成之后，接下来我们就来添加一些动画让**AnimatedULogoView**动起来吧。
+了解了图层的构成之后，接下来我们就来添加一些动画让**AnimatedULogoView**动起来吧。
 
 ## 让圆形动起来
 
