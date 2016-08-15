@@ -626,4 +626,6 @@ private func startAnimatingWithBeginTime(beginTime: NSTimeInterval) {
 
 可以在这下载到[最终的Fuber工程](https://cdn1.raywenderlich.com/wp-content/uploads/2016/06/Fuber-final.zip).
 
+您还可以在这里找到由译者更新至Swift 3.0的[最终的Fuber工程](https://github.com/Dracarys/Fuber-final)，请使用Xcode 8.0 beta4 或更新版本打开。
+
 如果想了解更多关于动画的知识，请访问这里的[iOS动画教程](https://www.raywenderlich.com/store/ios-animations-by-tutorials).

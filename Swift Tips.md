@@ -1,5 +1,7 @@
 # Swift 学习小记
 
+
+
 ### 1. 如何给代码分段
 熟悉Objective-C的同学都知道可以通过`#pragma mark escription` 宏标记，在代码的方法导航中添加描述语句。此外，还可以在描述语句前添加一条中划线，例如`＃pragma mark － Description`，这样在方法导航中，会显示一条横线将代码段分隔开，令分段显示更加清晰。
 
@@ -47,3 +49,11 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 	var c = converToUnsafeMutablePointer(&a)//顺利通过编译
 ```
 哈哈，成功了，顺利通过编译。（更深层的原因，笔者受限于个人知识水平，未能深究，有知晓者还望不吝赐教。）
+
+### 6.Swift错误处理原则
+*来源:[Magical Error Handling in Swift](https://www.raywenderlich.com/130197/magical-error-handling-swift)，由  [Gemma Barlow](https://www.raywenderlich.com/u/gemmakbarlow) 发表于Raywenderliche*
+
+- 错误类型的命名要清晰无歧义
+- 单个错误尽量用可选类型来处理
+- 当可能出现多种错误时，用自定义的错误类型来处理
+- 不要让抛除的错误传播过远
