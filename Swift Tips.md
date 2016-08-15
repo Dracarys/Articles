@@ -58,3 +58,17 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 - 单个错误尽量用可选类型来处理
 - 当可能出现多种错误时，用自定义的错误类型来处理
 - 不要让抛除的错误传播过远
+
+### 7.Swift数组指针的妙用
+
+```
+	let numbers = [1, 2, 3, 4, 5]
+let sum = numbers.withUnsafeBufferPointer { buffer -> Int in
+    var result = 0
+    for i in stride(from: buffer.startIndex, to: buffer.endIndex, by: 2) {
+        result += buffer[i]
+    }
+    return result
+}
+// 'sum' == 9
+```
