@@ -1,4 +1,4 @@
-# \[翻译]如何制作一个类似Uber的溅落式启动屏
+# \[译文]如何制作一个类似Uber的溅落式启动屏
 
 *本文翻译自 [How To Create an Uber Splash Screen](https://www.raywenderlich.com/133224/how-to-create-an-uber-splash-screen)*， *由 [Derek Selander](https://www.raywenderlich.com/u/lolgrep) 发表于Raywenderlich*。
 
