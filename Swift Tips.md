@@ -19,3 +19,31 @@
 
 ### 4.lazy属性的线程安全问题
 我们知道Swift通过其语言自身的特点，保证了全局常量和存储型属性，即使被多个线程交替存取，也仅初始化一次，但是这里有一个特例，就是lazy属性，当多个线程同时访问一个尚未初始化的lazy属性时，则不能保证仅初始化一次。
+
+### 5.如何便捷的在Swift中获取指针
+Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是保留了指针，但是我们不能像在 C 中一样通过`&`便捷的获取某个常量或变量的指针，例如：
+
+```
+	let a = 8
+	
+	let b = &a //编译错误
+
+```
+查看下错误信息："Type ‘inout Int’ of variable is not materializable"，这里编译器将`&a`识别为 inout Int类型，并不是我们期望的指针类型，所以是不是我们只要把它明确指定为指针类型就可以了呢？我们来试一下：
+
+```
+	func converToUnsafePointer(_ pointer: UnsafePointer<Int>) -> UnsafePointer<Int> {
+    	return pointer
+	}
+
+	func converToUnsafeMutablePointer(_ pointer: UnsafeMutablePointer<Int>) -> UnsafeMutablePointer<Int> {
+    		return pointer
+		}
+
+	var a = 8
+
+	var b = converToUnsafePointer(&a)
+
+	var c = converToUnsafeMutablePointer(&a)//顺利通过编译
+```
+哈哈，成功了，顺利通过编译。（更深层的原因，笔者受限于个人知识水平，未能深究，有知晓者还望不吝赐教。）
