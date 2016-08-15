@@ -522,7 +522,7 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 	// Prints "12"
 ```
 
-类似功能由trideof(\_:)和strideofValue(\_:)函数代替，这两个函数返回的内存空间大小与 C 的sizeof返回相同。
+类似功能由 strideof(\_:) 和 strideofValue(\_:) 函数代替，这两个函数返回的内存空间大小与 C 的sizeof返回相同。
 
 ``` Swift
 	printf(strideof(timeval.self))
