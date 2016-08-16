@@ -49,7 +49,7 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 
 	var c = converToUnsafeMutablePointer(&a)//顺利通过编译
 ```
-哈哈，成功了，顺利通过编译。（更深层的原因，笔者受限于个人知识水平，未能深究，有知晓者还望不吝赐教。）
+哈哈，成功了，顺利通过编译。
 
 ### 6.Swift错误处理原则
 *来源:[Magical Error Handling in Swift](https://www.raywenderlich.com/130197/magical-error-handling-swift)，由  [Gemma Barlow](https://www.raywenderlich.com/u/gemmakbarlow) 发表于Raywenderliche*
