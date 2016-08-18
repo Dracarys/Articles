@@ -517,6 +517,8 @@ Swift一直在尽力避免直接访问指针。但仍提供了丰富的指针类
 #### 数据类型空间计算
 在 C 语言中，通过sizeof操作符来获取各种变量或数据类型的空间大小，而Swift则分别通过sizeof(\_:)和sizeofValue(\_:)来获取指特定类型或值所占的内存空间大小。然而与 C 语言中的sizeof不同，Swift中的sizeof(\_:)和sizeofValue(\_:)函数未将因内存对齐而增加的额外空间计算在内。例如，在Darwin中以 C 方式来获取timeval结构体的空间是16字节，而通过Swift获取则是12字节。
 
+（译者注：在最新的 Xcode 8 beta 6 中，这里提到的获取size的函数均被新的Enum MemoryLayout取代。由于官方英文文档尚未更新，所以译文暂不改动）
+
 ``` Swift
 	printf(sizeof(timeval.self))
 	// Prints "12"
