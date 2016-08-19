@@ -8,7 +8,7 @@
 
 Apple 在 Swift 中提供了模式匹配，今天我们就一起来领略Swift 中的模式匹配技术。
 
-本文设计模式如下：
+本文涉及以下模式：
 
 - 元组模式（Tuple pattern）
 - 类型转换模式（Type-casting patterns）
@@ -17,45 +17,45 @@ Apple 在 Swift 中提供了模式匹配，今天我们就一起来领略Swift �
 - 枚举转换模式（Enumeration case pattern）
 - 表达式模式（Expression pattern）
 
-为了展示如何运用模式匹配，为你设计这样一个场景：作为[raywenderlich.com](https://www.raywenderlich.com/)的主编，你需要通过模式匹配来安排教程并发布到网站上。
+为了展示如何运用模式匹配，为你设计了如下场景：作为[raywenderlich.com](https://www.raywenderlich.com/)的主编，你需要通过模式匹配来排定教程并按照排定好的日程将其发布到网站上。
 
-注意：该教程需要Xcode 8 和 Swift 3，并假定您已具备Swift开发的基础。如果您才接触Swift不久，那么你可以查看我们为您提供的其它[Swit教程](https://www.raywenderlich.com/category/swift)。
+注意：该教程需要 Xcode 8 和 Swift 3，并假定您已具备 Swift 开发的基础知识。如果才开始接触Swift，请访问我们为您提供的其它[Swit教程](https://www.raywenderlich.com/category/swift)。
 	
 ### 开始
 
-欢迎光临，代主编！您今天的主要任务是改进那些即将发布到网站上的教程编排。首先下载[起始playground](https://cdn4.raywenderlich.com/wp-content/uploads/2016/07/starter-project.playground-2.zip)并打开.
+欢迎光临，代主编！您今天的主要任务是改进那些即将发布到网站上的教程排定日程。首先下载[起始playground](https://cdn4.raywenderlich.com/wp-content/uploads/2016/07/starter-project.playground-2.zip)并打开.
 
 playground包含两部分：
-- `random_uniform(value:)`函数，会生成一个介于0和＊之间的随机数，通过该随机数来指定编排的具体日子。
-- 余下的代码，解析了**tutorials.json**文件，并返回一个包含字典元素的数组，接下来将通过这个数组提供的信息对教程进行编排。
+- `random_uniform(value:)`函数，会生成一个介于0和给定值之间的随机数，通过它来随机地为教程排定日期。
+- 余下的代码，通过解析**tutorials.json**文件，返回了一个包含字典元素的数组，接下来将通过该数组所包含信息对教程进行排期。
 
-注意：欲了解更多在Swift中如何解析JSON的知识，请访问[该教程](https://www.raywenderlich.com/120442/swift-json-tutorial)
+注意：欲了解更多在Swift中如何解析JSON的知识，请访问[教程](https://www.raywenderlich.com/120442/swift-json-tutorial)
 
-虽然不需要了解解析过程，但要清楚其数据结构，在playground的**Resources**文件夹中找到并打开**tutorials.json**文件，
-每个待编排的教程均含有两个属性：名称和排定日期。你的团队负责实施排定的教程，为每个教程的日期赋一个介于1（周一）到5（周五）的值，如果没有排定教程则为nil
+虽然不需要了解解析的具体过程，但还是清楚其数据结构，在 playground 的 **Resources** 文件夹中找到并打开 **tutorials.json** 文件。可以看到每个待排定的教程均包含两个属性：title 和 day。每个排定的教程的 day 属性都会赋一个介于1（周一）到5（周五）的值，暂不排定的教程则设为 nil。
 
-你本想一周内每天一篇教程，但是查阅完教程安排表后发现，你的团队在同一天实施了两篇教程。你需要修复该问题，此外，你还想将教程进行特定排序。你该怎么完成这一切呢？如果你说“用模式”，那么你就说对了。
+本想一周内每天一篇教程，但是查阅完教程安排表后发现，存在一天两篇教程的情况。你需要修复该问题，此外，还需对教程进行特定排序。该怎么解决这些问题呢？如果你能想到“用模式！”，那么你就算想对了。
 
 ### 模式匹配类型
 
-让我们先来了解下，你在该教程中会用到哪些模式：
+让我们先来了解下本文即将用到的几种模式：
 
 - 元组模式（Tuple patterns）用于匹配正确的元组类型值
 - 类型转换模式（Type-casting patterns）允许你去转换或匹配类型
 - 通配符模式（Wildcard pattern）用于匹配或忽略任意值和类型
 - 可选类型模式（Optional pattern）用于匹配可选值
-- 枚举转换模式（Enumeration case pattern）用于匹配已有枚举类型
-- 表达式模式（Expression pattern）允许你通过一个表达式去比较给定的值
+- 枚举模式（Enumeration case pattern）用于匹配已有枚举类型
+- 表达式模式（Expression pattern）允许你通过一个指定的表达式去比较指定的值
 
 ### 元组模式（Tuple Pattern）
 
-首先，通过一个元组模式去教程数组。在playground的最后添加如下代码：
+首先，通过元组模式创建一个包含所有教程的数组。在playground的最后添加如下代码：
+
 ``` Swift
 enum Day: Int {
   case monday, tuesday, wednesday, thursday, friday, saturday, sunday
 }
 ```
-如此为一周中每天创建一个枚举。原始类型的**Int**，那么可以赋 0 到 6 任意值来表示星期一到星期日。在枚举的后面添加如下代码：
+这里一周的划分情况创建了一个原始类型为 **Int**的枚举，这样便可以通过赋 0 到 6 之间的任意值来表示星期一到星期日。在枚举的后面添加如下代码：
 
 ``` SWift
 class Tutorial {
@@ -69,13 +69,13 @@ class Tutorial {
   }
 }
 ```
-现在通过一个数组来保存所有的教程：
+接下来通过一个数组来保存所有的 tutorial：
 
 ``` Swift
 var tutorials: [Tutorial] = []
 ```
 
-接下来，紧挨着刚才的代码，添加如下代码，将包含字典的数组转换为包含tutorial对象的数组：
+紧挨着刚才的代码，添加如下内容，将包含字典的数组转换为包含 tutorial 对象的数组：
 
 ``` Swift
 for dictionary in json {
@@ -91,11 +91,12 @@ for dictionary in json {
 }
 ```
 
-这里通过`for-in`遍历整个 json 数组，同时又通过一个元组遍历了数组中每个字典的所有键值对，这就是元组模式的运用。
-将tutorial实例添加到了数组中，但现在tutorial 还是空的，接下来我们将同哟
-You add each tutorial to the array, but it is currently empty—you are going to set the tutorial’s properties in the next section with the type-casting pattern.
-Type-Casting Patterns
-To extract the tutorial information from the dictionary, you’ll use a type-casting pattern. Add this code inside the for (key, value) in dictionary loop, replacing the placeholder comment:
+这里通过`for-in`语句来遍历整个 json 数组，同时又通过元组去遍历字典中的键值对。这里展示了元组模式的应用。
+
+已将 tutorial 添加到了数组中，但它现在还是空的，下一小节将通过类型转换模式来设置其属性。
+
+### 类型转换模式（Type-Casting Patterns）
+为了取出字典的信息，你将用到类型转换模式。在`for (key, value) in dictionary`循环体中，用如下代码替换掉注释：
 
 ``` Swift
 // 1
@@ -114,30 +115,30 @@ switch (key, value) {
 }
 ```
 
-代码逐步说明:
+代码说明:
 
-1. 在Switch中传入一个包含键和值的元组，元组模式的又一次运用。
-2. 测试教程的title是否为String，如果是，则通过类型转换模式将其抓换为String。
-3. You test if the tutorial’s day is a string with the as type-casting pattern. If the test succeeds, you convert it into an Int first and then into a day of the week with the Day enumeration’s failable initializer init(rawValue:). You subtract 1 from the dayInt variable because the enumeration’s raw values start at 0, while the days in tutorials.json start at 1.
-4. 为包含所有情况，添加了一个defalut ，并通过break 来退出Switch
-5. 
+1. 通过 switch 匹配元组中的键值对。
+2. 测试 tutorial 的 title 是否为 String，如果是，则通过类型转换模式将其转换为 String 类型（译者注：这里有点String转String，但别迷糊，注意开始的 json 数组类型）。
+3. 通过类型转换来测试day属性。如果测试通过，先将其转为整型，然后在通过 Day 枚举的可失败构造器 `init(rawValue:)`，将其构造成枚举 day。减 1 是因为 json 中的日期是从 1 开始， 而枚举是从 0 开始的。
+4. switch语句要完整，这里添加一个 defalut 分支，并通过 break 语句来退出 switch。 
 
-在playground的最后添加如下代码，以将tutorial信息输出到控制台。
+在playground的最后添加如下代码，以将 tutorial 信息输出到控制台。
 
 ``` Swift
 print(tutorials)
 ```
 
-如你所见，现在数组中的每个教程都有了自己的title和day属性。 准备就绪，接下来就该解决教程排期问题：一周中每天仅一个教程。
+如你所见，现在数组中的每个 tutorial 都拥有了自己的 title 和 day 属性。 前期准备已毕，接下来就该解决教程排定的问题：一周中每天仅安排一个教程。
 
 ### 通配符模式（Wildcard Pattern）
-要通过通配符模式来排定教程，首先得先去取消每个教程的安排。在playground的最后添如下代码:
+
+要通过通配符模式来排定教程，首先得取消每个教程现有的日期安排。在 playground 的最后添如下代码:
 
 ``` Swift
 tutorials.forEach { $0.day = nil }
 ```
 
-这里将所有无排定的教程的日期设为nil。为了排定所有教程，在palayground的最后添加如下代码:
+这里通过将 tutorial 的 day 设置为 nil 来取消所有教程安排。为了重新排定所有教程，在 palayground 的最后添加如下代码:
 
 ``` Swift
 // 1 
@@ -150,11 +151,11 @@ let randomDays = days.sorted { _ in random_uniform(value: 2) == 0 }
 
 代码说明:
 
-1. 首先创建一个days数组，一周中的日期无重复。
-2. You “sort” this array. The random_uniform(value:) function is used to randomly determine if an element should be sorted before or after the next element in the array. In the closure, you use an underscore to ignore the closure parameters, since you don’t need them here. Although there are technically more efficient and mathematically correct ways to randomly shuffle an array this shows the wildcard pattern in action!
-3. 最后，将随机生成且不重复的日期，赋值给教程的day属性
+1. 首先创建一个 days 数组，其中无重复日期。
+2. 对数组进行“排序”. 通过`random_uniform(value:)`方法对数组中两个相邻元素进行随机排序。由于不需要，所以闭包中使用下划线来忽略参数。虽然还有其他更高效的数学方法来随机打乱一个数组，但这里更好地展示了通配符模式的应用。
+3. 最后，将随机生成的日期赋值给前7个 tutorial 的 day 属性。
 
-在playground的最后添加如下代码，以便打印tutorial：
+在 playground 的最后添加如下代码，将 tutorial 的排定情况输出到控制台：
 
 ``` Swift
 print(tutorials)
@@ -164,9 +165,9 @@ print(tutorials)
 
 ### 可选类型模式（Optional Pattern）
 
-教程日程搞定了，但是作为主编，你还需要对教程进行排序。接下来通过可选类型模式来解决该问题。
+教程日程安排虽然搞定了，但是作为主编，你还需要对教程进行排序。接下来通过可选类型模式来解决该问题。
 
-按升序对教程进行排序，未安排的教程通过title进行升序排序，已安排的教程按日期进行排序。在playground的最后添加如下代码：
+对教程进行升序排序，未排定日期的 tutorial 按 title 排序，已排定日期的 tutorial 按 day 进行排序。在 playground 的最后添加如下代码：
 
 ``` Swift
 // 1
@@ -189,7 +190,8 @@ tutorials.sort {
 ```
 
 代码说明:
-1.通过数组的ort(_:) 方法对tutorials数组进行排序。该方法接受一个简洁的闭包，该闭包定意义了数组中任一两个tutorial间的排序规则。升序该方法返回true，否则返回false。
+
+1. 通过数组的`sort(_:)`方法对 tutorials 进行排序。该方法接受一个简洁的闭包，该闭包定意义了数组中任一两个 tutorial 间的排序规则。升序该方法返回true，否则返回false。
 
 2. switch接受一个元组，该元组包含两个当前正在进行比较的tutorial的da属性。这是元组模式的又一次应用。
 
@@ -208,9 +210,10 @@ print(tutorials)
 现在我们已经将教程按预先的想法排好了。
 
 ### 枚举模式（Enumeration Case Pattern）
+
 现在我们通过枚举模式去侦测每个教程具体安排的日期。
 
-在Tutorial的extension中，你通过枚举来将Day类型转换为自定义的字符串。下面，添加一个计算型属性name，来取代这种绑定关系。在Playground的最后添加如下代码：
+在 Tutorial 的 extension 中，你通过枚举来将 Day 类型转换为自定义的字符串。下面，添加一个计算型属性 name，来取代这种绑定关系。在Playground的最后添加如下代码：
 
 ``` Swift
 extension Day {
@@ -236,12 +239,13 @@ extension Day {
 }
 ```
 
-通过可能的枚举值在Switch中去匹配当前值（self)。这就是枚举类型匹配的应用。
+在 switch 语句通过枚举去匹配当前值（self）。这里展示了枚举类型在匹配中的应用。
 
-令人阴险深刻吧？数字总是计算便捷，但名字则更加直观且便于理解。
+一目了然，是不是？数字虽然计算便捷，但名称则更加直观且便于理解。
 
 ### 表达式模式（Expression Pattern）
-接下来，会添加一个用于描述教程安排顺序的属性。你本可以再一次向下面这样使用枚举来处理该问题（不要将这里的代码添加到Playground中）：
+
+接下来，会添加一个用于描述教程安排顺序的属性。你本可以向下面这样使在此使用枚举来处理该问题（不要将这里的代码添加到 Playground 中）：
 
 ``` Swift
 var order: String {
@@ -264,7 +268,7 @@ var order: String {
 }
 ```
 
-但同样事情做两次，是个差劲的主编，不是吗? ;] 我们使用另外一种类似的方式来解决。首先要重载模式匹配操作符，以改变其功能，能适用于日期。在playground的最后添加如下代码:
+但同样事情做两次，是个差劲的主编，不是吗? 我们使用另外一种类似的方式来解决该问题。首先重载模式匹配操作符，改变其默认功能以便能适用于 Day 类型。在 playground 的最后添加如下代码:
 
 ``` Swift
 func ~=(lhs: Int, rhs: Day) -> Bool {
@@ -272,7 +276,7 @@ func ~=(lhs: Int, rhs: Day) -> Bool {
 }
 ```
 
-这段代码允许你使用 1 到 7 之间的任意整数与日期进行匹配。你可以通过该重载操作符以另外一种方式去写你的计算型属性。
+这段代码允许你使用 1 到 7 之间的任意整数与日期进行匹配。你可以通过该重载操作符以另外一种方式去实现你的计算型属性。
 
 在palyground的最后添加如下代码：
 
@@ -305,11 +309,11 @@ extension Tutorial {
 }
 ```
 
-感谢模式匹配操作符重载，先**day**对象已经可以跟整型表达式匹配了。这就是表达式模式的实际应用。
+感谢模式匹配操作符重载，现在**day**对象已经可以跟整型表达式匹配了。这展示了表达式模式的应用。
 
 ### 组合起来
 
-定义好了日期名称，并且教程的排序也排好了，现在开始打印每个教程。在playground的最后添加如下代码块：
+定义好了日期名称，并且教程的排序也排好了，现在开始打印每个教程。在 playground 的最后添加如下代码块：
 
 
 ``` Swift
@@ -322,11 +326,7 @@ for (index, tutorial) in tutorials.enumerated() {
 }
 ```
 
-主要到for-in循环中的元组了吗？，这里又用到了元组模式。
-
-哇哦！你做为代主编，今天的人物还真是不少，不过你做的很棒，现在你可以放松去享受下泳池了。
-
-开玩笑的！主编的工作永远也做不完，怪怪滚回去工作吧！
+注意到 for-in 语句中的元组了吗？，这里又用到了元组模式。
 
 ### 接下来
 这里下载[最终playground](https://cdn2.raywenderlich.com/wp-content/uploads/2016/07/patterns.playground-1.zip)。想亲自试试，可以到 [IBM Swift Sandbox](http://swiftlang.ng.bluemix.net/#/repl/57b2d2a68bbb01d512f4ca2b) 动手体验。
