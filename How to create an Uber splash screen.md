@@ -2,7 +2,10 @@
 
 *本文翻译自 [How To Create an Uber Splash Screen](https://www.raywenderlich.com/133224/how-to-create-an-uber-splash-screen)*， *由 [Derek Selander](https://www.raywenderlich.com/u/lolgrep) 发表于Raywenderlich*。
 
-*受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至翻译错误的地方，还望不吝赐教予以指正* 。
+*受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
+
+－－－－－－－－－－－－－－－－－－－
+
 
 一个好的溅落式启动页（别被毫无动画效果的静态启动页迷惑），使开发人员有机会在展示动画期间，从后端获取必要的数据。同时它在应用启动期间让用户始终保持高昂兴趣方面也发挥了重要作用。
 

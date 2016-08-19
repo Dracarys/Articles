@@ -4,11 +4,12 @@
 
 *受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*。
 
-对任何编程语言来说，模式匹配都是其最强大的特性之一，它允许你制定数值间匹配的规则，可使代码变得更加简洁和灵活。
+－－－－－－－－－－－－－－－－－－－
 
-Apple 在 Swift 中提供了模式匹配，今天我们就一起来领略Swift 中的模式匹配技术。
 
-本文涉及以下模式：
+
+
+对任何编程语言来说，模式匹配都是其最强大的特性之一，它允许你制定数值间匹配的规则，可使代码变得更加简洁和灵活。本文涉及以下模式：
 
 - 元组模式（Tuple pattern）
 - 类型转换模式（Type-casting patterns）
@@ -23,10 +24,10 @@ Apple 在 Swift 中提供了模式匹配，今天我们就一起来领略Swift �
 	
 ### 开始
 
-欢迎光临，代主编！您今天的主要任务是改进那些即将发布到网站上的教程排定日程。首先下载[起始playground](https://cdn4.raywenderlich.com/wp-content/uploads/2016/07/starter-project.playground-2.zip)并打开.
+首先下载[起始playground](https://cdn4.raywenderlich.com/wp-content/uploads/2016/07/starter-project.playground-2.zip)并打开。
 
 playground包含两部分：
-- `random_uniform(value:)`函数，会生成一个介于0和给定值之间的随机数，通过它来随机地为教程排定日期。
+- `random_uniform(value:)`函数，会生成一个介于 0 和给定值之间的随机数，通过它来随机地为教程排定日期。
 - 余下的代码，通过解析**tutorials.json**文件，返回了一个包含字典元素的数组，接下来将通过该数组所包含信息对教程进行排期。
 
 注意：欲了解更多在Swift中如何解析JSON的知识，请访问[教程](https://www.raywenderlich.com/120442/swift-json-tutorial)
