@@ -26,7 +26,7 @@
 ### 5.如何便捷的在Swift中获取指针
 Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是保留了指针，但是我们不能像在 C 中一样通过`&`便捷的获取某个常量或变量的指针，例如：
 
-```
+``` Swift
 	let a = 8
 	
 	let b = &a //编译错误
@@ -34,7 +34,7 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 ```
 查看下错误信息："Type ‘inout Int’ of variable is not materializable"，这里编译器将`&a`识别为 inout Int类型，并不是我们期望的指针类型，所以是不是我们只要把它明确指定为指针类型就可以了呢？我们来试一下：
 
-```
+``` Swift
 	func converToUnsafePointer(_ pointer: UnsafePointer<Int>) -> UnsafePointer<Int> {
     	return pointer
 	}
@@ -49,7 +49,7 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 
 	var c = converToUnsafeMutablePointer(&a)//顺利通过编译
 ```
-哈哈，成功了，顺利通过编译。（更深层的原因，笔者受限于个人知识水平，未能深究，有知晓者还望不吝赐教。）
+哈哈，成功了，顺利通过编译。
 
 ### 6.Swift错误处理原则
 *来源:[Magical Error Handling in Swift](https://www.raywenderlich.com/130197/magical-error-handling-swift)，由  [Gemma Barlow](https://www.raywenderlich.com/u/gemmakbarlow) 发表于Raywenderliche*
@@ -61,7 +61,7 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 
 ### 7.Swift数组指针的妙用
 
-```
+``` Swift
 	let numbers = [1, 2, 3, 4, 5]
 let sum = numbers.withUnsafeBufferPointer { buffer -> Int in
     var result = 0
@@ -72,3 +72,16 @@ let sum = numbers.withUnsafeBufferPointer { buffer -> Int in
 }
 // 'sum' == 9
 ```
+
+### 8.简写闭包参数名
+*来源《The Swift Programming Language (SWift 3 Beta)》Shorthand Argument Names 小节*
+
+Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`等参数简写。
+
+如果您在闭包表达式中使用参数名称简写，您可以在定义闭包时省略其参数列表，相应参数简写的类型会通过函数类型对其进行推断。此外`in`关键字也可以被省略，因为此时闭包表达式完全由闭包函数体构成：
+
+``` Swift
+	reversed = sorted(names, { $0 > $1 } )
+
+```
+在这个例子中，`$0`和`$1`分别表示闭包中第一个和第二个String类型的参数。
