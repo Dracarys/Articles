@@ -2,7 +2,7 @@
 
 *本文翻译自 [How To Create an Uber Splash Screen](https://www.raywenderlich.com/133224/how-to-create-an-uber-splash-screen)*， *由 [Derek Selander](https://www.raywenderlich.com/u/lolgrep) 发表于Raywenderlich*。
 
-*受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
+*受限于译者英语水平及翻译经验，译文难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
 
 －－－－－－－－－－－－－－－－－－－
 
