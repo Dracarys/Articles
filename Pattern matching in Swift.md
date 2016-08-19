@@ -1,8 +1,12 @@
 # Swift中的模式匹配
 
-对任何编程语言来说，模式匹配都是最强大的功能之一，通过制定数值间匹配的规则，使你的代码变得更加简洁和灵活。
+*本文翻译自 [Pattern Matching in Swift](https://www.raywenderlich.com/134844/pattern-matching-in-swift)，由 [Cosmin Pupaza](https://www.raywenderlich.com/u/shogunkaramazov) 发表于Raywenderlich*。
 
-Apple 在 Swift 中开放了模式匹配，今天我们就一起来领略Swift 中的模式匹配技术。
+*受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*。
+
+对任何编程语言来说，模式匹配都是其最强大的特性之一，它允许你制定数值间匹配的规则，可使代码变得更加简洁和灵活。
+
+Apple 在 Swift 中提供了模式匹配，今天我们就一起来领略Swift 中的模式匹配技术。
 
 本文设计模式如下：
 
