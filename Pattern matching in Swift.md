@@ -1,6 +1,6 @@
 # Swift中的模式匹配
 
-*本文翻译自 [Pattern Matching in Swift](https://www.raywenderlich.com/134844/pattern-matching-in-swift)，由 [Cosmin Pupaza](https://www.raywenderlich.com/u/shogunkaramazov) 发表于Raywenderlich*。
+*本文翻译自 [Pattern Matching in Swift](https://www.raywenderlich.com/134844/pattern-matching-in-swift)，由 [Cosmin Pupaza](https://www.raywenderlich.com/u/shogunkaramazov) 发表于[Raywenderlich](https://www.raywenderlich.com)*。
 
 *受限于译者英语水平及翻译经验，译文容难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*。
 
