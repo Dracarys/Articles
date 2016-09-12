@@ -85,3 +85,22 @@ Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`
 
 ```
 在这个例子中，`$0`和`$1`分别表示闭包中第一个和第二个String类型的参数。
+
+### 9.绘制虚线
+
+```Swift
+		if let context = UIGraphicsGetCurrentContext() {
+            CGContextSetLineWidth(context, 2.0);
+            CGContextSetStrokeColorWithColor(context, UIColor.greenColor().CGColor);
+            CGContextBeginPath(context);
+            
+            // 该数组用于指定虚线的重复样式，这里指定绘制10，然后跳过5，依次重复。
+            let lengths: [CGFloat] = [10.0, 5.0]
+            // 第4个参数指定传入的数组包含有几个元素。
+            CGContextSetLineDash(context, 0.0, lengths, 2)
+            
+            CGContextMoveToPoint(context, 0, rect.size.height/2)
+            CGContextAddLineToPoint(context, rect.width, rect.size.height/2)
+            CGContextStrokePath(context)
+        }
+```
