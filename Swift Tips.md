@@ -104,3 +104,24 @@ Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`
             CGContextStrokePath(context)
         }
 ```
+
+### 10.访问控制 （尚未翻译）
+Swift 3.0更新了访问控制，添加了open和fileprivate两个新控制权限，这里摘录了[《The Swift Programming Language (Swift 3)》](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/AccessControl.html#//apple_ref/doc/uid/TP40014097-CH41-ID3)书中部分内容：
+
+Swift provides five different access levels for entities within your code. These access levels are relative to the source file in which an entity is defined, and also relative to the module that source file belongs to.
+
+- Open access and public access enable entities to be used within any source file from their defining module, and also in a source file from another module that imports the defining module. You typically use open or public access when specifying the public interface to a framework. The difference between open and public access is described below.
+- Internal access enables entities to be used within any source file from their defining module, but not in any source file outside of that module. You typically use internal access when defining an app’s or a framework’s internal structure.
+- File-private access restricts the use of an entity to its own defining source file. Use file-private access to hide the implementation details of a specific piece of functionality when those details are used within an entire file.
+- Private access restricts the use of an entity to the enclosing declaration. Use private access to hide the implementation details of a specific piece of functionality when those details are used only within a single declaration.
+Open access is the highest (least restrictive) access level and private access is the lowest (most restrictive) access level.
+
+Open access applies only to classes and class members, and it differs from public access as follows:
+
+- Classes with public access, or any more restrictive access level, can be subclassed only within the module where they’re defined.
+- Class members with public access, or any more restrictive access level, can be overridden by subclasses only within the module where they’re defined.
+- Open classes can be subclassed within the module where they’re defined, and within any module that imports the module where they’re defined.
+- Open class members can be overridden by subclasses within the module where they’re defined, and within any module that imports the module where they’re defined.
+
+Marking a class as open explicitly indicates that you’ve considered the impact of code from other modules using that class as a superclass, and that you’ve designed your class’s code accordingly.
+
