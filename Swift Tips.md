@@ -125,3 +125,8 @@ Open access applies only to classes and class members, and it differs from publi
 
 Marking a class as open explicitly indicates that you’ve considered the impact of code from other modules using that class as a superclass, and that you’ve designed your class’s code accordingly.
 
+### 11.@objc & dynamic
+关键字，摘录自王巍 [《Swift tips》](http://swifter.tips/objc-dynamic/)
+
+### 12.@escaping & @noescape
+摘录自[《What Do @escaping and @noescape Mean In Swift 3》](https://cocoacasts.com/what-do-escaping-and-noescaping-mean-in-swift-3/)
