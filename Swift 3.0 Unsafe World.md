@@ -4,17 +4,17 @@
 
 *受限于译者英语水平及翻译经验，译文难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
 
-与大多数现代编程语言一样，在Swift的环境中我们都很从容，因为内存被额外的元素来管理，可能是编译器或者是Swift的运行时，也可能是糟糕的垃圾回收器。这一切的处理都隐藏的语言背后，很少需要我们来干预。
+与大多数现代编程语言一样，Swift用起来还算舒服，至少内存由其它机制来管理，可能是编译器或者是Swift的运行时，也可能是糟糕的垃圾回收器。不管怎样，这一切的处理都隐藏的语言背后，很少需要我们来干预。
 
-然而，鉴于Swift的兼容性，还是会涉及到诸如：OpenGL 或 POSIX 函数等 C Api的调用，这时我们就不得不出处理那个让大多数人都头疼的问题，对，就是指针和堆内存的手动管理。
+然而，鉴于 Swift 的灵活性，多少还是会涉及到些许：OpenGL 或 POSIX 等 C Api的调用，这时我们就不得不出处理那个让大多数人都头疼的问题——指针和堆内存的手动管理。
 
-在3.0之前，Swift的unsafe API有点让人困惑，有多种方式获得相同的结果，这导致我们在复制粘贴 stackoverflow 上的代码时，并没有真正理解它。到了3.0 发生了变化，这些API变得更加完善。
+在3.0之前，Swift 的 unsafe API 多少有点让人困惑，很多方法都可以获得相同的结果，这让我们在复制粘贴 stackoverflow 上的代码时，都没能真正理解到底这些代码背后发生了什么。到了3.0 这些API变得更加完善了。
 
-本文不会涉及如何将代码从Swift 2.x 迁移到 3.0，会重点讨论 3.0的变化，偶尔会与 C 进行比较，主要目的就是能正确的使用不安全引用与低级 C APIs进行交互。
+本文不会涉及如何将代码从Swift 2.x 迁移到 3.0，会重点讨论 3.0的变化，偶尔会与 C 进行对比，目的在于如何正确的使用不安全引用与低级 C APIs进行交互。
 
-让我们通过一个简单的例子，创建并持有一个整型指针。
+首先我们从一个最简单的操作开始，创建并持有一个整型指针。
 
-在 C 语言中：
+在 C 语言中，我们这样操作：
 
 ``` C
 int *a = malloc(sizeof(int));
@@ -37,9 +37,9 @@ a.dealocate(capacity:1)
 
 ```
 
-我们在Swift中看到的第一个类型是 `UnsafeMutablePointer<T>`，该结构体代表一个指向T类型的指针，如你所见，他还有一个静态方法，`allocate`，它可转换`capacity`个数的元素。
+我们在Swift中看到的第一个类型是 `UnsafeMutablePointer<T>`，该结构体代表一个指向T类型的指针，如你所见，他还有一个静态方法，`allocate`，该方法可以存储`capacity`个数的元素（译者：该方法只是开辟一块内存，用于存储指定个数的数据，并非存储）。
 
-真如所预想那样，还存在一个`UnsafeMutablePointer `的变体`UnsafePointer `，它不允许更该其所指向的元素，不仅如此，不可变的`UnsafePointer `甚至都没有`allocate`方法。
+如预想的一样，同样存在一个`UnsafeMutablePointer `的变体`UnsafePointer `，它不允许更该其所指向的元素，不仅如此，不可变的`UnsafePointer `甚至都没有`allocate`方法。
 
 在Swift中，还有另外一种方式去生成一个`Unsafe[Mutable]Pointer `，那就是 `&` 操作符。当向一个`block`或`function`传参时，可以通过 `&` 来指定其接受一个指针。例如：
 
@@ -53,7 +53,7 @@ receive(pointer: &a)
 
 ```
 
-`&`操作只能应用于`var`声明的变量，任何时候我们都可以对其进行任意操作。例如，可以接受一个可变引用并修改引用值：
+`&`操作只能应用于`var`声明的变量，任何时候我们都可以对其进行任意操作。例如，可以接受一个可变引用并修改引用的值：
 
 ``` Swift
 func receive(mutablePointer: UnsafeMutablePointer<Int>) {
@@ -66,9 +66,9 @@ print("A's value has changed in the function: \(a)") // 84
 
 ```
 
-这里与第一个例子最大的不同在于，在第一个例子中我们手动开辟内存，（）and in the sample with a function, we are creating a pointer from a Swift allocated memory。显然，管理内存和接受指针是两个不同的点。在本文最后我们会讨论内存管理。
+该处与第一个例子最大的区别在于，在第一个例子中我们手动开辟了内存，（并且之后我们都将手动管理），而这个例子中，我们创建了一个指向了由Swift开辟的内存的指针。显然，管理内存和接受指针是两个截然不同的话题。在文末我们会有关讨论内存管理的话题。
 
-如果要接受一个由Swift管理内存的指针，且不通过创建一个函数的方式该怎么办？那么可以使用`withUnsafeMutablePointer`, 该方法接受一个Swift类型的指针和一个以该指针作为其参数的 block。例子：
+如果既要接受一个受 Swift 管理内存的指针，又不想创建函数该怎么办呢？那么可以使用`withUnsafeMutablePointer`, 该方法接受一个Swift类型的指针和一个以该指针作为其参数的 block。例子：
 
 ``` Swift
 var a = 42
@@ -78,7 +78,7 @@ print("a's value is: \(a)") //84
 
 ```
 
-现在我们了解了 如何通调用 带有指针参数的 C API，接下里我们看一个POSIX 的例子，通过 `opendir / readdir`来列出当前目录的内容。
+现在我们了解了如何通调用带有指针参数的 C API，接下里我们看一个 POSIX 的例子，通过 `opendir / readdir`来列出当前目录的内容。
 
 ``` Swift
 var dirEnt: UnsafeMutablePointer<dirent>?
@@ -104,7 +104,7 @@ repeat {
 
 ### Cast between pointers(指针间转换)
 
-在操作 C API 时，有时会需要从一种指针转换为另一种指针。这在 C 中处理起来非常简单（这非常危险也非常容易出错），在Swift中，所有指针都必需指定类型，这也就意味着一个`UnsafePointer<Int>`不能用于一个接受`UnsafePointer<UInt8>`类型的参数，这在对于代码的安全性而言很有帮助，但这也意味着与那些需要类型转换的 C API进行交换变为不可能，例如，socket 的 `bind()`函数。这种情况，我们就需要用到`withMemoryRebound` ，该函数可将指针从一种类型转化为其它类型，接下来我们来看看在bind函数中(TODO:这里翻译不完整)
+在操作 C API 时，有时会需要从一种指针转换为另一种指针。这在 C 中处理起来非常简单（这既非常危险又非常容易出错），在Swift中，所有指针都必需指定类型，这也就意味着一个`UnsafePointer<Int>`不能用于一个接受`UnsafePointer<UInt8>`类型的参数，这在对于代码的安全性而言很有帮助，但这也意味着与那些需要类型转换的 C API进行交互变为不可能，例如，socket 的 `bind()`函数。这种情况，我们就需要用到`withMemoryRebound` ，该函数可将指针从一种类型转化为其它类型，接下来我们来看看在bind函数中进行转换，首先我们创建一个sockaddr_in类型的结构体，之后转换为sockaddr类型：
 
 ``` Swift
 var addrIn = sockaddr_in()
@@ -116,7 +116,7 @@ withUnsafePointer(to: &addrIn) { ptr in
 }
 ```
 
-在转换指针类型时，有一种特殊情况，一些 C API 要求传入一个 void * 指针。在Swift 3.0 之前，我们可以用UnsafePointer<Void>，然而，3.0中添加了一个新的类型，来出来该类型指针：UnsafeRawPointer。该结构体不普通（这里翻译部通顺），意味着她不会持有任何绑定于任何特殊类型的信息，这简化了我们的代码。要创建一个UnsafeRawPointer，我们可以通过它的构造器包装一个现有指针来实现。如果想尝试不同的方法，讲一个UnsafeRawPointer转换一个指定类型的指针，我们可以使用我们之前用到的withMemoryRebound的一个特别版，assumingMemoryBound.
+在转换指针类型时，有一种特殊情况，一些 C API 要求传入一个 void * 指针。在Swift 3.0 之前，我们可以用UnsafePointer<Void>，然而，3.0中添加了一个新的类型：UnsafeRawPointer 来处理该类型指针。该结构体并非泛指，这意味着它不会持有任何绑定于任何特殊类型的信息，这简化了我们的代码。要创建一个UnsafeRawPointer，我们可以通过它的构造器包装一个现有指针来实现。如果想尝试不同的方法，讲一个UnsafeRawPointer转换一个指定类型的指针，我们可以使用我们之前用到的withMemoryRebound的一个特别版，assumingMemoryBound.
 
 ``` Swift
 let intPtr = UnsafeMutablePointer<Int>.allocate(capacity: 1)
@@ -125,7 +125,7 @@ let intPtrAgain = VoidPtr.assumingMemoryBound(to: Int.self)
 
 ```
 
-### Pointers as arrays
+### Pointers as arrays（数组指针）
 
 至此，我们已经讨论指针的典型应用场景，已经可以处理大多数的 C API调用。然而指针应用非常广泛，其中之一便是，内存数据遍历。在Swift中有几种方法来实现该功能。事实上，UnsafePointer 有一个advanced(by:) 方法，允许你遍历内存，advanced(by:) 会返回另一个UnsafePointer，可借此进行相应的存取操作。
 
