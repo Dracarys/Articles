@@ -1,6 +1,6 @@
 # Swift 3.0 Unsafe World
 
-本文是[《Swift 3.0 Unsafe World》](http://technology.meronapps.com/2016/09/27/swift-3-0-unsafe-world-2/?utm_source=Swift_Developments&utm_medium=email&utm_campaign=Swift_Developments_Issue_58)的中文译文，由作者：[Roberto Perez](http://technology.meronapps.com/author/rob/)发布于[technology.meronapps.com](http://technology.meronapps.com)
+本文是[《Swift 3.0 Unsafe World》](http://technology.meronapps.com/2016/09/27/swift-3-0-unsafe-world-2/?utm_source=Swift_Developments&utm_medium=email&utm_campaign=Swift_Developments_Issue_58) 的中文译文，由作者：[Roberto Perez](http://technology.meronapps.com/author/rob/) 发布于 [technology.meronapps.com](http://technology.meronapps.com)
 
 *受限于译者英语水平及翻译经验，译文难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
 
@@ -206,13 +206,13 @@ withUnsafePointer(to: &data, { generic_function(VALUE_TYPE_STRUCT, UnsafeRawPoin
 
 ### Opaque Pointer
 
-he last thing I would like to comment is the post is the usage of Opaque pointers to Swift types. It is very common to have a userData like parameter in some C API functions, that user data will be a void* pointer that will hold an arbitrary memory value that will be used after. A common use case is when dealing with functions that sets some callbacks that will be invoked when an event happens. In that case it will be useful to pass a reference to a Swift object so we can call its method from the C callback.
+最后，我们来讨论一下 Opaque pointer 转 Swift 类型的用法。它在一些包含用户数据参数的 C API 中非常常见，这些用户数据以一个指向未知内存地址的 void* 指针的形式呈现，随后会被调用。一个常见的使用场景就是处理那些由事件触发的设置有回调的函数。这时向Swift对象传递一个引用就变得非常有用，因为可以从 C 回调它的方法。
 
-We could use a regular UnsafeRawPointer like we have seen in the rest of the post, however, as we've also seen, doing this could have problems with memory management. If we pass to a C world function a pointer to a object that we don't retain before, it can be freed and out program will crash.
+我们可以使用如下所用到的 UnsafeRawPointer，然而这会带来内存管理问题。如果我们向一个 C 函数传递一个非自己持有的对象指针，那么这个对象有个能被释放，早成应用崩溃。
 
-Swift has an utility to take pointers to objects retaining its reference or not depending on our needs. Those are static functions of Unmanaged struct. With passRetained() we will create a retained reference to an object, so we can be sure that when using it from C world, it will be still there. If the object is already retained for the life of the callback we can also use passUnretained(). Both methods produces a instance of Unmanaged that will be converted to a UnsafeRawPointer by calling toOpaque()
+Swift有一个非常实用的功能，可以接受一个指向对象的指针，并视需要对其进行持有或非持有。它们是非管理结构体的静态函数。通过`passRetained()`我们可以创建一个持有该对象的引用，这样我们就能确定在 C 环境调用时，他不会被释放掉。如果该对象已经在整个回调周期被持有，那么我们还可以调用`passUnretained()`。这两个方法都会产生的实力，都可以通过调用 `toOpaque()` 方法转换为UnsafeRawPointer
 
-On the other side, we can transform an UnsafeRawPointer to a class or struct instance using the inverse api fromOpaque() and takeRetained() or takeUnretained()`.
+此外，我们还可以通过`fromOpaque()` 、 `takeRetained()` 、 `takeUnretained()`这几个转换方法，将一个UnsafeRawPointer，转换类或者结构体的实例。
 
 ``` Swift
 void set_callback(void (* functionPtr)(void *), void* userData));
