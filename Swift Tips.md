@@ -21,7 +21,7 @@
 - 十进制格式增强 `let paddedDobule = 000123.456`，`let oneMillion = 1_000_000`，`let justOverOneMillion = 1_000_000.000_000_1`
 
 ### 4.lazy属性的线程安全问题
-我们知道Swift通过其语言自身的特点，保证了全局常量和存储型属性，即使被多个线程交替存取，也仅初始化一次，但是这里有一个特例，就是lazy属性，当多个线程同时访问一个尚未初始化的lazy属性时，则不能保证仅初始化一次。
+我们知道 Swift 通过其语言自身的特点，保证了全局常量和存储型属性，即使被多个线程交替存取，也仅初始化一次，但是这里有一个特例，就是 lazy 属性，当多个线程同时访问一个尚未初始化的 lazy 属性时，则不能保证仅初始化一次。
 
 ### 5.如何便捷的在Swift中获取指针
 Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是保留了指针，但是我们不能像在 C 中一样通过`&`便捷的获取某个常量或变量的指针，例如：
@@ -74,7 +74,7 @@ let sum = numbers.withUnsafeBufferPointer { buffer -> Int in
 ```
 
 ### 8.简写闭包参数名
-*来源《The Swift Programming Language (SWift 3 Beta)》Shorthand Argument Names 小节*
+*来源《The Swift Programming Language (SWift 3.0.1)》Closure 一章Shorthand Argument Names 小节*
 
 Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`等参数简写。
 
