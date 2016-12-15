@@ -105,25 +105,27 @@ Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`
         }
 ```
 
-### 10.访问控制 （尚未翻译）
+### 10.访问控制
 Swift 3.0更新了访问控制，添加了open和fileprivate两个新控制权限，这里摘录了[《The Swift Programming Language (Swift 3)》](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/AccessControl.html#//apple_ref/doc/uid/TP40014097-CH41-ID3)书中部分内容：
 
-Swift provides five different access levels for entities within your code. These access levels are relative to the source file in which an entity is defined, and also relative to the module that source file belongs to.
+Swift 为代码中的实体提供了5种不同的访问权限。访问权限同时取决于源文件中的实体定义及源文件所属模块。
 
-- Open access and public access enable entities to be used within any source file from their defining module, and also in a source file from another module that imports the defining module. You typically use open or public access when specifying the public interface to a framework. The difference between open and public access is described below.
-- Internal access enables entities to be used within any source file from their defining module, but not in any source file outside of that module. You typically use internal access when defining an app’s or a framework’s internal structure.
-- File-private access restricts the use of an entity to its own defining source file. Use file-private access to hide the implementation details of a specific piece of functionality when those details are used within an entire file.
-- Private access restricts the use of an entity to the enclosing declaration. Use private access to hide the implementation details of a specific piece of functionality when those details are used only within a single declaration.
-Open access is the highest (least restrictive) access level and private access is the lowest (most restrictive) access level.
+- Open、Public 访问权限定义的实体，在同一模块内可于任意源文件内访问，即使该源文件属于另一个被引入的模块。Open和Public的区别稍后介绍。
+- Internal 访问权限定义的实体，可以被其定义的模块内的任意源文件访问，模块外的源文件则不能。通常，定义一个app或Framework的内部结构时，会使用Internal权限。
+- File-private 访问权限，限制实体仅能在其定义的源文件内访问。当某个功能仅用于某个源文件时，我们就可以通过 File-private 访问权限，隐藏其具体的实现细节。
+- Private 访问权限定义的实体，仅能在其所定义的作用域内访问。当某个功能仅用于某个声明时，我们就可以通过 Private 访问权限，隐藏其具体的实现细节。
 
-Open access applies only to classes and class members, and it differs from public access as follows:
+Open是最高访问权限（最少限制），Private是最低访问权限（限制最多）。
 
-- Classes with public access, or any more restrictive access level, can be subclassed only within the module where they’re defined.
-- Class members with public access, or any more restrictive access level, can be overridden by subclasses only within the module where they’re defined.
-- Open classes can be subclassed within the module where they’re defined, and within any module that imports the module where they’re defined.
-- Open class members can be overridden by subclasses within the module where they’re defined, and within any module that imports the module where they’re defined.
+Open访问权限仅适用于类和类成员，它与Public访问权限的区别如下：
 
-Marking a class as open explicitly indicates that you’ve considered the impact of code from other modules using that class as a superclass, and that you’ve designed your class’s code accordingly.
+- 定义为 Public，或其它更严格访问权限的类，仅能在其所定义的模块内被继承。
+- 定义为 Public，或其它更严格访问权限的类成员，仅能在其所定义的模块内被Override(覆盖、重写)。
+- 定义为 Open 访问权限的类，既可以在其所定义的模块内被继承，也可以在其它引入其被定义模块的模块中被继承。
+- 定义为 Open 访问权限的类成员，既可以在其所定义的模块内override(覆盖、重写)，也可以在其它引入其被定义模块的模块中Override(覆盖、重写)。 
+(译者：在a模块中用 Open 定义了一个A类，那么A类既可以在a模块中被继承，也可以在任何引入了a模块的b，c...等模块中被继承)
+
+将一个类标记为Open 访问权限，即表明你已充分考虑到该类会被其它模块当作父类继承，并为此妥善的编写了该类的代码。
 
 ### 11.@objc & dynamic
 关键字，摘录自王巍 [《Swift tips》](http://swifter.tips/objc-dynamic/)
