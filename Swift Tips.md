@@ -132,3 +132,20 @@ open访问权限仅适用于类和类成员，它与public访问权限的区别�
 
 ### 12.@escaping & @noescape
 摘录自[《What Do @escaping and @noescape Mean In Swift 3》](https://cocoacasts.com/what-do-escaping-and-noescaping-mean-in-swift-3/)
+
+### 13.溢出运算符
+当向一个整型常量或变量赋一个超出其所允许范围的数值时，默认情况下，Swift不会生成一个无效的数值，而是报错。该做法为过大或过小数值地操作提供了额外的安全性。
+
+例如，Int16 整型能容纳从 -32768 到 32767 的有符号整型。如果尝试向 Int16 有符号整型的常量或变量赋超过其容纳范围的数值，则会报错：
+
+``` Swift
+var potentialOverflow = Int16.max
+// potentialOverflow 被赋值为 Int16 整型所能容纳的最大值 32767。
+potentialOverflow += 1
+// 该操作会引发错误
+```
+
+在处理过大或过小值时提供相应的错误处理，可以让我们对边界的操作更加灵活。相对于报错，我们可以对数值进行截取。Swift提供了三种溢出运算符来让系统支持整型溢出运算。这些运算符均以 & 开头：
+- 溢出加 &+
+- 溢出减 &-
+- 溢出乘 &*
