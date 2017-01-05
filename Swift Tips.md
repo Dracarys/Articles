@@ -149,3 +149,22 @@ potentialOverflow += 1
 - 溢出加 &+
 - 溢出减 &-
 - 溢出乘 &*
+
+### 14.特殊的字面量
+
+在 C 中调试时我们经常会用到 `__FILE__`，`__FUNCTION__` 等特殊字面量，来获取一些信息，那么在 Swift 中怎么用呢？
+
+```Swfit
+    print(#file)// 打印当前文件
+
+    func hello() {
+        print(#function)//打印当前函数
+    }
+    hello()
+
+    print(#line)//打印当前行号
+
+    print(#column)// 打印所处的列，7
+```
+
+通过上面的例子可以看出，Swift 采用 `#` + 关键字小写的方式，很好的照顾了那些从其它语言转过来的朋友们。
