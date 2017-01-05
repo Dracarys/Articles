@@ -39,9 +39,9 @@
 
 #### 常量的引入
 
-在Objective-C中，常量通常用来为属性和函数参数提供一组可选值。使用NS\_STRING\_ENUM和NS\_EXTENSIBLE\_STRING\_ENUM宏标注的Ojbective-C的typedef声明，可被Swift以普通类型的成员的方式引入。
+在 Objective-C 中，常量通常用来为属性和函数参数提供一组可选值。使用NS\_STRING\_ENUM和NS\_EXTENSIBLE\_STRING\_ENUM宏标注的Ojbective-C的typedef声明，可被Swift以普通类型的成员的方式引入。
 
-表示一组可用值的常量，可以通过添加NS\_STRING\_ENUM宏，来将其引入为枚举。例如，下面这段关于TraficLightColor的Objective-C字符串常量声明：
+表示一组可用值的常量，可以通过添加NS\_STRING\_ENUM宏，来将其引入为枚举。例如，下面这段关于TraficLightColor的Objective-C字符串常量的声明：
 
 ``` Objective-C
 	typedef NSString * TrafficLightColor NS_STRING_ENUM;
