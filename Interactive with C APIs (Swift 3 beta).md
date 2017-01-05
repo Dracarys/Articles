@@ -1,6 +1,6 @@
 # ［翻译］Swift与 C API的交互（Swift 3 beta）
 
-*本文译自《Using Swift with Cocoa and Objective-C》书中Interacting with C APIs 一章*。
+*本文译自《Using Swift with Cocoa and Objective-C》书中 Interacting with C APIs 一章*。
 
 *受限于译者英语水平及翻译经验，译文难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
 
@@ -8,11 +8,11 @@
 
 
 
-作为与Objective-C交互的一部分，Swift对 C 语言的类型和特性也提供了良好的兼容。Swift还提供了相应的交互方式，以便在需要时可以在代码中使用常见的 C 结构模式。
+作为与 Objective-C 交互的一部分，Swift 对 C 语言的类型和特性也提供了良好的兼容。Swift还提供了相应的交互方式，以便在需要时可以在代码中使用常见的 C 结构模式。
 
 ### 基本类型
 
-虽然Swift提供了与 C 语言中char，int，float和double等基本类型等价的类型。但这些类型，诸如Int，不能与Swift核心类型进行隐式转换。因此除非代码中有明确要求（使用等价的 C 类型），否则都应使用Int（等Swift核心类型）。
+虽然Swift提供了与 C 语言中 char，int，float 和 double 等基本类型等价的类型。但这些类型，诸如Int，不能与 Swift 核心类型进行隐式转换。因此除非代码中有明确要求（使用等价的 C 类型），否则都应使用Int（等Swift核心类型）。
 
 
 |C|Swift|
