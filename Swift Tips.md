@@ -168,3 +168,14 @@ potentialOverflow += 1
 ```
 
 通过上面的例子可以看出，Swift 采用 `#` + 关键字小写的方式，很好的照顾了那些从其它语言转过来的朋友们。
+
+# 15.用函数做参数以简化代码
+摘录自：[@南峰子_老驴](http://m.weibo.cn/3321824014/4060979186247385)
+
+```Swift
+	let setInt: (Int, String) -> Void = UserDefaults.standard.set
+	let getInt: (String) -> Int = UserDefaults.standard.integer
+
+	setInt(10, "Ten")
+	print(getInt("Ten"))
+```
