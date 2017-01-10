@@ -102,8 +102,12 @@ The designers of Swift could have just created a single UnsafePointer type and m
 Unsafe Swift pointers use a very predictable naming scheme so that you know what the traits of the pointer are. Mutable or immutable, raw or typed, buffer style or not. In total there is a combination of eight of these.
 unsafe swift pointers
 In the following sections, you’ll learn more about these pointer types.
-Using Raw Pointers
+
+###Using Raw Pointers
+
 Add the following code to your playground:
+
+```Swift
 // 1
 let count = 2
 let stride = MemoryLayout<Int>.stride
@@ -133,6 +137,8 @@ do {
     print("byte \(index): \(byte)")
   }
 }
+```
+
 In this example you use Unsafe Swift pointers to store and load two integers. Here’s what’s going on:
 These constants hold often used values:
 count holds the number of integers to store
@@ -145,8 +151,12 @@ A defer block is added to make sure the pointer is deallocated properly. ARC isn
 The storeBytes and load methods are used to store and load bytes. The memory address of the second integer is calculated by advancing the pointer stride bytes.
 Since pointers are Strideable you can also use pointer arithmetic as in (pointer+stride).storeBytes(of: 6, as: Int.self).
 An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. This means you can iterate over the bytes, access them using subscripting and even use cool methods like filter, map and reduce. The buffer pointer is initialized using the raw pointer.
-Using Typed Pointers
+
+###Using Typed Pointers
+
 The previous example can be simplified by using typed pointers. Add the following code to your playground:
+
+```Swift
 do {
   print("Typed pointers")
  
@@ -167,15 +177,21 @@ do {
     print("value \(index): \(value)")
   }
 }
+```
+
 Notice the following differences:
 Memory is allocated using the method UnsafeMutablePointer.allocate. The generic parameter lets Swift know the pointer will be used to load and store values of type Int.
 Typed memory must be initialized before use and deinitialized after use. This is done using initialize and deinitialize methods respectively. Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
 Typed pointers have a pointee property that provides a type-safe way to load and store values.
 When advancing a typed pointer, you can simply state the number of values you want to advance. The pointer can calculate the correct stride based on the type of values it points to. Again, pointer arithmetic also works. You can also say (pointer+1).pointee = 6
 The same holds true for typed buffer pointers: they iterate over values, instead of bytes.
-Converting Raw Pointers to Typed Pointers
+
+###Converting Raw Pointers to Typed Pointers
+
 Typed pointers need not always be initialized directly. They can be derived from raw pointers as well.
 Add the following code to your playground:
+
+```Swift
 do {
   print("Converting raw pointers to typed pointers")
  
@@ -200,11 +216,17 @@ do {
     print("value \(index): \(value)")
   }
 }
+```
+
 This example is similar to the previous one, except that it first creates a raw pointer. The typed pointer is created by binding the memory to the required type Int. By binding memory, it can be accessed in a type-safe way. Memory binding is done behind the scenes when you create a typed pointer.
 The rest of this example is the same as the previous one. Once you’re in typed pointer land, you can make use of `pointee` for example.
-Getting The Bytes of an Instance
+
+###Getting The Bytes of an Instance
+
 Often you have an existing instance of a type that you want to inspect the bytes that form it. This can be achieved using a method called withUnsafeBytes(of:).
 Add the following code to your playground:
+
+```Swift
 do {
   print("Getting the bytes of an instance")
  
@@ -216,11 +238,17 @@ do {
     }
   }
 }
+```
+
 This prints out the raw bytes of the SampleStruct instance. The withUnsafeBytes(of:) method gives you access to an UnsafeRawBufferPointer that you can use inside the closure.
 withUnsafeBytes is also available as an instance method on Array and Data.
-Computing a Checksum
+
+###Computing a Checksum
+
 Using withUnsafeBytes(of:) you can return a result. An example use of this is to compute a 32-bit checksum of the bytes in a structure.
 Add the following code to your playground:
+
+```Swift
 do {
   print("Checksum the bytes of a struct")
  
@@ -232,8 +260,12 @@ do {
  
   print("checksum", checksum) // prints checksum 4294967269
 }
+```
+
 The reduce call adds up all of the bytes and ~ then flips the bits. Not a particularly robust error detection, but it shows the concept.
-Three Rules of Unsafe Club
+
+###Three Rules of Unsafe Club
+
 You need to be careful when writing unsafe code so that you avoid undefined behavior. Here are a few examples of bad code.
 Don’t return the pointer from withUnsafeBytes!
  // Rule #1
@@ -250,6 +282,9 @@ do {
 }
 You should never let the pointer escape the withUnsafeBytes(of:) closure. Things may work today but…
 Only bind to one type at a time!
+
+```Swift
+
 // Rule #2
 do {
   print("2. Only bind to one type at a time!")
@@ -272,9 +307,14 @@ do {
     print(boolPointer.pointee)  // See Rule #1, don't return the pointer
   }
 }
-badpun
+```
+
+![badpun](https://koenig-media.raywenderlich.com/uploads/2016/12/badpun-480x175.png)
+
 Never bind memory to two unrelated types at once. This is called Type Punning and Swift does not like puns. Instead, you can temporarily rebind memory with a method like withMemoryRebound(to:capacity:). Also, the rules say it is illegal to rebind from a trivial type (such as an Int) to a non-trivial type (such as a class). Don’t do it.
 Don’t walk off the end… whoops!
+
+```Swift
 // Rule #3... wait
 do {
   print("3. Don't walk off the end... whoops!")
@@ -291,11 +331,17 @@ do {
     print(byte)  // pawing through memory like an animal
   }
 }
+```
+
 The ever present problem of off-by-one errors are especially worse with unsafe code. Be careful, review and test!
-Unsafe Swift Example 1: Compression
+
+###Unsafe Swift Example 1: Compression
+
 Time to take all of your knowledge and wrap a C API. Cocoa includes a C module that implements some common data compression algorithms. These include LZ4 for when speed is critical, LZ4A for when you need the highest compression ratio and don’t care about speed, ZLIB which balances space and speed and the new (and open source) LZFSE which does an even better job balancing space and speed.
 Create a new playground, calling it Compression. Begin by defining a pure Swift API that uses Data.
 Then, replace the contents of your playground with the following code:
+
+```Swift
 import Foundation
 import Compression
  
@@ -317,8 +363,12 @@ func perform(_ operation: CompressionOperation,
              workingBufferSize: Int = 2000) -> Data?  {
   return nil
 }
+```
+
 The function that does the compression and decompression is perform which is currently stubbed out to return nil. You will add some unsafe code to it shortly.
 Next add the following code to the end of the playground:
+
+```Swift
 // Compressed keeps the compressed data and the algorithm
 // together as one unit, so you never forget how the data was
 // compressed.
@@ -348,8 +398,12 @@ struct Compressed {
   }
  
 }
+```
+
 The Compressed structure stores both the compressed data and the algorithm that was used to create it. That makes it less error prone when deciding what decompression algorithm to use.
 Next add the following code to the end of the playground:
+
+```Swift
 // For discoverability, add a compressed method to Data
 extension Data {
  
@@ -369,9 +423,13 @@ compressed?.data.count // in most cases much less than orginal input count
  
 let restoredInput = compressed?.decompressed()
 input == restoredInput // true
+```
+
 The main entry point is an extension on the Data type. You’ve added a method called compressed(with:) which returns an optional Compressed struct. This method simply calls the static method compress(input:with:) on Compressed.
 There is an example usage at the end but it is currently not working. Time to start fixing that!
 Scroll back up to the first block of code you entered, and begin the implementation of the perform(_:on:using:workingBufferSize:) function as follows:
+
+```Swift
 func perform(_ operation: CompressionOperation,
              on input: Data,
              using algorithm: CompressionAlgorithm,
@@ -400,8 +458,12 @@ func perform(_ operation: CompressionOperation,
  
   return nil /// To be continued
 }
+```
+
 This converts from your Swift types to the C types required by the compression library, for the compression algorithm and operation to perform.
 Next, replace return nil with:
+
+```Swift
 // 1: create a stream
 var streamPointer = UnsafeMutablePointer<compression_stream>.allocate(capacity: 1)
 defer {
@@ -426,11 +488,16 @@ defer {
 }
  
 return nil /// To be continued
+```
+
 This is what is happening here:
-Allocate a compression_stream and schedule it for deallocation with the defer block.
-Then, using the pointee property you get the stream and pass it to the compression_stream_init function. The compiler is doing something special here. By using the inout & marker it is taking your compression_stream and turning it into a UnsafeMutablePointer<compression_stream> automatically. (You could have also just passed streamPointer and not needed this special conversion.)
-Finally, you create a destination buffer that will act as your working buffer.
+1. Allocate a compression_stream and schedule it for deallocation with the defer block.
+2. Then, using the pointee property you get the stream and pass it to the compression_stream_init function. The compiler is doing something special here. By using the inout & marker it is taking your compression_stream and turning it into a UnsafeMutablePointer<compression_stream> automatically. (You could have also just passed streamPointer and not needed this special conversion.)
+3. Finally, you create a destination buffer that will act as your working buffer.
+
 Finish the perform function by replacing return nil with:
+
+```Swift
 // process the input
 return input.withUnsafeBytes { (srcPointer: UnsafePointer<UInt8>) in
   // 1
@@ -469,19 +536,27 @@ return input.withUnsafeBytes { (srcPointer: UnsafePointer<UInt8>) in
   }
   return output
 }
+```
+
 This is where the work really happens. And here’s what it’s doing:
-Create a Data object which is going to contain the output – either the compressed or decompressed data, depending on what operation this is.
-Set up the source and destination buffers with the pointers you allocated and their sizes.
-Then you keep calling compression_stream_process as long as it continues to return COMPRESSION_STATUS_OK.
-The destination buffer is then copied into output that is eventually returned from this function.
-When the last packet comes in, marked with COMPRESSION_STATUS_END only part of the destination buffer potentially needs to be copied.
+1. Create a Data object which is going to contain the output – either the compressed or decompressed data, depending on what operation this is.
+2. Set up the source and destination buffers with the pointers you allocated and their sizes.
+3. Then you keep calling compression_stream_process as long as it continues to return COMPRESSION_STATUS_OK.
+4. The destination buffer is then copied into output that is eventually returned from this function.
+5. When the last packet comes in, marked with COMPRESSION_STATUS_END only part of the destination buffer potentially needs to be copied.
 In the example usage you can see that the 10,000-element array is compressed down to 153 bytes. Not too shabby.
-Unsafe Swift Example 2: Random Generator
+
+###Unsafe Swift Example 2: Random Generator
+
 Random numbers are important for many applications from games to machine learning. macOS provides arc4random (A Replacement Call 4 random) that produces great (cryptographically sound) random numbers. Unfortunately this call is not available on Linux. Moreover, arc4random only provides randoms as UInt32. However, the file /dev/urandom provides an unlimited source of good random numbers.
 In this section, you will use your new knowledge to read this file and create completely type safe random numbers.
-hexdump
+
+![hexdump](https://koenig-media.raywenderlich.com/uploads/2016/12/hexdump-480x202.png)
+
 Start by creating a new playground, calling it RandomNumbers. Make sure to select the macOS platform this time.
 Once you’ve created it, replace the default contents with:
+
+```Swift
 import Foundation
  
 enum RandomSource {
@@ -501,10 +576,14 @@ enum RandomSource {
     return Array(UnsafeMutableBufferPointer(start: data, count: count))
   }
 }
+```
+
 The file variable is declared static so only one will exist in the system. You will rely on the system closing it when the process exits. Since it is possible that multiple threads will want random numbers, you need to protect access to it with a serial GCD queue.
 The get function is where the work happens. First you create some unallocated storage that is one beyond what you need because fgets is always 0 terminated. Next, you get the data from the file, making sure to do so while operating on the GCD queue. Finally, you copy the data to a standard array by first wrapping it in a UnsafeMutableBufferPointer that can act as a Sequence.
 So far this will only (safely) give you an array of Int8 values. Now you’re going to extend that.
 Add the following to the end of your playground:
+
+```Swift
 extension Integer {
  
   static var randomized: Self {
@@ -526,13 +605,17 @@ Int16.randomized
 UInt32.randomized
 Int64.randomized
 UInt64.randomized
+```
+
 This adds a static randomized property to all subtypes of the Integer protocol (see protocol oriented programming for more on this!). You first get the random numbers, and with the bytes of the array that is returned, you rebind (as in C++’s reinterpret_cast) the Int8 values as the type being requested and return a copy. Simples! :]
 And that’s it! Random numbers in a safe way, using unsafe Swift under the hood.
-Where to Go From Here?
+
+### to Go From Here?
+
 Here are the completed playgrounds. There many additional resources you can explore to learn more:
-Swift Evolution 0107: UnsafeRawPointer API gives a detailed overview of the Swift memory model and makes reading the API documents more understandable.
-Swift Evolution 0138: UnsafeRawBufferPointer API talks extensively about working with untyped memory and has links to open source projects that benefit from using them.
-If you are converting unsafe code to Swift 3 check out The Migration Guide. Even if you aren’t migrating, it contains a number of interesting examples.
-Interacting with C APIs will give you insights in how Swift interacts with C.
+- Swift Evolution 0107: UnsafeRawPointer API gives a detailed overview of the Swift memory model and makes reading the API documents more understandable.
+- Swift Evolution 0138: UnsafeRawBufferPointer API talks extensively about working with untyped memory and has links to open source projects that benefit from using them.
+- If you are converting unsafe code to Swift 3 check out The Migration Guide. Even if you aren’t migrating, it contains a number of interesting examples.
+- Interacting with C APIs will give you insights in how Swift interacts with C.
 Mike Ash has an excellent presentation on Exploring Swift Memory Layout.
 I hope you have enjoyed this tutorial. If you have questions or experiences you would like to share, I am looking forward to hearing about them in the forums!
