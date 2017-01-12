@@ -153,11 +153,16 @@ do {
 - stride holds the stride of type Int
 - alignment holds the alignment of type Int
 - byteCount holds the total number of bytes needed
+
 2. A do block is added, to add a scope level, so you can reuse the variable names in upcoming examples.
+
 3.The method UnsafeMutableRawPointer.allocate is used to allocate the required bytes. This method returns an UnsafeMutableRawPointer. The name of that type tells you the pointer can be used to load and store (mutate) raw bytes.
+
 4. A defer block is added to make sure the pointer is deallocated properly. ARC isn’t going to help you here – you need to handle memory management yourself! You can read more about defer here.
+
 5.The storeBytes and load methods are used to store and load bytes. The memory address of the second integer is calculated by advancing the pointer stride bytes.
 Since pointers are Strideable you can also use pointer arithmetic as in (pointer+stride).storeBytes(of: 6, as: Int.self).
+
 6. An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. This means you can iterate over the bytes, access them using subscripting and even use cool methods like filter, map and reduce. The buffer pointer is initialized using the raw pointer.
 
 ###类型指针的应用（Using Typed Pointers）
