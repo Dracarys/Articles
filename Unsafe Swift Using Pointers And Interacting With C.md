@@ -148,19 +148,20 @@ do {
 该例中我们使用不安全的Swift 指针去存取2个整数。
 
 代码解释如下:
+
 1. These constants hold often used values:
-- count holds the number of integers to store
-- stride holds the stride of type Int
-- alignment holds the alignment of type Int
-- byteCount holds the total number of bytes needed
+	- count holds the number of integers to store
+	- stride holds the stride of type Int
+	- alignment holds the alignment of type Int
+	- byteCount holds the total number of bytes needed
 
 2. A do block is added, to add a scope level, so you can reuse the variable names in upcoming examples.
 
-3.The method UnsafeMutableRawPointer.allocate is used to allocate the required bytes. This method returns an UnsafeMutableRawPointer. The name of that type tells you the pointer can be used to load and store (mutate) raw bytes.
+3. The method UnsafeMutableRawPointer.allocate is used to allocate the required bytes. This method returns an UnsafeMutableRawPointer. The name of that type tells you the pointer can be used to load and store (mutate) raw bytes.
 
 4. A defer block is added to make sure the pointer is deallocated properly. ARC isn’t going to help you here – you need to handle memory management yourself! You can read more about defer here.
 
-5.The storeBytes and load methods are used to store and load bytes. The memory address of the second integer is calculated by advancing the pointer stride bytes.
+5. The storeBytes and load methods are used to store and load bytes. The memory address of the second integer is calculated by advancing the pointer stride bytes.
 Since pointers are Strideable you can also use pointer arithmetic as in (pointer+stride).storeBytes(of: 6, as: Int.self).
 
 6. An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. This means you can iterate over the bytes, access them using subscripting and even use cool methods like filter, map and reduce. The buffer pointer is initialized using the raw pointer.
@@ -257,10 +258,10 @@ do {
 This prints out the raw bytes of the SampleStruct instance. The withUnsafeBytes(of:) method gives you access to an UnsafeRawBufferPointer that you can use inside the closure.
 withUnsafeBytes is also available as an instance method on Array and Data.
 
-###Computing a Checksum
+###求和校验（Computing a Checksum）
 
 Using withUnsafeBytes(of:) you can return a result. An example use of this is to compute a 32-bit checksum of the bytes in a structure.
-Add the following code to your playground:
+在playground中添加如下代码:
 
 ```Swift
 do {
@@ -278,10 +279,13 @@ do {
 
 The reduce call adds up all of the bytes and ~ then flips the bits. Not a particularly robust error detection, but it shows the concept.
 
-###Three Rules of Unsafe Club
+###非安全操作三原则（Three Rules of Unsafe Club）
 
-You need to be careful when writing unsafe code so that you avoid undefined behavior. Here are a few examples of bad code.
-Don’t return the pointer from withUnsafeBytes!
+便携不安全代码的时候务必小心，以避免那些不可预料的行为。这里罗列了一些糟糕的例子。
+
+####不要通过 `withUnsafeBytes` 返回指针。
+
+```Swift
  // Rule #1
 do {
   print("1. Don't return the pointer from withUnsafeBytes!")
@@ -294,8 +298,11 @@ do {
  
   print("Horse is out of the barn!", bytes)  /// undefined !!!
 }
-You should never let the pointer escape the withUnsafeBytes(of:) closure. Things may work today but…
-Only bind to one type at a time!
+```
+
+不要在 withUnsafeBytes(of:) 作用域外调用指针。或许一时可用，但…
+
+####同一时间只绑定一种类型！
 
 ```Swift
 
@@ -324,6 +331,8 @@ do {
 ```
 
 ![badpun](https://koenig-media.raywenderlich.com/uploads/2016/12/badpun-480x175.png)
+
+绝不要将内存同时绑定到两个不相关的类型。这被称为类型双关，而Swift不喜欢双关。
 
 Never bind memory to two unrelated types at once. This is called Type Punning and Swift does not like puns. Instead, you can temporarily rebind memory with a method like withMemoryRebound(to:capacity:). Also, the rules say it is illegal to rebind from a trivial type (such as an Int) to a non-trivial type (such as a class). Don’t do it.
 Don’t walk off the end… whoops!
