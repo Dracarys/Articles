@@ -12,13 +12,13 @@
 
 如果你有与诸如 C 这样的不安全语言进行交互的需求，那么在使用这些 Swift 特性前，你可能还需要了解一些额外的与运行时相关的知识。这是一个更深入的话题，如果你熟悉 Swift，那么这些知识可以帮助你更好的理解，C 语言经验也会有所助益，但不是必须的。 
 
-### 开始
+### 开始（Getting Started）
 
 本文由三个 playgrounds 构成。首先，我们会创建几个小段代码以认识内存布局和不安全的指针操作。其次，我们将一个执行数据流的底层的 C API封装成 Swift 样式。最后, you will create a platform independent alternative to arc4random that, while using unsafe Swift, hides that detail from users.
 
 先来新建一个playground, 命名为 *UnsafeSwift* . 平台任意, 本文所涉的代码均全平台通用. 确认导入了 Foundation framework.
 
-###Memory Layout
+###内存布局（Memory Layout）
 
 ![Sample memory](https://koenig-media.raywenderlich.com/uploads/2017/01/memory-480x214.png)
 
@@ -50,9 +50,11 @@ MemoryLayout<Double>.alignment  // returns 8
 MemoryLayout<Double>.stride     // returns 8
 ```
 
-MemoryLayout<Type> is a generic type evaluated at compile time that determines the size, alignment and stride of each specified Type. The number returned is in bytes. For example, an Int16 is two bytes in size and has an alignment of two as well. That means it has to start on even addresses (evenly divisible by two).
-So, for example, it is legal to allocate an Int16 at address 100, but not 101 because it violates the required alignment. When you pack a bunch of Int16s together, they pack together at an interval of stride. For these basic types the size is the same as the stride.
-Next, look at the layout of some user defined structs and by adding the following to the playground:
+MemoryLayout<Type> 估算函数可以在编译期侦测指定类型的大小，对齐和步长。返回值以字节为单位。例如，Int16 占用两个字节，且恰好与两个字节对齐。也就是说，都是从两段地址的起始。也就是说，从地址100开始开辟一个合法的Int16，注意不是101，因为那样会违反对齐规则。
+
+When you pack a bunch of Int16s together, they pack together at an interval of stride. 因此，基础类型的大小与步长相同。
+
+接下来，向playground中添加如下代码，我们看看用户定义的结构体在内存中对布局情况:
 
 ```Swift
 struct EmptyStruct {}
@@ -92,20 +94,25 @@ MemoryLayout<SampleClass>.stride    // returns 8 (on 64-bit)
 MemoryLayout<SampleClass>.alignment // returns 8 (on 64-bit)
 ```
 
-Classes are reference types so MemoryLayout reports the size of a reference: eight bytes.
-If you want to explore memory layout in greater detail, see this excellent talk by Mike Ash.
+由于类是引用类型，所以通过 MemoryLayout 得到的大小是： 8 字节。
 
-###Pointers
+如果想了解更多关于内存布局方面的知识，可以观看这段Mike Ash 的[视频](https://realm.io/news/goto-mike-ash-exploring-swift-memory-layout/)。
 
-A pointer encapsulates a memory address. Types that involve direct memory access get an “unsafe” prefix so the pointer type is called UnsafePointer. While the extra typing may seem annoying, it lets you and your reader know that you are dipping into non-compiler checked access of memory that when not done correctly could lead to undefined behavior (and not just a predictable crash).
-The designers of Swift could have just created a single UnsafePointer type and made it the C equivalent of char *, which can access memory in an unstructured way. They didn’t. Instead, Swift contains almost a dozen pointer types, each with different capabilities and purposes. Using the most appropriate pointer type communicates intent better, is less error prone, and helps keep you away from undefined behavior.
-Unsafe Swift pointers use a very predictable naming scheme so that you know what the traits of the pointer are. Mutable or immutable, raw or typed, buffer style or not. In total there is a combination of eight of these.
-unsafe swift pointers
-In the following sections, you’ll learn more about these pointer types.
+###指针（Pointers）
 
-###Using Raw Pointers
+一个指针包含了一个内存地址。为了与内存直接操作的“不安全”相应，指针被称为 UnsafePointer. 虽然打起来有点烦，但是它可以提醒你正在脱离编译器的帮助，错误的处理可能引起不可预料的行为（并不限于崩溃）。
 
-Add the following code to your playground:
+Swift的设计者，本可以只提供一种与 C 语言中 char \* 等价，可任意访问内存的 UnsafePointer 类型。但是他们没有，相反Swift 包含了将近一打的指针类型，以使用不同的场景和目的。选择合适的指针类型至关重要，可以帮助你远离那些未预料的行为。
+
+Swift 指针采用了非常鲜明的命名方式，以便人们通过类型即可清楚其特点。可变还是不可变，类型不明确还是类型明确的，连续还是不连续。下面这张表罗列了这8中指针。
+
+![unsafe swift pointers](https://koenig-media.raywenderlich.com/uploads/2016/12/pointers-650x444.png)
+
+接下来一节，我们将学习这些指针类型。
+
+### 裸指针应用 （Using Raw Pointers）
+
+在playground中添加如下代码:
 
 ```Swift
 // 1
@@ -138,23 +145,24 @@ do {
   }
 }
 ```
+该例中我们使用不安全的Swift 指针去存取2个整数。
 
-In this example you use Unsafe Swift pointers to store and load two integers. Here’s what’s going on:
-These constants hold often used values:
-count holds the number of integers to store
-stride holds the stride of type Int
-alignment holds the alignment of type Int
-byteCount holds the total number of bytes needed
-A do block is added, to add a scope level, so you can reuse the variable names in upcoming examples.
-The method UnsafeMutableRawPointer.allocate is used to allocate the required bytes. This method returns an UnsafeMutableRawPointer. The name of that type tells you the pointer can be used to load and store (mutate) raw bytes.
-A defer block is added to make sure the pointer is deallocated properly. ARC isn’t going to help you here – you need to handle memory management yourself! You can read more about defer here.
-The storeBytes and load methods are used to store and load bytes. The memory address of the second integer is calculated by advancing the pointer stride bytes.
+代码解释如下:
+1. These constants hold often used values:
+- count holds the number of integers to store
+- stride holds the stride of type Int
+- alignment holds the alignment of type Int
+- byteCount holds the total number of bytes needed
+2. A do block is added, to add a scope level, so you can reuse the variable names in upcoming examples.
+3.The method UnsafeMutableRawPointer.allocate is used to allocate the required bytes. This method returns an UnsafeMutableRawPointer. The name of that type tells you the pointer can be used to load and store (mutate) raw bytes.
+4. A defer block is added to make sure the pointer is deallocated properly. ARC isn’t going to help you here – you need to handle memory management yourself! You can read more about defer here.
+5.The storeBytes and load methods are used to store and load bytes. The memory address of the second integer is calculated by advancing the pointer stride bytes.
 Since pointers are Strideable you can also use pointer arithmetic as in (pointer+stride).storeBytes(of: 6, as: Int.self).
-An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. This means you can iterate over the bytes, access them using subscripting and even use cool methods like filter, map and reduce. The buffer pointer is initialized using the raw pointer.
+6. An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. This means you can iterate over the bytes, access them using subscripting and even use cool methods like filter, map and reduce. The buffer pointer is initialized using the raw pointer.
 
-###Using Typed Pointers
+###类型指针的应用（Using Typed Pointers）
 
-The previous example can be simplified by using typed pointers. Add the following code to your playground:
+前面的例子可以通过类型指针简化. 在playground中添加如下代码:
 
 ```Swift
 do {
@@ -179,17 +187,18 @@ do {
 }
 ```
 
-Notice the following differences:
-Memory is allocated using the method UnsafeMutablePointer.allocate. The generic parameter lets Swift know the pointer will be used to load and store values of type Int.
-Typed memory must be initialized before use and deinitialized after use. This is done using initialize and deinitialize methods respectively. Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
-Typed pointers have a pointee property that provides a type-safe way to load and store values.
-When advancing a typed pointer, you can simply state the number of values you want to advance. The pointer can calculate the correct stride based on the type of values it points to. Again, pointer arithmetic also works. You can also say (pointer+1).pointee = 6
-The same holds true for typed buffer pointers: they iterate over values, instead of bytes.
+注意以下不同:
+- Memory is allocated using the method UnsafeMutablePointer.allocate. The generic parameter lets Swift know the pointer will be used to load and store values of type Int.
+- Typed memory must be initialized before use and deinitialized after use. This is done using initialize and deinitialize methods respectively. Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
+- Typed pointers have a pointee property that provides a type-safe way to load and store values.
+- When advancing a typed pointer, you can simply state the number of values you want to advance. The pointer can calculate the correct stride based on the type of values it points to. Again, pointer arithmetic also works. You can also say (pointer+1).pointee = 6
+- The same holds true for typed buffer pointers: they iterate over values, instead of bytes.
 
-###Converting Raw Pointers to Typed Pointers
+###裸指针到类型指针的转换（Converting Raw Pointers to Typed Pointers）
 
-Typed pointers need not always be initialized directly. They can be derived from raw pointers as well.
-Add the following code to your playground:
+类型指针除了直接初始化得到，还可以通过裸指针取得。
+
+在playground中添加如下代码:
 
 ```Swift
 do {
@@ -218,13 +227,13 @@ do {
 }
 ```
 
-This example is similar to the previous one, except that it first creates a raw pointer. The typed pointer is created by binding the memory to the required type Int. By binding memory, it can be accessed in a type-safe way. Memory binding is done behind the scenes when you create a typed pointer.
-The rest of this example is the same as the previous one. Once you’re in typed pointer land, you can make use of `pointee` for example.
+该示例与前一个类似，不同处在于它先创建了一个裸指针。之后通过将内存绑定给制定的类型来得到类型指针。由于绑定了内存，所以可以以类型安全的方式存取。内存绑定是在创建类型指针时在后台完成的。余下的内容与前一个示例相同。一旦转换成类型指针，就可以调用'pointee'了。
 
-###Getting The Bytes of an Instance
+###获取示例的字节（Getting The Bytes of an Instance）
 
-Often you have an existing instance of a type that you want to inspect the bytes that form it. This can be achieved using a method called withUnsafeBytes(of:).
-Add the following code to your playground:
+通常，可以通过`withUnsafeBytes(of:)`函数来获取某个类型示例所占字节的大小。
+
+在playground添加如下代码:
 
 ```Swift
 do {
