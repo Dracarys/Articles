@@ -10,23 +10,23 @@
 
 本文将带你领略Swift的“不安全”特性。这里的“不安全“可能会引起误解，它并不意味着你写的代码及危险又糟糕，相反它是提醒你要格外的留意自己的代码，因为编译器将不在帮你进行一些必要的审查。
 
-如果你经常与诸如 C 这样的不安全语言进行交互，那么你可能就需要这些Swift特性了。
-
-You may find yourself needing to use these features if you interoperate with an unsafe language such as C, need to gain additional runtime performance, or simply want to explore internals. 然而这是一个进阶话题，如果你熟悉Swift那么你就能理解，熟悉 C 
+如果你有与诸如 C 这样的不安全语言进行交互的需求，那么在使用这些 Swift 特性前，你可能还需要了解一些额外的与运行时相关的知识。这是一个更深入的话题，如果你熟悉 Swift，那么这些知识可以帮助你更好的理解，C 语言经验也会有所助益，但不是必须的。 
 
 ### 开始
 
 本文由三个 playgrounds 构成。首先，我们会创建几个小段代码以认识内存布局和不安全的指针操作。其次，我们将一个执行数据流的底层的 C API封装成 Swift 样式。最后, you will create a platform independent alternative to arc4random that, while using unsafe Swift, hides that detail from users.
 
-先来新建一个playground, 命名为 *UnsafeSwift* . 平台任意, 本文所涉的代码均全平台通用. 确认倒入了 Foundation framework.
-Memory Layout
+先来新建一个playground, 命名为 *UnsafeSwift* . 平台任意, 本文所涉的代码均全平台通用. 确认导入了 Foundation framework.
+
+###Memory Layout
 
 ![Sample memory](https://koenig-media.raywenderlich.com/uploads/2017/01/memory-480x214.png)
 
-Unsafe Swift works directly with the memory system. Memory can be visualized as series of boxes (billions of boxes, actually), each with a number inside it. Each box has a unique memory address associated with it. The smallest addressable unit of storage is a byte, which usually consists of eight bits. Eight bit bytes can store values from 0-255. Processors can also efficiently access words of memory which are typically more than one byte. On a 64-bit system, for example, a word is 8 bytes or 64 bits long.
-Swift has a MemoryLayout facility that tells you about the size and alignment of things in your program.
+不安全的Swift直接与系统内存打交道。内存可以被看做是一系列排列整齐的盒子（事实上有数十亿之多），每个里面都有一个数字。每个盒子都有一个唯一的内存地址与之关联。最小的存储单元叫 *字节（byte）*，它由8个连续的比特位（bit）构成。8位构成的字节可以存储0-255的任意值。处理器可以高效地存取内存中不只一个字节的单词。以64位系统为例，一个字母是8位，长度为64个比特。
 
-Add the following to your playground:
+Swift 有个 MemoryLayout 的函数，可以查看内存中对象的大小和对齐情况。
+
+在你的 playground 中添加如下代码:
 
 ```Swift
 MemoryLayout<Int>.size          // returns 8 (on 64-bit)
