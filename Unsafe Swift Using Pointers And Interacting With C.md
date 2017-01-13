@@ -18,7 +18,7 @@
 
 先来新建一个playground, 命名为 *UnsafeSwift* . 平台任意, 本文所涉的代码均全平台通用. 确认导入了 Foundation framework.
 
-###内存布局（Memory Layout）
+###内存排布（Memory Layout）
 
 ![Sample memory](https://koenig-media.raywenderlich.com/uploads/2017/01/memory-480x214.png)
 
@@ -448,10 +448,14 @@ let restoredInput = compressed?.decompressed()
 input == restoredInput // true
 ```
 
-主入口在一个Data类型的扩展。我们已经添加了一个名为 `compressed(with:)` 函数。
+主入口是一个Data类型的扩展。我们已经添加了一个名为 `compressed(with:)` 函数，它返回一个可选类型的 Compressed 结构体。该方法只是简单地调用了一下静态方法 `compress(input:with:)`。
+
+
+
 The main entry point is an extension on the Data type. You’ve added a method called compressed(with:) which returns an optional Compressed struct. This method simply calls the static method compress(input:with:) on Compressed.
 There is an example usage at the end but it is currently not working. Time to start fixing that!
-Scroll back up to the first block of code you entered, and begin the implementation of the perform(_:on:using:workingBufferSize:) function as follows:
+
+滚动到首次进入时的代码块，`perform(_:on:using:workingBufferSize:)` 函数实现如下：
 
 ```Swift
 func perform(_ operation: CompressionOperation,
@@ -485,7 +489,7 @@ func perform(_ operation: CompressionOperation,
 ```
 
 This converts from your Swift types to the C types required by the compression library, for the compression algorithm and operation to perform.
-Next, replace return nil with:
+加下来用如下代码替换`return nil`:
 
 ```Swift
 // 1: create a stream
@@ -515,11 +519,12 @@ return nil /// To be continued
 ```
 
 This is what is happening here:
+
 1. Allocate a compression_stream and schedule it for deallocation with the defer block.
 2. Then, using the pointee property you get the stream and pass it to the compression_stream_init function. The compiler is doing something special here. By using the inout & marker it is taking your compression_stream and turning it into a UnsafeMutablePointer<compression_stream> automatically. (You could have also just passed streamPointer and not needed this special conversion.)
 3. Finally, you create a destination buffer that will act as your working buffer.
 
-Finish the perform function by replacing return nil with:
+用如下代码替换掉`return nil`，以完成 `perform` 函数:
 
 ```Swift
 // process the input
@@ -562,7 +567,8 @@ return input.withUnsafeBytes { (srcPointer: UnsafePointer<UInt8>) in
 }
 ```
 
-This is where the work really happens. And here’s what it’s doing:
+这里才是真正执行压缩任务的代码. 下面是代码释义:
+
 1. Create a Data object which is going to contain the output – either the compressed or decompressed data, depending on what operation this is.
 2. Set up the source and destination buffers with the pointers you allocated and their sizes.
 3. Then you keep calling compression_stream_process as long as it continues to return COMPRESSION_STATUS_OK.
@@ -570,15 +576,17 @@ This is where the work really happens. And here’s what it’s doing:
 5. When the last packet comes in, marked with COMPRESSION_STATUS_END only part of the destination buffer potentially needs to be copied.
 In the example usage you can see that the 10,000-element array is compressed down to 153 bytes. Not too shabby.
 
-###Unsafe Swift Example 2: Random Generator
+###不安全的Swift 示例2:随机数迭代器（Unsafe Swift Example 2: Random Generator）
+
+对于游戏和机器学习类的应用，随机数非常重要。macOS 提供了 `arc4random` 函数用于生成随机数。
 
 Random numbers are important for many applications from games to machine learning. macOS provides arc4random (A Replacement Call 4 random) that produces great (cryptographically sound) random numbers. Unfortunately this call is not available on Linux. Moreover, arc4random only provides randoms as UInt32. However, the file /dev/urandom provides an unlimited source of good random numbers.
 In this section, you will use your new knowledge to read this file and create completely type safe random numbers.
 
 ![hexdump](https://koenig-media.raywenderlich.com/uploads/2016/12/hexdump-480x202.png)
 
-Start by creating a new playground, calling it RandomNumbers. Make sure to select the macOS platform this time.
-Once you’ve created it, replace the default contents with:
+先创建一个新的playground, 命名为“RandomNumbers”。确保平台选择macOS.
+创建完毕后，用一下代码替换原有默认内容:
 
 ```Swift
 import Foundation
@@ -634,7 +642,7 @@ UInt64.randomized
 This adds a static randomized property to all subtypes of the Integer protocol (see protocol oriented programming for more on this!). You first get the random numbers, and with the bytes of the array that is returned, you rebind (as in C++’s reinterpret_cast) the Int8 values as the type being requested and return a copy. Simples! :]
 And that’s it! Random numbers in a safe way, using unsafe Swift under the hood.
 
-### to Go From Here?
+###接下来（ Where to Go From Here?）
 
 Here are the completed playgrounds. There many additional resources you can explore to learn more:
 - Swift Evolution 0107: UnsafeRawPointer API gives a detailed overview of the Swift memory model and makes reading the API documents more understandable.
