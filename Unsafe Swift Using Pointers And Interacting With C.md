@@ -357,7 +357,7 @@ do {
 ```
 在已出现的差一错误中，尤数不安全代码最糟糕。有一务必小心审查，测试你的代码!
 
-###不安全的Swift 示例 1: 压缩（Unsafe Swift Example 1: Compression）
+###不安全的Swift 示例 1: 压缩（算法）（Unsafe Swift Example 1: Compression）
 
 是时候整理之前的知识点，封装一个C API了。Coca框架中包含了一些C 模块，其实现了一些常用的压缩算法。LZ4压缩速度最快，LZ4A压缩比最高，但相对速度较慢，ZLIB相对平衡了时间和压缩比，还有新（开源）LZFSE算法，更好的平衡了空间和压缩速度。
 
@@ -386,9 +386,9 @@ func perform(_ operation: CompressionOperation,
   return nil
 }
 ```
+这个即可压缩又可以解压缩的函数还没内容，只是简单返回nil。稍后我们会添加一些不安全的代码。
 
-The function that does the compression and decompression is perform which is currently stubbed out to return nil. You will add some unsafe code to it shortly.
-Next add the following code to the end of the playground:
+在playground中代码的最后添加如下代码:
 
 ```Swift
 // Compressed keeps the compressed data and the algorithm
@@ -422,8 +422,9 @@ struct Compressed {
 }
 ```
 
-The Compressed structure stores both the compressed data and the algorithm that was used to create it. That makes it less error prone when deciding what decompression algorithm to use.
-Next add the following code to the end of the playground:
+压缩结构题包含了压缩后的数据和压缩算法。这可以在解压时减少因算法不正确而导致的错误。
+
+接下来在Playground的代码末尾添加如下内容:
 
 ```Swift
 // For discoverability, add a compressed method to Data
@@ -447,6 +448,7 @@ let restoredInput = compressed?.decompressed()
 input == restoredInput // true
 ```
 
+主入口在一个Data类型的扩展。我们已经添加了一个名为 `compressed(with:)` 函数。
 The main entry point is an extension on the Data type. You’ve added a method called compressed(with:) which returns an optional Compressed struct. This method simply calls the static method compress(input:with:) on Compressed.
 There is an example usage at the end but it is currently not working. Time to start fixing that!
 Scroll back up to the first block of code you entered, and begin the implementation of the perform(_:on:using:workingBufferSize:) function as follows:
