@@ -332,10 +332,10 @@ do {
 
 ![badpun](https://koenig-media.raywenderlich.com/uploads/2016/12/badpun-480x175.png)
 
-绝不要将内存同时绑定到两个不相关的类型。这被称为类型双关，而Swift不喜欢双关。
+绝不要将内存同时绑定到两个不相关的类型。这被称为类型双关而Swift不喜欢双关。
 
 Never bind memory to two unrelated types at once. This is called Type Punning and Swift does not like puns. Instead, you can temporarily rebind memory with a method like withMemoryRebound(to:capacity:). Also, the rules say it is illegal to rebind from a trivial type (such as an Int) to a non-trivial type (such as a class). Don’t do it.
-Don’t walk off the end… whoops!
+####Don’t walk off the end… whoops!
 
 ```Swift
 // Rule #3... wait
@@ -355,14 +355,13 @@ do {
   }
 }
 ```
+在已出现的差一错误中，尤数不安全代码最糟糕。有一务必小心审查，测试你的代码!
 
-The ever present problem of off-by-one errors are especially worse with unsafe code. Be careful, review and test!
+###不安全的Swift 示例 1: 压缩（Unsafe Swift Example 1: Compression）
 
-###Unsafe Swift Example 1: Compression
+是时候整理之前的知识点，封装一个C API了。Coca框架中包含了一些C 模块，其实现了一些常用的压缩算法。LZ4压缩速度最快，LZ4A压缩比最高，但相对速度较慢，ZLIB相对平衡了时间和压缩比，还有新（开源）LZFSE算法，更好的平衡了空间和压缩速度。
 
-Time to take all of your knowledge and wrap a C API. Cocoa includes a C module that implements some common data compression algorithms. These include LZ4 for when speed is critical, LZ4A for when you need the highest compression ratio and don’t care about speed, ZLIB which balances space and speed and the new (and open source) LZFSE which does an even better job balancing space and speed.
-Create a new playground, calling it Compression. Begin by defining a pure Swift API that uses Data.
-Then, replace the contents of your playground with the following code:
+创建一个新的playground，命名为 Compression（压缩）。默认设置即可。然后用下面的代码替换原有内容：
 
 ```Swift
 import Foundation
