@@ -1,4 +1,4 @@
-#【译】 Unsafe Swift: Using Pointers And Interacting With C
+#【译未完成】 Unsafe Swift: Using Pointers And Interacting With C
 
 *本文翻译自 [Unsafe Swift: Using Pointers And Interacting With C](https://www.raywenderlich.com/148569/unsafe-swift)*， *由 [Ray Fix](https://www.raywenderlich.com/u/rayfix) 发表于[Raywenderlich](https://www.raywenderlich.com)*。
 
