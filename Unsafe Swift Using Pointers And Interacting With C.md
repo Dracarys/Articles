@@ -22,7 +22,7 @@
 
 ![Sample memory](https://koenig-media.raywenderlich.com/uploads/2017/01/memory-480x214.png)
 
-不安全的Swift直接与系统内存打交道。内存可以被看做是一系列排列整齐的盒子（事实上有数十亿之多），每个里面都有一个数字。每个盒子都有一个唯一的内存地址与之关联。最小的存储单元叫 *字节（byte）*，它由8个连续的比特位（bit）构成。8位构成的字节可以存储0-255的任意值。处理器可以高效地存取内存中不只一个字节的单词。以64位系统为例，一个字母是8位，长度为64个比特。
+不安全的 Swift 直接与系统内存打交道。内存可以被看做是一系列排列整齐的盒子（事实上有数十亿之多），每个里面都有一个数字。每个盒子都有一个唯一的内存地址与之关联。最小的存储单元叫 **字节（byte）**，它由8个连续的比特位（bit）构成。8位构成的字节可以存储0-255的任意值。处理器可以高效地存取内存中不只一个字节的单词。以64位系统为例，一个字母是8位，长度为64个比特。
 
 Swift 有个 MemoryLayout 的函数，可以查看内存中对象的大小和对齐情况。
 
@@ -73,9 +73,11 @@ MemoryLayout<SampleStruct>.alignment  // returns 4
 MemoryLayout<SampleStruct>.stride     // returns 8
 ```
 
+空结构体的大小为零，随意直到对齐，它可以从内存的任意地址开始。步长是一。这是因为任何一个空结构体在创建时都有一个唯一的内存地址。
 The empty structure has a size of zero. It can be located at any address since alignment is one. (i.e. All numbers are evenly divisible by one.) The stride, curiously, is one. This is because each EmptyStruct that you create has to have a unique memory address despite being of zero size.
 For SampleStruct, the size is five but the stride is eight. This is driven by its alignment requirements to be on 4-byte boundaries. Given that, the best Swift can do is pack at an interval of eight bytes.
-Next add:
+
+接下来添加如下代码:
 
 ```Swift
 class EmptyClass {}
@@ -145,7 +147,7 @@ do {
   }
 }
 ```
-该例中我们使用不安全的Swift 指针去存取2个整数。
+该例中我们使用不安全的 Swift 指针去存取2个整数。
 
 代码解释如下:
 
@@ -644,10 +646,11 @@ And that’s it! Random numbers in a safe way, using unsafe Swift under the hood
 
 ###接下来（ Where to Go From Here?）
 
-Here are the completed playgrounds. There many additional resources you can explore to learn more:
-- Swift Evolution 0107: UnsafeRawPointer API gives a detailed overview of the Swift memory model and makes reading the API documents more understandable.
-- Swift Evolution 0138: UnsafeRawBufferPointer API talks extensively about working with untyped memory and has links to open source projects that benefit from using them.
-- If you are converting unsafe code to Swift 3 check out The Migration Guide. Even if you aren’t migrating, it contains a number of interesting examples.
-- Interacting with C APIs will give you insights in how Swift interacts with C.
-Mike Ash has an excellent presentation on Exploring Swift Memory Layout.
-I hope you have enjoyed this tutorial. If you have questions or experiences you would like to share, I am looking forward to hearing about them in the forums!
+这是完整的[playgrounds](https://koenig-media.raywenderlich.com/uploads/2017/01/Unsafe.zip)。下面还提供了一些额外的一些资源，以便加深了解:
+
+- [Swift Evolution 0107: UnsafeRawPointer API](https://github.com/apple/swift-evolution/blob/master/proposals/0107-unsaferawpointer.md) 更详细的介绍了Swift内存模型，可以帮助你更好的读懂API文档.
+- [Swift Evolution 0138: UnsafeRawBufferPointer API](https://github.com/apple/swift-evolution/blob/master/proposals/0138-unsaferawbufferpointer.md)更多的讲述了如何与untyped memory的交互，并提供了一些开源工程连接，以便更好的运用。
+- 如果你正在向Swift 3迁移非安全代码，可以看看这篇[The Migration Guide](https://swift.org/migration-guide/se-0107-migrate.html)。即使你还没开始前一，文中也提供了大量有趣的例子，值得一看。
+- [Interacting with C APIs](https://developer.apple.com/library/content/documentation/Swift/Conceptual/BuildingCocoaApps/InteractingWithCAPIs.html) 可以帮助更深入的了解与C API的交互。
+Mike Ash 在[Exploring Swift Memory Layout](https://realm.io/news/goto-mike-ash-exploring-swift-memory-layout/)分享了一些非常棒的经验。
+希望大家能喜欢这篇文章. 如果你有什么问题，或者有什么经验要分享，欢迎大家将其发布到论坛上，我会时刻关注的!
