@@ -96,9 +96,9 @@ MemoryLayout<SampleClass>.stride    // returns 8 (on 64-bit)
 MemoryLayout<SampleClass>.alignment // returns 8 (on 64-bit)
 ```
 
-由于类是引用类型，所以通过 MemoryLayout 得到的大小是： 8 字节。
+由于类是引用类型，所以 MemoryLayout 返回的是“引用”的大小： 8 字节。
 
-如果想了解更多关于内存布局方面的知识，可以观看这段Mike Ash 的[视频](https://realm.io/news/goto-mike-ash-exploring-swift-memory-layout/)。
+如果想了解更多关于内存布局方面的知识，可以看看这段 Mike Ash 的精彩[讲解](https://realm.io/news/goto-mike-ash-exploring-swift-memory-layout/)。
 
 ###指针（Pointers）
 
@@ -153,20 +153,20 @@ do {
 
 1. These constants hold often used values:
 	- count holds the number of integers to store
-	- stride holds the stride of type Int
-	- alignment holds the alignment of type Int
-	- byteCount holds the total number of bytes needed
+	- stride 用于保存Int类型的步长
+	- alignment 用于保存Int类型的对齐
+	- byteCount 用于保存Int类型实际字节大小
 
-2. A do block is added, to add a scope level, so you can reuse the variable names in upcoming examples.
+2. do 代码块，用于指定一个作用域，如此在后面的例子中还可以继续使用这些变量名。
 
-3. The method UnsafeMutableRawPointer.allocate is used to allocate the required bytes. This method returns an UnsafeMutableRawPointer. The name of that type tells you the pointer can be used to load and store (mutate) raw bytes.
+3. `UnsafeMutableRawPointer.allocate` 可以开辟制定字节数的内粗，该方法返回一个 UnsafeMutableRawPointer 指针. 类型名字已经告诉我们，该指针可以用于家在或存储（可变的）原始字节.
 
-4. A defer block is added to make sure the pointer is deallocated properly. ARC isn’t going to help you here – you need to handle memory management yourself! You can read more about defer here.
+4. 一个 defer 代码块，用于确保指针在使用后能够正确的被释放。在这里 ARC 无效，你需要自己手动管理内存。可以从[这里](https://www.raywenderlich.com/130197/magical-error-handling-swift)了解到更过关于defer的知识。
 
-5. The storeBytes and load methods are used to store and load bytes. The memory address of the second integer is calculated by advancing the pointer stride bytes.
-Since pointers are Strideable you can also use pointer arithmetic as in (pointer+stride).storeBytes(of: 6, as: Int.self).
+5. storeBytes 和 load 方法，用于存储和加载字节。 第二个整数的内存地址，可以通过指针的步长移动计算去的。
+既然指针可以步进，那么就可以对指针进行运算(pointer+stride).storeBytes(of: 6, as: Int.self).
 
-6. An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. This means you can iterate over the bytes, access them using subscripting and even use cool methods like filter, map and reduce. The buffer pointer is initialized using the raw pointer.
+6. An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. 意味着可以按字节遍历, 可以通过下标存取，甚至是filter, map and reduce等方法. buffer pointer需要通过裸指针来初始化.
 
 ###类型指针的应用（Using Typed Pointers）
 
@@ -196,6 +196,7 @@ do {
 ```
 
 注意以下不同:
+
 - Memory is allocated using the method UnsafeMutablePointer.allocate. The generic parameter lets Swift know the pointer will be used to load and store values of type Int.
 - Typed memory must be initialized before use and deinitialized after use. This is done using initialize and deinitialize methods respectively. Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
 - Typed pointers have a pointee property that provides a type-safe way to load and store values.
