@@ -197,10 +197,10 @@ do {
 
 注意以下不同:
 
-- Memory is allocated using the method UnsafeMutablePointer.allocate. The generic parameter lets Swift know the pointer will be used to load and store values of type Int.
-- Typed memory must be initialized before use and deinitialized after use. This is done using initialize and deinitialize methods respectively. Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
-- Typed pointers have a pointee property that provides a type-safe way to load and store values.
-- When advancing a typed pointer, you can simply state the number of values you want to advance. The pointer can calculate the correct stride based on the type of values it points to. Again, pointer arithmetic also works. You can also say (pointer+1).pointee = 6
+- 通过UnsafeMutablePointer.allocate方法开辟一块内存. 而传入的参数是告诉swift该指针即将加载和存储Int类型
+- 带有类型的内存，在使用和用后销毁前都必需先初始化. initialize and deinitialize方法各自完成该功能。 Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
+- 类型明确的指针提供了一个pointee 属性，通过它可以进行类型安全的加载和存储值。
+- When advancing a typed pointer, you can simply state the number of values you want to advance. 指针会根据其所指向的类型自动计算步长. 指针运算有一次发挥了作用. 你还可以说(pointer+1).pointee = 6
 - The same holds true for typed buffer pointers: they iterate over values, instead of bytes.
 
 ###裸指针到类型指针的转换（Converting Raw Pointers to Typed Pointers）
