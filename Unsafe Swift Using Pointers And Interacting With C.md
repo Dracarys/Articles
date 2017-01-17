@@ -521,11 +521,11 @@ defer {
 return nil /// To be continued
 ```
 
-This is what is happening here:
+代码讲解如下:
 
-1. Allocate a compression_stream and schedule it for deallocation with the defer block.
-2. Then, using the pointee property you get the stream and pass it to the compression_stream_init function. The compiler is doing something special here. By using the inout & marker it is taking your compression_stream and turning it into a UnsafeMutablePointer<compression_stream> automatically. (You could have also just passed streamPointer and not needed this special conversion.)
-3. Finally, you create a destination buffer that will act as your working buffer.
+1. 创建一个compression_stream并且通过defer代码块儿，确保其能够及时释放。
+2. 接下来，通过访问 pointee 属性得到 steam，并且将其传递给compression_stream_init方法.编译器会做一些特殊的处理（必要的初始化）。 通过输入输出标识符 & 将接收的 compression_stream自动转换为UnsafeMutablePointer<compression_stream>。 (当然直接传递streamPointer也可以，这样就不需要转换了)
+3. 左后，创建一个目标缓存，作为工作输出的缓冲区。
 
 用如下代码替换掉`return nil`，以完成 `perform` 函数:
 
