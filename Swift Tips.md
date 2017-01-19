@@ -179,3 +179,9 @@ potentialOverflow += 1
 	setInt(10, "Ten")
 	print(getInt("Ten"))
 ```
+
+# 16.包名冲突
+
+今天在尝试项目中引入“NetworkExtension”的时候，发现编译器提示“File 'NameOfCrrentFile.Swift is a part of module 'NetworkExtension' ; ignoring import”， 后来在苹果[官方论坛](https://forums.developer.apple.com/thread/45186)上找到了答案，原来是工程名“NetworkExtension”与要引入的包名冲突了，由于**.swift已经是“NetworkExtension”工程（实际也是一个包）一部分，所以Swift拒绝再在该包中引入一个同名的包。
+
+Swift虽然支持命名空间，但是随即也带来了类似的问题，看来接下来有必要好好了解下Swift的包管理和命名空间问题。
