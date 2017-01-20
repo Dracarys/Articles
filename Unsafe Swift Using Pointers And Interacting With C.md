@@ -50,11 +50,12 @@ MemoryLayout<Double>.alignment  // returns 8
 MemoryLayout<Double>.stride     // returns 8
 ```
 
-MemoryLayout<Type> 估算函数可以在编译期侦测指定类型的大小，对齐和步长。返回值以字节为单位。例如，Int16 占用两个字节，且恰好与两个字节对齐。也就是说，都是从两段地址的起始。也就是说，从地址100开始开辟一个合法的Int16，注意不是101，因为那样会违反对齐规则。
+MemoryLayout<Type> 用于在编译期侦测指定类型的大小，对齐和步长情况，其返回值以字节为单位。例如，**Int16** 在**空间**上占用两个字节，且恰好与两个字节**对齐**。即占满两个字节。
+举个例子，在地址100上开辟一个 **Int16**是合法的，101则不可以，因为这违反内存对齐原则
 
-When you pack a bunch of Int16s together, they pack together at an interval of stride. 因此，基础类型的大小与步长相同。
+当有一串 Int16 时，那么它们之间是一个步长串联在一起的基础类型的大小和步长相同。
 
-接下来，向playground中添加如下代码，我们看看用户定义的结构体在内存中对布局情况:
+接下来，向playground中添加如下代码，我们看看用户定义的结构体在内存中的排布情况:
 
 ```Swift
 struct EmptyStruct {}
@@ -73,11 +74,10 @@ MemoryLayout<SampleStruct>.alignment  // returns 4
 MemoryLayout<SampleStruct>.stride     // returns 8
 ```
 
-空结构体的大小为零，随意直到对齐，它可以从内存的任意地址开始。步长是一。这是因为任何一个空结构体在创建时都有一个唯一的内存地址。
-The empty structure has a size of zero. It can be located at any address since alignment is one. (i.e. All numbers are evenly divisible by one.) The stride, curiously, is one. This is because each EmptyStruct that you create has to have a unique memory address despite being of zero size.
-For SampleStruct, the size is five but the stride is eight. This is driven by its alignment requirements to be on 4-byte boundaries. Given that, the best Swift can do is pack at an interval of eight bytes.
+空结构体的大小为零，它可以从任意地址开始直至对齐到某一个。步长也是一，这是因为任何一个**空结构体**在创建时都有一个唯一的内存地址，虽然大小为0。
+而 SampleStruct 的大小是 5 步长为 8 。这是因为它必须要对齐到4个字节（即4的倍数），所以Swift以 8 字节来打包。（这里非常不好）
 
-接下来添加如下代码:
+接下来添加:
 
 ```Swift
 class EmptyClass {}
@@ -96,21 +96,21 @@ MemoryLayout<SampleClass>.stride    // returns 8 (on 64-bit)
 MemoryLayout<SampleClass>.alignment // returns 8 (on 64-bit)
 ```
 
-由于类是引用类型，所以 MemoryLayout 返回的是“引用”的大小： 8 字节。
+由于类是引用类型，所以 MemoryLayout 返回的是“引用”自身的大小： 8 字节。
 
 如果想了解更多关于内存布局方面的知识，可以看看这段 Mike Ash 的精彩[讲解](https://realm.io/news/goto-mike-ash-exploring-swift-memory-layout/)。
 
 ###指针（Pointers）
 
-一个指针包含了一个内存地址。为了与内存直接操作的“不安全”相应，指针被称为 UnsafePointer. 虽然打起来有点烦，但是它可以提醒你正在脱离编译器的帮助，错误的处理可能引起不可预料的行为（并不限于崩溃）。
+一个指针包含了一个内存地址。为了与内存直接操作的“不安全”相应，指针被冠以“Unsafe”前缀，该指针类型称为 UnsafePointer. 虽然要多打点字，但是它可以提醒你正在脱离编译器的帮助，错误的处理可能引起[不可预料的行为](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)（并不限于崩溃）。
 
-Swift的设计者，本可以只提供一种与 C 语言中 char \* 等价，可任意访问内存的 UnsafePointer 类型。但是他们没有，相反Swift 包含了将近一打的指针类型，以使用不同的场景和目的。选择合适的指针类型至关重要，可以帮助你远离那些未预料的行为。
+Swift的设计者，本可以只提供一种与 C 语言中 char \* 等价的，可任意访问内存的 **UnsafePointer** 类型。但是他们没有，相反 Swift 提供了近乎一打的指针类型，以适用不同的场景和目的。选择合适的指针类型至关重要，可以帮助你避免一些不可预料的行为。
 
-Swift 指针采用了非常鲜明的命名方式，以便人们通过类型即可清楚其特点。可变还是不可变，类型不明确还是类型明确的，连续还是不连续。下面这张表罗列了这8中指针。
+Swift 指针采用了非常鲜明的命名方式，以便人们通过类型即可清楚其特点。可变还是不可变，类型不明确还是类型明确的，连续还是不连续。下面这张表罗列了这 8 中指针。
 
 ![unsafe swift pointers](https://koenig-media.raywenderlich.com/uploads/2016/12/pointers-650x444.png)
 
-接下来一节，我们将学习这些指针类型。
+下面，我们将学习这些指针类型。
 
 ### 裸指针应用 （Using Raw Pointers）
 
@@ -151,22 +151,22 @@ do {
 
 代码解释如下:
 
-1. These constants hold often used values:
-	- count holds the number of integers to store
-	- stride 用于保存Int类型的步长
-	- alignment 用于保存Int类型的对齐
-	- byteCount 用于保存Int类型实际字节大小
+1. 这些常量保存一些常用的值:
+	- count 表明需要存储几个整形数值
+	- stride 表示保存Int类型的步长
+	- alignment 用于存储Int类型对齐所需空间大小
+	- byteCount 表示总占用内存空间大小
 
-2. do 代码块，用于指定一个作用域，如此在后面的例子中还可以继续使用这些变量名。
+2. do 代码块，用于指定一个作用域，以便在后面的例子中还可以继续使用相同的变量名。
 
-3. `UnsafeMutableRawPointer.allocate` 可以开辟制定字节数的内粗，该方法返回一个 UnsafeMutableRawPointer 指针. 类型名字已经告诉我们，该指针可以用于家在或存储（可变的）原始字节.
+3. `UnsafeMutableRawPointer.allocate` 可以开辟指定字节数的内存，该方法返回一个 `UnsafeMutableRawPointer` 指针. 类型名称已经清楚的表明，该指针可以用于加载或存储（可变的）裸字节.
 
-4. 一个 defer 代码块，用于确保指针在使用后能够正确的被释放。在这里 ARC 无效，你需要自己手动管理内存。可以从[这里](https://www.raywenderlich.com/130197/magical-error-handling-swift)了解到更过关于defer的知识。
+4. `defer` 代码块，可以确保指针在使用后能够得到正确地释放。在这里 ARC 是无效，你需要自己手动管理内存。可以从[这里](https://www.raywenderlich.com/130197/magical-error-handling-swift)了解到更多有关 `defer` 的知识。
 
-5. storeBytes 和 load 方法，用于存储和加载字节。 第二个整数的内存地址，可以通过指针的步长移动计算去的。
-既然指针可以步进，那么就可以对指针进行运算(pointer+stride).storeBytes(of: 6, as: Int.self).
+5. `storeBytes` 和 `load` 方法用于存储和加载字节。 第二个整数的内存地址，可以通过指针的步长移动计算去的。
+既然指针可以步进，那么就可以对指针进行运算`(pointer+stride).storeBytes(of: 6, as: Int.self)`。
 
-6. An UnsafeRawBufferPointer lets you access memory as if it was a collection of bytes. 意味着可以按字节遍历, 可以通过下标存取，甚至是filter, map and reduce等方法. buffer pointer需要通过裸指针来初始化.
+6. `UnsafeRawBufferPointer`可以以字节的方式对内存进行访问。也就是说你可以便利所有字节，可以通过下标，或者 filter, map reduce等更酷的方法去访问。buffer pointer需要通过裸指针来初始化。
 
 ###类型指针的应用（Using Typed Pointers）
 
@@ -197,11 +197,11 @@ do {
 
 注意以下不同:
 
-- 通过UnsafeMutablePointer.allocate方法开辟一块内存. 而传入的参数是告诉swift该指针即将加载和存储Int类型
-- 带有类型的内存，在使用和用后销毁前都必需先初始化. initialize and deinitialize方法各自完成该功能。 Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
-- 类型明确的指针提供了一个pointee 属性，通过它可以进行类型安全的加载和存储值。
-- When advancing a typed pointer, you can simply state the number of values you want to advance. 指针会根据其所指向的类型自动计算步长. 指针运算有一次发挥了作用. 你还可以说(pointer+1).pointee = 6
-- The same holds true for typed buffer pointers: they iterate over values, instead of bytes.
+- 通过`UnsafeMutablePointer.allocate`方法开辟一块内存. 而传入的参数是告诉swift该指针即将装并存储Int类型
+- 已指定类型的内存，在使用和后销毁前都必需初始化，初始化和销毁分别通过initialize 和 deinitialize方法来完成。 Update: as noted by user atrick in the comments below, deinitialization is only required for non-trivial types. That said, including deinitialization is a good way to future proof your code in case you change to something non-trivial. Also, it usually doesn’t cost anything since the compiler will optimize it out.
+- 类型明确的指针提供了一个pointee 属性，通过它可以以类型安全方式装载和存储相应类型的值。
+- 当移动指针时，可以简单地通过指定需要移动的距离来移动指针。指针会根据其所指向的类型自动计算步长. 指针运算再一次发挥了作用. 简单的表示为`(pointer+1).pointee = 6`。
+- 同类型的 buffer pointer是一样的：只是一个遍历的是值，另一个遍历的是字节。
 
 ###裸指针到类型指针的转换（Converting Raw Pointers to Typed Pointers）
 
