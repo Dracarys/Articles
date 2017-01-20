@@ -14,19 +14,19 @@
 
 ### 开始（Getting Started）
 
-本文由三个 playgrounds 构成。首先，我们会创建几个小段代码以认识内存布局和不安全的指针操作。其次，我们将一个执行数据流的底层的 C API封装成 Swift 样式。最后, you will create a platform independent alternative to arc4random that, while using unsafe Swift, hides that detail from users.
+本文由三个 playgrounds 构成。首先，我们会创建几个小段代码以认识内存布局和不安全的指针操作。其次，我们将一个执行数据流的底层的 C API封装成 Swift 样式。在最后的Palyground中, 我们将创建一个平台独立的随机数生成器用于取代**arc4random**, 通过 Unsafe Swift 相关技术向用户隐藏烦碎的细节.
 
-先来新建一个playground, 命名为 *UnsafeSwift* . 平台任意, 本文所涉的代码均全平台通用. 确认导入了 Foundation framework.
+首先新建一个 playground, 命名为 **UnsafeSwift**。 平台任意, 本文所涉的代码均全平台通用。接下来导入 Foundation 框架。
 
 ###内存排布（Memory Layout）
 
 ![Sample memory](https://koenig-media.raywenderlich.com/uploads/2017/01/memory-480x214.png)
 
-不安全的 Swift 直接与系统内存打交道。内存可以被看做是一系列排列整齐的盒子（事实上有数十亿之多），每个里面都有一个数字。每个盒子都有一个唯一的内存地址与之关联。最小的存储单元叫 **字节（byte）**，它由8个连续的比特位（bit）构成。8位构成的字节可以存储0-255的任意值。处理器可以高效地存取内存中不只一个字节的单词。以64位系统为例，一个字母是8位，长度为64个比特。
+不安全的 Swift 直接与系统内存打交道。内存可以被看做是一系列排列整齐的盒子（实际上有数以亿计之多），每个里面都有一个数字。每个盒子都有一个唯一的**内存地址**与之关联。最小的存储地址单元被称为一个 **字节（byte）**，它通常由 8 个连续的**比特（bit）**构成。一个 8 位的字节可以存储 0 -255 的任意数值。一个单词占据的内存通常不只一个字节，但是处理器同样可以对其进行高效存取。以64位系统为例，一个字母是8字节64个比特。
 
-Swift 有个 MemoryLayout 的函数，可以查看内存中对象的大小和对齐情况。
+通过 Swift 提供的 **MemoryLayout（枚举）** 可以查看内存中对象的大小和对齐情况。
 
-在你的 playground 中添加如下代码:
+在 playground 中添加如下代码:
 
 ```Swift
 MemoryLayout<Int>.size          // returns 8 (on 64-bit)
