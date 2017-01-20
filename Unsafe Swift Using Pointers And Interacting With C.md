@@ -258,12 +258,14 @@ do {
 }
 ```
 
-This prints out the raw bytes of the SampleStruct instance. The withUnsafeBytes(of:) method gives you access to an UnsafeRawBufferPointer that you can use inside the closure.
-withUnsafeBytes is also available as an instance method on Array and Data.
+这里打印了SampleStruct实例的裸字节。`withUnsafeBytes(of:) `让你可以在闭包中访问一个 `UnsafeRawBufferPointer `。
+
+withUnsafeBytes 在 Array 和 Data示例上同样有效。
 
 ###求和校验（Computing a Checksum）
 
-Using withUnsafeBytes(of:) you can return a result. An example use of this is to compute a 32-bit checksum of the bytes in a structure.
+withUnsafeBytes(of:) 方法可以返回一个值，下面的例子以此来计算一个结构体的字节校验和。
+
 在playground中添加如下代码:
 
 ```Swift
@@ -284,7 +286,7 @@ The reduce call adds up all of the bytes and ~ then flips the bits. Not a partic
 
 ###非安全操作三原则（Three Rules of Unsafe Club）
 
-便携不安全代码的时候务必小心，以避免那些不可预料的行为。这里罗列了一些糟糕的例子。
+编写不安全代码的时候务必小心，以避免那些不可预料的行为。这里罗列了一些糟糕的例子。
 
 ####不要通过 `withUnsafeBytes` 返回指针。
 
@@ -335,9 +337,10 @@ do {
 
 ![badpun](https://koenig-media.raywenderlich.com/uploads/2016/12/badpun-480x175.png)
 
-绝不要将内存同时绑定到两个不相关的类型。这被称为类型双关而Swift不喜欢双关。
+绝不要将内存同时绑定给两个不相关的类型。这被称为类型双关而Swift不喜欢双关。但可以通过withMemoryRebound(to:capacity:)等方法重新绑定内存。
 
 Never bind memory to two unrelated types at once. This is called Type Punning and Swift does not like puns. Instead, you can temporarily rebind memory with a method like withMemoryRebound(to:capacity:). Also, the rules say it is illegal to rebind from a trivial type (such as an Int) to a non-trivial type (such as a class). Don’t do it.
+
 ####Don’t walk off the end… whoops!
 
 ```Swift
@@ -453,9 +456,6 @@ input == restoredInput // true
 
 主入口是一个Data类型的扩展。我们已经添加了一个名为 `compressed(with:)` 函数，它返回一个可选类型的 Compressed 结构体。该方法只是简单地调用了一下静态方法 `compress(input:with:)`。
 
-
-
-The main entry point is an extension on the Data type. You’ve added a method called compressed(with:) which returns an optional Compressed struct. This method simply calls the static method compress(input:with:) on Compressed.
 There is an example usage at the end but it is currently not working. Time to start fixing that!
 
 滚动到首次进入时的代码块，`perform(_:on:using:workingBufferSize:)` 函数实现如下：
@@ -572,9 +572,9 @@ return input.withUnsafeBytes { (srcPointer: UnsafePointer<UInt8>) in
 
 这里才是真正执行压缩任务的代码. 下面是代码释义:
 
-1. Create a Data object which is going to contain the output – either the compressed or decompressed data, depending on what operation this is.
-2. Set up the source and destination buffers with the pointers you allocated and their sizes.
-3. Then you keep calling compression_stream_process as long as it continues to return COMPRESSION_STATUS_OK.
+1. 创建一个Data对象，用于存储输出数据，具体是压缩后的数据还是解压后的数据取决与当前操作。
+2. 设置输入输出指针，及其大小。
+3. 持续掉用compression_stream_process 直至完成 即状态COMPRESSION_STATUS_OK.
 4. The destination buffer is then copied into output that is eventually returned from this function.
 5. When the last packet comes in, marked with COMPRESSION_STATUS_END only part of the destination buffer potentially needs to be copied.
 In the example usage you can see that the 10,000-element array is compressed down to 153 bytes. Not too shabby.
