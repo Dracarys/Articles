@@ -129,6 +129,9 @@ open访问权限仅适用于类和类成员，它与public访问权限的区别�
 
 ### 11.@objc & dynamic
 关键字，摘录自王巍 [《Swift tips》](http://swifter.tips/objc-dynamic/)
+@objc 当 Objective-C 需要引用 Swift 代码，我们可以将需要暴露给 Objective-C 使用的任何地方 (包括类，属性和方法等) 的声明前面加上 @objc 修饰符。
+@objc 修饰符的另一个作用是为 Objective-C 重新声明方法或者变量的名字
+@dynamic 当需要用刀某些动态特性时，即可用此关键词，例如KVO。
 
 ### 12.@escaping & @noescape
 摘录自[《What Do @escaping and @noescape Mean In Swift 3》](https://cocoacasts.com/what-do-escaping-and-noescaping-mean-in-swift-3/)
@@ -185,3 +188,23 @@ potentialOverflow += 1
 今天在尝试项目中引入“NetworkExtension”的时候，发现编译器提示“File 'NameOfCrrentFile.Swift is a part of module 'NetworkExtension' ; ignoring import”， 后来在苹果[官方论坛](https://forums.developer.apple.com/thread/45186)上找到了答案，原来是工程名“NetworkExtension”与要引入的包名冲突了，由于**.swift已经是“NetworkExtension”工程（实际也是一个包）一部分，所以Swift拒绝再在该包中引入一个同名的包。
 
 Swift虽然支持命名空间，但是随即也带来了类似的问题，看来接下来有必要好好了解下Swift的包管理和命名空间问题。
+
+# 17. #keyPath语法糖
+摘录自：[@南峰子_老驴](http://m.weibo.cn/3321824014/4060979186247385)
+
+在使用KVC或KVO时，经常会犯一些因KeyPath拼写不正确，从而导致应用崩溃的错误。为此，Swift 3中引入了 #keyPath()表达式，不多解释，直接看代码：
+
+```Swift
+class Person: NSObject {
+    dynamic var firstName: String
+    
+    init(firstName: String) {
+        self.firstName = firstName
+    }
+}
+
+let chris = Person(firstName: "Chris")
+
+let keyPath = #keyPath(Person.firstName)
+chris.value(forKey: keyPath)
+```
