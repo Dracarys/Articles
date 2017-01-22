@@ -19,7 +19,7 @@
 首先新建一个 playground, 命名为 **UnsafeSwift**。 平台任意, 本文所涉的代码均全平台通用。接下来导入 Foundation 框架。
 
 ###内存排布（Memory Layout）
-*这段翻译的特别不好，尤其是“内存对齐”，为了避免误导，如果你从未了解过内存排布相关知识，请先参考其它书籍了解相关知识，如《计算机系统》*
+*【译者注】这段翻译的特别不好，尤其是“内存对齐”，为了避免误导，如果你从未了解过内存排布相关知识，请先参考其它书籍了解相关知识，如《计算机系统》*
 
 ![Sample memory](https://koenig-media.raywenderlich.com/uploads/2017/01/memory-480x214.png)
 
