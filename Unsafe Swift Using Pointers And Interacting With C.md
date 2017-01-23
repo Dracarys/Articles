@@ -1,4 +1,4 @@
-#【译未完成】 Unsafe Swift: Using Pointers And Interacting With C
+#【粗译完成】 Unsafe Swift: Using Pointers And Interacting With C
 
 *本文翻译自 [Unsafe Swift: Using Pointers And Interacting With C](https://www.raywenderlich.com/148569/unsafe-swift)*， *由 [Ray Fix](https://www.raywenderlich.com/u/rayfix) 发表于[Raywenderlich](https://www.raywenderlich.com)*。
 
@@ -8,9 +8,9 @@
 
 默认情况下，Swift 是内存安全的，这意味着禁止对内存进行直接访问，并确保所有对象在使用前都已被正确初始化。既然是“默认”，那么就意味着如果有需要，Swift 还是允许通过指针对内存进行直接访问的。
 
-本文将带你领略 Swift 的“不安全”特性。这里的“不安全“可能有点让人困惑，它并不意味着你写的代码即危险又糟糕，相反它是在提醒你，提醒你要格外地留意自己的代码，因为编译器将不在帮你进行一些必要的审查。
+本文将带你领略 Swift 的 “Unsafe” 特性。这里的 “Unsafe“ 可能有点让人困惑，它并不意味着你写的代码即危险又糟糕，相反它是在提醒你，提醒你要格外小心地编写自己的代码，因为编译器将不在帮你进行一些必要的审查。
 
-在运用 Swift 一些非安全特性与诸如 C 这类非安全语言交互之前，我们还需要了解一些额外的与运行相关的知识。本文讨论的是一个进阶性的话题，如果了解过Swift，本文可以帮你加深认识。C 语言开发经验也会有所帮助，但不是必须的。 
+在运用 Swift 一些非安全特性与诸如 C 这类非安全语言交互之前，我们还需要了解一些额外的与运行相关的知识。本文讨论的是一个进阶性的话题，如果有 Swift 基础，那么你会更好的理解本文所涉内容。C 语言开发经验也会有所帮助，但不是必须的。 
 
 ### 开始（Getting Started）
 
