@@ -294,7 +294,7 @@ The reduce call adds up all of the bytes and ~ then flips the bits. Not a partic
 
 编写不安全代码的时候务必小心，以避免那些不可预料的行为。这里罗列了一些糟糕的例子。
 
-####不要通过 `withUnsafeBytes` 返回指针。
+**不要通过 `withUnsafeBytes` 返回指针（Dont't return the pointer from withUnsafeBytes）!**
 
 ```Swift
  // Rule #1
@@ -311,9 +311,9 @@ do {
 }
 ```
 
-不要在 withUnsafeBytes(of:) 作用域外调用指针。或许一时可用，但…
+不要在 `withUnsafeBytes(of:)` 作用域外调用指针。或许一时可用，但…
 
-####同一时间只绑定一种类型！
+**一时间只绑定一种类型（Only bind to oen type at a time）!**
 
 ```Swift
 
@@ -343,11 +343,9 @@ do {
 
 ![badpun](https://koenig-media.raywenderlich.com/uploads/2016/12/badpun-480x175.png)
 
-绝不要将内存同时绑定给两个不相关的类型。这被称为类型双关而Swift不喜欢双关。但可以通过withMemoryRebound(to:capacity:)等方法重新绑定内存。
+绝不要将内存同时绑定给两个不相关的类型。这被称为类型双关而 Swift 不喜欢双关。但可以通过 `withMemoryRebound(to:capacity:)` 方法暂时地重新绑定内存。同样，将一个普通类型（例如：Int）重新绑定到一个非普通类型（例如：类）也是不合法的。所以千万别这么做。
 
-Never bind memory to two unrelated types at once. This is called Type Punning and Swift does not like puns. Instead, you can temporarily rebind memory with a method like withMemoryRebound(to:capacity:). Also, the rules say it is illegal to rebind from a trivial type (such as an Int) to a non-trivial type (such as a class). Don’t do it.
-
-####Don’t walk off the end… whoops!
+**千万别越界（Don’t walk off the end… whoops）!**
 
 ```Swift
 // Rule #3... wait
@@ -367,13 +365,13 @@ do {
   }
 }
 ```
-在已出现的差一错误中，尤数不安全代码最糟糕。有一务必小心审查，测试你的代码!
+在已出现的 off-by-one 错误中，尤以不安全代码最糟糕。所以务必小心审查，测试你的代码!
 
 ###不安全的Swift 示例 1: 压缩（算法）（Unsafe Swift Example 1: Compression）
 
-是时候整理之前的知识点，封装一个C API了。Coca框架中包含了一些C 模块，其实现了一些常用的压缩算法。LZ4压缩速度最快，LZ4A压缩比最高，但相对速度较慢，ZLIB相对平衡了时间和压缩比，还有新（开源）LZFSE算法，更好的平衡了空间和压缩速度。
+接下来我们运用之前所讲的知识来对一个 C API 进行封装。Coca 框架中包含一个 C 模块，其实现了一些常用的压缩算法。例如 LZ4压缩算法速度最快，LZ4A算法的压缩比最高，但相对速度较慢，ZLIB算法在时间和压缩比上比较均衡，此外还有一个新的（开源）LZFSE算法，更好的平衡了空间和压缩速率。
 
-创建一个新的playground，命名为 Compression（压缩）。默认设置即可。然后用下面的代码替换原有内容：
+创建一个新的 playground，命名为 Compression（压缩）。默认设置即可。然后用下面的代码替换原有内容：
 
 ```Swift
 import Foundation
@@ -398,9 +396,9 @@ func perform(_ operation: CompressionOperation,
   return nil
 }
 ```
-这个即可压缩又可以解压缩的函数还没内容，只是简单返回nil。稍后我们会添加一些不安全的代码。
+用来执行压缩和解压缩操作的 **perform** 函数还是空的，只是简单地返回 nil。稍后我们会添加一些“非安全代码”。
 
-在playground中代码的最后添加如下代码:
+在 playground 中代码的最后添加如下代码:
 
 ```Swift
 // Compressed keeps the compressed data and the algorithm
@@ -434,9 +432,9 @@ struct Compressed {
 }
 ```
 
-压缩结构题包含了压缩后的数据和压缩算法。这可以在解压时减少因算法不正确而导致的错误。
+**Compressed** 结构体存有压缩后的数据和相应的压缩算法。这可以在解压时减少因算法侦测不正确而导致的错误。
 
-接下来在Playground的代码末尾添加如下内容:
+在 Playground 的代码末尾添加如下内容:
 
 ```Swift
 // For discoverability, add a compressed method to Data
@@ -460,9 +458,7 @@ let restoredInput = compressed?.decompressed()
 input == restoredInput // true
 ```
 
-主入口是一个Data类型的扩展。我们已经添加了一个名为 `compressed(with:)` 函数，它返回一个可选类型的 Compressed 结构体。该方法只是简单地调用了一下静态方法 `compress(input:with:)`。
-
-There is an example usage at the end but it is currently not working. Time to start fixing that!
+主入口是一个 **Data** 类型的扩展。我们已经添加了一个名为 `compressed(with:)` 的函数，它返回一个可选类型的 **Compressed** 结构体。该方法只是简单地调用了 **Compressed** 的静态方法 `compress(input:with:)`。
 
 滚动到首次进入时的代码块，`perform(_:on:using:workingBufferSize:)` 函数实现如下：
 
@@ -496,9 +492,9 @@ func perform(_ operation: CompressionOperation,
   return nil /// To be continued
 }
 ```
+从 Swift 类型转换为 C 类型需要用到 compression 库中提供的压缩算法和操作。
 
-This converts from your Swift types to the C types required by the compression library, for the compression algorithm and operation to perform.
-加下来用如下代码替换`return nil`:
+接下来用如下代码替换`return nil`:
 
 ```Swift
 // 1: create a stream
@@ -527,7 +523,7 @@ defer {
 return nil /// To be continued
 ```
 
-代码讲解如下:
+代码释义如下:
 
 1. 创建一个compression_stream并且通过defer代码块儿，确保其能够及时释放。
 2. 接下来，通过访问 pointee 属性得到 steam，并且将其传递给compression_stream_init方法.编译器会做一些特殊的处理（必要的初始化）。 通过输入输出标识符 & 将接收的 compression_stream自动转换为UnsafeMutablePointer<compression_stream>。 (当然直接传递streamPointer也可以，这样就不需要转换了)
@@ -581,16 +577,16 @@ return input.withUnsafeBytes { (srcPointer: UnsafePointer<UInt8>) in
 1. 创建一个Data对象，用于存储输出数据，具体是压缩后的数据还是解压后的数据取决与当前操作。
 2. 设置输入输出指针，及其大小。
 3. 持续掉用compression_stream_process 直至完成 即状态COMPRESSION_STATUS_OK.
-4. The destination buffer is then copied into output that is eventually returned from this function.
-5. When the last packet comes in, marked with COMPRESSION_STATUS_END only part of the destination buffer potentially needs to be copied.
-In the example usage you can see that the 10,000-element array is compressed down to 153 bytes. Not too shabby.
+4. 目标 buff 被拷贝到 output 其从中会被返回
+5. 当传入最后一个包时, marked with COMPRESSION_STATUS_END only part of the destination buffer potentially needs to be copied.
 
-###不安全的Swift 示例2:随机数迭代器（Unsafe Swift Example 2: Random Generator）
+在这个例子中，我们可以看到含有10000个元素的数组被压缩到153字节。
 
-对于游戏和机器学习类的应用，随机数非常重要。macOS 提供了 `arc4random` 函数用于生成随机数。
+###不安全的Swift 示例2:随机数生成器（Unsafe Swift Example 2: Random Generator）
 
-Random numbers are important for many applications from games to machine learning. macOS provides arc4random (A Replacement Call 4 random) that produces great (cryptographically sound) random numbers. Unfortunately this call is not available on Linux. Moreover, arc4random only provides randoms as UInt32. However, the file /dev/urandom provides an unlimited source of good random numbers.
-In this section, you will use your new knowledge to read this file and create completely type safe random numbers.
+无论是游戏还是机器学习类的应用，随机数至关重要。macOS 提供了 `arc4random` 函数用于生成随机数。糟糕的是 Linux 上不可用。此外 `arc4random` 仅提供 UInt32类型的随机数。而 `/dev/urandom` 提供了一个无限的随机数源。
+
+这一小节，我们会运用新学到的知识读取这个文件，并创建类型安全的随机数。
 
 ![hexdump](https://koenig-media.raywenderlich.com/uploads/2016/12/hexdump-480x202.png)
 
@@ -618,11 +614,9 @@ enum RandomSource {
   }
 }
 ```
+将 file 声明为静态变量，以保证系统中仅存在一个实例。当线程退出时系统会关闭打开的文件。由于存在多个进程获取随机数的可能，所以通过一个串行的 GCD 队列来保证它的存取顺序。所有实现都在 get 方法中。首先创建capacity，因为 fgets 总是以 0 结束，所以这里要额外的加 1。从file中得到数据，确保操作是运行在 GCD 队列上，最后，将数据拷贝到一个由 `UnsafeMutableBufferPointer` 指针指向起始位的标准的数组中。现在我们得到一个含有 Int8 数值的数组。
 
-The file variable is declared static so only one will exist in the system. You will rely on the system closing it when the process exits. Since it is possible that multiple threads will want random numbers, you need to protect access to it with a serial GCD queue.
-The get function is where the work happens. First you create some unallocated storage that is one beyond what you need because fgets is always 0 terminated. Next, you get the data from the file, making sure to do so while operating on the GCD queue. Finally, you copy the data to a standard array by first wrapping it in a UnsafeMutableBufferPointer that can act as a Sequence.
-So far this will only (safely) give you an array of Int8 values. Now you’re going to extend that.
-Add the following to the end of your playground:
+接下来在 playground 末尾添加如下代码：
 
 ```Swift
 extension Integer {
@@ -648,8 +642,7 @@ Int64.randomized
 UInt64.randomized
 ```
 
-This adds a static randomized property to all subtypes of the Integer protocol (see protocol oriented programming for more on this!). You first get the random numbers, and with the bytes of the array that is returned, you rebind (as in C++’s reinterpret_cast) the Int8 values as the type being requested and return a copy. Simples! :]
-And that’s it! Random numbers in a safe way, using unsafe Swift under the hood.
+这里在通过扩展 Integer 协议，为其所有子类型添加了一个静态的 randomized 属性(可查阅[protocol oriented programming](https://www.raywenderlich.com/148448/introducing-protocol-oriented-programming)了解更多)。首先取得随机数，之后根据返回数组的字节，重新绑定到 (译者注：这里不正确)
 
 ###接下来（ Where to Go From Here?）
 
