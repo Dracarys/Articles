@@ -642,7 +642,7 @@ Int64.randomized
 UInt64.randomized
 ```
 
-这里在通过扩展 Integer 协议，为其所有子类型添加了一个静态的 randomized 属性(可查阅[protocol oriented programming](https://www.raywenderlich.com/148448/introducing-protocol-oriented-programming)了解更多)。首先取得随机数，之后根据返回数组的字节，重新绑定到 (译者注：这里不正确)
+这里在通过扩展 Integer 协议，为其所有子类型添加了一个静态的 randomized 属性(可查阅[protocol oriented programming](https://www.raywenderlich.com/148448/introducing-protocol-oriented-programming)了解更多)。
 
 ###接下来（ Where to Go From Here?）
 
