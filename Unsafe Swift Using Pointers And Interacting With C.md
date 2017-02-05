@@ -115,7 +115,7 @@ Swift 指针采用了非常鲜明的命名方式，以便人们通过类型即�
 
 下面，我们将学习这些指针类型。
 
-### 裸指针应用 （Using Raw Pointers）
+### 裸指针的应用 （Using Raw Pointers）
 
 在playground中添加如下代码:
 
