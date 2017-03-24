@@ -208,3 +208,84 @@ let chris = Person(firstName: "Chris")
 let keyPath = #keyPath(Person.firstName)
 chris.value(forKey: keyPath)
 ```
+# 18. as、as?、as!
+
+从字面理解`as`作为什么的意思，那也在Swift中它的作用就是类型转换（type casting）,那么三个as分别有什么不同呢？
+
+`as` 直接转换，首先，其可用于从`sub class`到`super class`／`Any`的向上转换(upcast)，这种转换没有额外的风险，所以直接`as`:
+
+``` Swift
+class People {
+}
+
+class Child: People {
+}
+
+let john  = Child()
+let people: People = johon as People
+
+```
+其次，其可用于消除歧义，指明类型；
+
+``` Swift
+let num1 = 7 as CGFloat
+
+let num2 = 7 as Int
+
+let num3 = 3.14 as Int
+
+let num4 = (7 / 2) as Double
+```
+
+最后，其还可以在 Switch
+
+``` Swift
+class Boy: Child {
+}
+
+class Girl: Child {
+}
+
+let child: Child = Boy()
+
+switch child {
+    case let boy as Boy:
+        //
+        break
+    case let girl as Girl:
+        //
+        break
+    default:
+        break
+}
+```
+
+`as?`用于向下转换（downcast）。尝试去转换并返回一个可选类型，成功则包含一个值，失败则为`nil`，所以转换结果需要判断。
+
+``` Swift
+class People {
+}
+
+class Child: People {
+}
+
+let people: People  = People()
+
+if let child = people as? Child {
+    print("转换成功")
+} else {
+    print("转换失败")
+}
+
+```
+
+`as!` 强制转换，成功返回可选类型，失败则导致运行时错误。所以在操作前，要求开发者非常清楚待转换对象的类型。
+
+``` Swift
+let someOne: Any = People()
+let people = someOne as! People // 转换成功
+
+let someOne: Any = "Who are you"
+let people = someOne as! People // 转换失败，崩溃。
+
+```
