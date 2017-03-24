@@ -291,7 +291,7 @@ let people = someOne as! People // 转换失败，崩溃。
 ```
 # 19.闭包的几种表达
 
-闭包不算什么新表达方式，但不知道为什么 Swift 要弄这么多种表达方式（效仿茴字的四种写法吗？）：
+闭包不算什么新表达方式，但不知道为什么 Swift 要弄这么多种表达方式（效仿茴字吗？）：
 
 ``` Swift
 let score = [1,3,40,32,2,53,77,13]
@@ -311,7 +311,10 @@ let scoreSorted3 = score.sorted {i, j in i < j}
 // Version 4 
 let scoreSorted4 = score.sorted(by: {$0 < $1})
 
-// 以上四种表达方式是等价的。
+// Version 5
+let scoreSorted5 = score.sorted{$0 < $1}
+
+// 以上五种表达方式是等价的。
 ``` 
 
 	注意：不是所有的闭包都可以采用上面的任意一种写法。
