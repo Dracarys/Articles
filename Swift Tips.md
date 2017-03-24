@@ -305,11 +305,13 @@ let scoreSorted1 = score.sorted(by: sortAscending)
 let scoreSorted2 = score.sorted { (i, j) -> Bool in
     return i > j
 }
-// Version 3
+// Version 3 
 let scoreSorted3 = score.sorted {i, j in i < j}
 
-// Version 4
+// Version 4 
 let scoreSorted4 = score.sorted(by: {$0 < $1})
 
 // 以上四种表达方式是等价的。
 ``` 
+
+	注意：不是所有的闭包都可以采用上面的任意一种写法。
