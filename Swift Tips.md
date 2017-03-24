@@ -289,3 +289,27 @@ let someOne: Any = "Who are you"
 let people = someOne as! People // 转换失败，崩溃。
 
 ```
+# 19.闭包的几种表达
+
+闭包不算什么新表达方式，但不知道为什么 Swift 要弄这么多种表达方式（效仿茴字的四种写法吗？）：
+
+``` Swift
+let score = [1,3,40,32,2,53,77,13]
+
+// Version 1
+func sortAscending (_ i: Int , _ j: Int) -> Bool {
+    return i < j
+}
+let scoreSorted1 = score.sorted(by: sortAscending)
+// Version 2
+let scoreSorted2 = score.sorted { (i, j) -> Bool in
+    return i > j
+}
+// Version 3
+let scoreSorted3 = score.sorted {i, j in i < j}
+
+// Version 4
+let scoreSorted4 = score.sorted(by: {$0 < $1})
+
+// 以上四种表达方式是等价的。
+``` 
