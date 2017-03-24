@@ -8,5 +8,5 @@
 
 ##Licence
 
-该仓库所有文章均采用[知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议](http://creativecommons.org/licenses/by-nc-sa/4.0/)。
+该仓库所有文章均采用[知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)。
 如有译文的原文许可协议与该协议抵触，请以原文许可协议为准。
