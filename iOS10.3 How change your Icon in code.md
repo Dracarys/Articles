@@ -49,7 +49,7 @@ func changeIcon() {
 
 意思是我们还要修改一下“Info.plist”文件，在其中添加一些键值。想了解Info.plist文件所有键值可以点[这里](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/TP40009249-SW14)
 
-好了按文档说明添加键值如下：
+按文档说明添加键值如下：
 
 ``` xml
 <key>CFBundleIcons</key>  
