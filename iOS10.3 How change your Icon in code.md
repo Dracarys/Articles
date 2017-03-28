@@ -22,7 +22,7 @@ extension UIApplication {
     open var alternateIconName: String? { get }
 }
 ```
-好了，接下来准备两个样式的图标，拖入项目中，然后再写一小段代码：
+好了，接下来准备两种样式的图标，拖入项目中，然后再写一小段代码：
 
 ``` Swift
 func changeIcon() {
@@ -43,15 +43,41 @@ func changeIcon() {
         }
     }
 ```
-运行一下，我们可以看到Console的打印信息提示：“The file doesn’t exist.”。为什么会找不到呢，我们明明把图标文件添加到项目中了。好了我们再看一下API说明：
+运行一下，我们可以看到Console的打印信息提示：“The file doesn’t exist.”。为什么会找不到呢，明明把图标文件添加到项目中了。再回顾下API文档，又这样一段话：
 
 >The name of the alternate icon, as declared in the CFBundleAlternateIcons key of your app's Info.plist file. Specify nil if you want to display the app's primary icon, which you declare using the CFBundlePrimaryIcon key. Both keys are subentries of the CFBundleIcons key in your app's Info.plist file.
 
-意思是我们还要修改一下“Info.plist”文件，在其中添加一些Key。想了解Info.plist文件设计的key和value可以点[这里](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/TP40009249-SW14)
+意思是我们还要修改一下“Info.plist”文件，在其中添加一些键值。想了解Info.plist文件所有键值可以点[这里](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/TP40009249-SW14)
 
-这里重点说下“CFBundleAlternateIcons”字典，文档介绍它包含两个键值“CFBundleIconFiles”和“CFBundleIconFiles”，可是添加完成后，还是依旧报错找不到文件。怎么办呢，这是就要基础谷歌大法了。终于在苹果官方论坛里找到了[答案](https://forums.developer.apple.com/thread/71463)，看来不止一个人在这里被文档给误导了。
+好了按文档说明添加键值如下：
 
-下面是正确plist键值对：
+``` xml
+<key>CFBundleIcons</key>  
+<dict>  
+    <key>CFBundleAlternateIcons</key>  
+    <dict>  
+         <key>CFBundleIconFiles</key>  
+         <array>  
+            <string>AppIcon2</string>  
+         </array>  
+         <key>UIPrerenderedIcon</key>  
+         <false/>  
+    </dict>  
+    <key>CFBundlePrimaryIcon</key>  
+    <dict>  
+        <key>CFBundleIconFiles</key>  
+        <array>  
+            <string>AppIcon60x60</string>  
+        </array>  
+    </dict>  
+</dict>  
+```
+
+>注意：如果你的Info.plist文件看上去和我的不一样，请选中它，然后右键“Open as”->"Source code"
+
+OK，再次运行，发现还是不行，为什么呢？是时候祭出谷歌大法了。终于在苹果官方论坛里找到了[答案](https://forums.developer.apple.com/thread/71463)。看来很多人都在这里被[文档](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/TP40009249-SW14)给误导了。
+
+正确的做法是：
 
 ``` xml
 <key>CFBundleIcons</key>  
@@ -77,11 +103,11 @@ func changeIcon() {
     </dict>  
 </dict>  
 ```
-可以看出“CFBundleAlternateIcons”字典还需要在嵌一个字典，其键与图标文件同名。
+可以看出“CFBundleAlternateIcons”字典还需要在嵌一个键与图标文件名相同的字典。
 
 修改完成后，在此运行，终于可以更新了。
 
-引用：[苹果官方论坛giveme5的解决方案](https://forums.developer.apple.com/thread/71463)
+参考：[苹果官方论坛 giveme5 的回复](https://forums.developer.apple.com/thread/71463)
 
 
 
