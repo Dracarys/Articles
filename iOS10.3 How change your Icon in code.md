@@ -58,7 +58,7 @@ func changeIcon() {
     <dict>  
          <key>CFBundleIconFiles</key>  
          <array>  
-            <string>AppIcon2</string>  
+            <string>AlternateIconFileName</string>  
          </array>  
          <key>UIPrerenderedIcon</key>  
          <false/>  
@@ -67,7 +67,7 @@ func changeIcon() {
     <dict>  
         <key>CFBundleIconFiles</key>  
         <array>  
-            <string>AppIcon60x60</string>  
+            <string>PrimaryIconFileName</string>  
         </array>  
     </dict>  
 </dict>  
@@ -75,7 +75,7 @@ func changeIcon() {
 
 >注意：如果你的Info.plist文件看上去和我的不一样，请选中它，然后右键“Open as”->"Source code"
 
-OK，再次运行，发现还是不行，为什么呢？是时候祭出谷歌大法了。终于在苹果官方论坛里找到了[答案](https://forums.developer.apple.com/thread/71463)。看来很多人都在这里被[文档](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/TP40009249-SW14)给误导了。
+OK，再次运行，还是找不到文件，why？是时候祭出谷歌大法了。终于在苹果官方论坛里找到了[答案](https://forums.developer.apple.com/thread/71463)。看来很多人都在这里被[文档](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/TP40009249-SW14)给误导了。
 
 正确的做法是：
 
@@ -84,11 +84,11 @@ OK，再次运行，发现还是不行，为什么呢？是时候祭出谷歌大
 <dict>  
     <key>CFBundleAlternateIcons</key>  
     <dict>  
-        <key>AppIcon2</key>  
+        <key>AlternateIconFileName</key>  
         <dict>  
             <key>CFBundleIconFiles</key>  
             <array>  
-                <string>AppIcon2</string>  
+                <string>AlternateIconFileName</string>  
             </array>  
             <key>UIPrerenderedIcon</key>  
             <false/>  
@@ -98,7 +98,7 @@ OK，再次运行，发现还是不行，为什么呢？是时候祭出谷歌大
     <dict>  
         <key>CFBundleIconFiles</key>  
         <array>  
-            <string>AppIcon60x60</string>  
+            <string>PrimaryIconFileName</string>  
         </array>  
     </dict>  
 </dict>  
