@@ -133,6 +133,9 @@ open访问权限仅适用于类和类成员，它与public访问权限的区别�
 @objc 修饰符的另一个作用是为 Objective-C 重新声明方法或者变量的名字
 @dynamic 当需要用刀某些动态特性时，即可用此关键词，例如KVO。
 
+扩展阅读：[《Swift Runtime动态性分析》](http://www.infoq.com/cn/articles/dynamic-analysis-of-runtime-swift)由尹峥伟发表于[InfoQ](http://www.infoq.com/cn/)。该文更好的从运行时介绍了Swift的“动态性”。
+
+
 ### 12.@escaping & @noescape
 摘录自[《What Do @escaping and @noescape Mean In Swift 3》](https://cocoacasts.com/what-do-escaping-and-noescaping-mean-in-swift-3/)
 
