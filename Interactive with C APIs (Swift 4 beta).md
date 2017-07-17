@@ -1,7 +1,6 @@
 # ［翻译］Swift与 C API的交互（Swift 4 beta）
 
 *本文译自《Using Swift with Cocoa and Objective-C》书中 Interacting with C APIs 一章*。
-
 *受限于译者英语水平及翻译经验，译文难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
 
 －－－－－－－－－－－－－－－－－－－
@@ -12,7 +11,7 @@
 
 ### 基本类型
 
-虽然Swift提供了与 C 语言中 char，int，float 和 double 等基本类型等价的类型。但这些类型，诸如Int，不能与 Swift 核心类型进行隐式转换。因此除非代码中有明确要求（使用等价的 C 类型），否则都应使用Int（等Swift核心类型）。
+虽然 Swift 提供了与 C 语言中 char，int，float 和 double 等基本类型等价的类型。但这些类型，如 Int，不能与 Swift 核心类型进行隐式转换。因此除非代码中有明确要求（使用等价的 C 类型），否则都应使用 Int（等 Swift 核心类型）。
 
 
 |C|Swift|
@@ -35,13 +34,13 @@
 |double|CDouble|
 
 ### 全局常量
-定义在 C 和 Objective-C 源文件中的全局常量，会自动被Swift编译器引入为全局常量。
+定义在 C 和 Objective-C 源文件中的全局常量，会自动被 Swift 编译器引入为全局常量。
 
 #### 导入的枚举和结构体
 
-在 Objective-C 中，常量通常用来为属性和函数参数提供一组可选值。使用 NS\_STRING\_ENUM 或 NS\_EXTENSIBLE\_STRING\_ENUM 宏标注的 Ojbective-C 的 typedef 声明，可被 Swift 以普通类型的成员的方式导入。使用 NS\_STRING\_ENUM 声明的枚举不可以添加额外的值进行扩展，而通过 NS\_EXTENSIBLE\_STRING\_ENUM 声明的枚举，则可以在 Swift 的扩展中进行扩展。
+在 Objective-C 中，常量通常用来为属性和函数参数提供一组可选值。Ojbective-C 中那些被 NS\_STRING\_ENUM 或 NS\_EXTENSIBLE\_STRING\_ENUM 宏标注的 typedef 声明，会被 Swift 以普通类型的成员的方式导入。通过 NS\_STRING\_ENUM 声明的枚举不可以在添加额外的值进行扩展，而通过 NS\_EXTENSIBLE\_STRING\_ENUM 声明的枚举，则可以在 Swift 的扩展（extension）中进行扩展。
 
-通过 NS\_STRING\_ENUM 宏声明的一组固定可用值常量，可以被导入为结构体。例如，下面这段在 Objective-C 中 被声明为字符串常量的 TraficLightColor 类型：
+通过 NS\_STRING\_ENUM 宏声明的一组常量，会被导入为结构体。例如，下面这段在 Objective-C 中 被声明为字符串常量的 TraficLightColor 类型：
 
 ``` Objective-C
 	typedef NSString * TrafficLightColor NS_STRING_ENUM;
@@ -53,7 +52,7 @@
 下面是 Swift 导入后结果: 
 
 ``` Swift
-	struct TrafficLightColor: RawRepresentable {//Swift 3 中是导入为枚举的
+	struct TrafficLightColor: RawRepresentable {//注意区别，Swift 3 中是导入为枚举的
 		typealias RawValue = String
 
 		init(rawValue: RawValue)
@@ -65,7 +64,7 @@
 	}
 ```
 	
-通过 NS\_EXTENSIBLE\_STRING\_ENUM 宏声明的一组可扩展的常量值，同样会被导入为结构体。例如，下面这段在 Objective-C 中 被声明为字符串常量的 StateOfMatter 类型：
+通过 NS\_EXTENSIBLE\_STRING\_ENUM 宏声明的一组可扩展的常量值，同样会被导入为结构体。例如，下面这段在 Objective-C 中被声明为字符串常量的 StateOfMatter 类型：
 
 ``` Objective-C
 	typedef NSString * StateOfMatter NS_EXTENSIBLE_STRING_ENUM;
@@ -74,7 +73,7 @@
 	StateOfMatter const StateOfMatterGas;
 ```
 
-下面展示了 Swift 如何导入它们:
+下面是 Swift 导入后结果:
 
 ``` Swift
 	struct StateOfMatter: RawRepresentable {
@@ -114,7 +113,7 @@ Swift可以把任何声明在 C 头文件中的函数作为全局函数导入。
 	float distance(struct Point2D from, struct Point2D to);
 ```
 
-下面展示了 Swift 是如何导入它们的:
+下面是 Swift 导入后结果:
 	
 ``` Swift
 	func product(_ multiplier: Int32, _ multiplicand: Int32) -> Int32
@@ -126,7 +125,7 @@ Swift可以把任何声明在 C 头文件中的函数作为全局函数导入。
 	
 #### 变参函数(Variadic Functions)
 
-在 Swift 中，可以通过 getValist(\_:)或者 withValist(\_:\_:) 来调用 C 中诸如 vaspritf 这样的变参函数. getValist(\_:)函数接收一个包含 CVarArg 值的数组，并返回一个 CVaListPointer，与直接返回不同的是 withValist(\_:\_:) 通过接受一个闭包来实现。其结果 CVaListPointer 最后会作为 va\_lsit 参数传递给 C 变参函数。
+在 Swift 中，可以通过 `getValist(\_:)` 或者 `withValist(\_:\_:)` 来调用 C 中诸如 vaspritf 这样的变参函数。 `getValist(\_:)` 函数接收一个包含 CVarArg 值的数组，并返回一个 CVaListPointer，与直接返回不同的是 `withValist(\_:\_:)` 通过接受一个闭包来实现。其结果 CVaListPointer 最后会作为 va\_lsit 参数传递给 C 变参函数。
 
 例如，下面的代码展示了如何在 Swift 中调用 vasprintf 函数：
 
@@ -149,12 +148,12 @@ Swift可以把任何声明在 C 头文件中的函数作为全局函数导入。
 ```
 
 	注意
-	可选类型指针不能传入withVaList(_:invoke:)函数，
-	可以通过Int.init(bitPattern:)构造函数，来将可选类型指针转为Int，
-	Which has the same C variadic calling conventions as pointer on all supported platforms(？？？ 尚待完善)。
+	可选类型指针不能传入 `withVaList(_:invoke:)` 函数，
+	可以通过 `Int.init(bitPattern:)` 构造函数，来将可选类型指针转为 Int，
+	在所有支持的平台上该指针的调用规则与 C 相同。
 	
 ### 结构体
-Swift 可以把任何头文件中声明的 C 结构体引入为 Swift 结构体，引入后的结构体会为每一个原 C 结构体成员生成一个存储型属性和一个该结构体的逐一成员构造器。如果被引入的成员均有默认值，那么 Swift 同时会生成一个无参数的默认构造器。例如下面这个 C 结构体：
+Swift 可以把任何头文件中声明的 C 结构体引入为 Swift 结构体，引入后的结构体会为每一个原 C 结构体成员生成一个存储型属性和一个逐一成员构造器。如果被引入的成员均有默认值，那么 Swift 同时会生成一个无参数的默认构造器。例如下面这个 C 结构体：
 
 ``` C
 	struct Color {
@@ -164,7 +163,7 @@ Swift 可以把任何头文件中声明的 C 结构体引入为 Swift 结构体�
 	typedef struct Color Color;
 ```
 
-下面是与之相应的Swift结构体：
+下面是与之相应的 Swift 结构体：
 
 ``` Swift
 	public struct Color {
@@ -179,7 +178,7 @@ Swift 可以把任何头文件中声明的 C 结构体引入为 Swift 结构体�
 
 #### 将函数引入为类型成员
 
-CoreFoundation框架中的 C API，大都提供了用于创建、存取、以及修改 C 结构体的函数。可以通过在代码添加CF\_SWIFT\_NAME宏，来让 Swift 将这些 C 函数引入为结构体的成员函数。例如，下面这段C函数声明：
+CoreFoundation 框架中的 C API，大都提供了用于创建、存取、以及修改 C 结构体的函数。可以通过在代码添加CF\_SWIFT\_NAME 宏标记，来让 Swift 将这些 C 函数引入为结构体的成员函数。例如，下面这段C函数声明：
 
 ``` C
 	Color ColorCreateWithCMYK(float c, float m, float y, float k) CF_SWFIT_NAME(Color.init(c:m:y:k:));
@@ -212,7 +211,7 @@ CoreFoundation框架中的 C API，大都提供了用于创建、存取、以及
 	}
 ```
 
-传入 CF\_SWIFT\_NAME 宏的参数语法与 `#selector` 表达式相同。CF\_SWIFT\_NAME 宏中的 `self`，表示接收该方法的实例对象。
+传入 CF\_SWIFT\_NAME 宏的参数语法与 `#selector` 表达式相同。CF\_SWIFT\_NAME 宏中的 self，表示接收该方法的实例对象。
 
 	注意
 	使用 CF_SWIFT_NAME 宏时不能改变被引入成员函数的参数顺序和数量。
@@ -231,7 +230,7 @@ Swift 可以把任何使用 NS\_ENUM 宏标记的 C 枚举引入为 Int 类型�
 		UITableViewCellStyleSubtitle
 	}
 ```
-在 Swift 导入后，会呈现为一下形式：
+在 Swift 导入后，会呈现为以下形式：
 
 ``` Swift
 	enum UITableViewCellStyle: Int {
@@ -253,7 +252,7 @@ Swift 可以把任何使用 NS\_ENUM 宏标记的 C 枚举引入为 Int 类型�
 	这么处理是为了与 C 兼容，因为 C 枚举允许任意类型的值，即使这个值没有暴露在头文件中，
 	而仅仅是供内部使用。
 	
-那些使用 NS\_ENUM 或 NS\_OPTIONS 宏声明的 C 枚举会被引入为Swift结构体。C 枚举中的每个成员都会被引入为一个与结构体类型相同的全局只读计算型属性，而非结构体成员属性。
+那些使用 NS\_ENUM 或 NS\_OPTIONS 宏声明的 C 枚举会被导入为 Swift 结构体。C 枚举中的每个成员都会被导入为一个与结构体类型相同的只读的全局计算型属性，而非结构体成员属性。
 
 例如，下面这个未使用 NS\_ENUM 宏声明的 C 结构体
 
@@ -278,7 +277,7 @@ Swift 会自动为导入的 C 枚举类型适配 Equaltable 协议。
 
 #### 选项型枚举（Option sets）
 
-Swift 同样可以把 NS\_OPTIONS 宏标注的 C 选项型枚举导入为 Swift 的选项（Option set）。与先前枚举的引入类似，选项值的命名前缀也会被移除。
+Swift 同样可以把 NS\_OPTIONS 宏标注的 C 选项型枚举导入为 Swift 的选项（Option set）。与先前枚举的引入类似，选项的命名前缀也会被移除。
 例如，下面这个在 Objective-C 声明的选项：
 
 ``` Objective-C
@@ -307,15 +306,15 @@ Swift 同样可以把 NS\_OPTIONS 宏标注的 C 选项型枚举导入为 Swift 
 		public static var flexibleBottomMargin: UIViewAutoresizing { get }
 	}
 ```
-在 Objective-C 中，选项型枚举实际上是整型位掩码。既可以通过位或运算符（｜）来组合选项值，又可以通过位与运算符（&)检查选项值。我们还可以通过常量或表达式来创建选项，空选项型用常量零（0）表示。
+在 Objective-C 中，选项型枚举实际上是整型位掩码。既可以通过位或运算符（｜）来组合选项值，又可以通过位与运算符（&)检查选项值。我们还可以通过常量或表达式来创建选项，空选项用常量零（0）表示。
 
-在 Swift 中，选项是以一个遵从 OptionSet 协议的结构体来实现的，每个选项都是该结构体的一个静态变量。与枚举类似，我们可以通过字面量数组来创建一个选项，还可以通过点（.）语法获取选项的一个值。一个空的选项既可以通过字面量空数组（［］）创建，也可以通过调用其默认构造函数创建。
+在 Swift 中，选项是以一个遵从 OptionSet 协议的结构体来实现的，每个选项都是该结构体的一个静态变量。与枚举类似，我们既可以通过字面量数组来创建一个选项，又可以通过点（.）语法获取选项的一个值。一个空的选项既可以通过字面量空数组（［］）创建，也可以通过调用其默认构造函数创建。
 
 	注意
 	当引入 NS_OPTIONS 宏标记的 C 枚举时，任何值为 0 的选项成员都会被 Swift 标记为无效，
 	因为 Swift 中使用空选项来表示没有选项。
 
-选项与Swift中的Set集合类型相似，可以通过 `insert(\_:)` 或 `formUnion(\_:)` 函数添加选项值，也可以通过 `remove(\_:)` 或 `substract(\_:)` 函数删除一个选项值，还可以通过 `contains(\_:)` 来查验选项值。
+选项与 Swift 中的 Set 集合类型相似，可以通过 `insert(\_:)` 或 `formUnion(\_:)` 函数添加选项值，也可以通过 `remove(\_:)` 或 `substract(\_:)` 函数删除一个选项值，还可以通过 `contains(\_:)` 来查验选项值。
 
 ``` Swift
 	let options: Data.Base64EncodingOptions = [
@@ -326,7 +325,7 @@ Swift 同样可以把 NS\_OPTIONS 宏标注的 C 选项型枚举导入为 Swift 
 	let string = data.base64EncodedString(options:options)
 ```
 
-#### 联合体（Unions）（译者注：Swift 3 是不支持的）
+#### 联合体（Unions）（译者注：该部分为新增加内容个，Swift 3 是不支持的）
 
 Swift 会把 C 联合体导入为 Swift 的结构体。虽然 Swift 不支持联合体，但是被导入后其使用仍与 C 联合体非常相似。例如，下面这个拥有 isAlive 和 isDead 两个域的联合体 SchroedingersCat:
 
@@ -351,7 +350,7 @@ Swift 会把 C 联合体导入为 Swift 的结构体。虽然 Swift 不支持联
 	}
 ```
 
-由于 C 中的联合体为所有的域使用相同的内存起始地址，所以被 Swift 导入后生成的所有计算型属性也使用来相同的内存结构。因此，当改变任何一个该结构体实例的计算型属性，那么该实例的其它属性也会发生相应改变。
+由于 C 中的联合体所有域共享一段内存，所以被 Swift 导入后生成的所有计算型属性也具有相同的内存结构。因此，当改变任何一个该结构体实例的计算型属性时，那么该实例的其它属性也会发生相应改变。
 
 例如下面这个例子，当改变 SchroedingersCat 实例上的 isAlive 计算型属性时，其另一个计算型属性 isDead 也发生来相应的变化：
 
@@ -368,13 +367,13 @@ Swift 会把 C 联合体导入为 Swift 的结构体。虽然 Swift 不支持联
 
 #### 位域（Bit Fields）
 
-Swift 可以把结构体中的位域，例如 Foundation 中的 NSDecimal 类型，导入为计算型存储属性。在对其进行访问时，Swift 会自动将其值转换为与 Swift 相兼容的类型。
+Swift 可以把结构体中的位域，例如 Foundation 中的 NSDecimal 类型，导入为计算型属性。在对其进行访问时，Swift 会自动将其值转换为与 Swift 相兼容的类型。
 
 #### 匿名的结构体和联合体域（Union Fields）
 
-(译者注：这里变化很大，且受限译者理解水平，翻译的不够准确)
+(译者注：这里变化很大，且受限译者理解水平，翻译的可能不够准确)
 
-C 中的 Struct 和 union 类型可定义成匿名域或者匿名类型，匿名域由具名的相邻结构题或联合体类型组成。
+C 中的 Struct 和 union 类型可定义成匿名或者匿名类型，匿名域由具名的相邻结构题或联合体类型组成。
 
 例如，这个名为 Cake 的 C 结构体，它包含一个拥有 layers 和 height 两个相邻域的匿名联合体，以及一个域为 toppings的匿名结构题类型：
 
@@ -450,7 +449,7 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 
 - 一个 UnsafePointer\<Type\>，UnsafeMutalbePointer\<Type\>，或 AutoreleasingUnsafeMutablePointer\<Type\> 类型的值，如有必要它会被转换为 UnsafePointer\<Type\> 类型。
 - 如果 Type 是 `Int8` 或 `UInt8` ，则可接受一个 String 类型的值。该字符串会自动被转换为一个 UTF8 字符缓存（buffer），然后将指向该缓存（buffer）的指针传入该函数。
-- 一个包含一个或多个变量、属性、Type 类型下标引用的in-out表达式。表达式会以指向左起首位参数内存地址的指针形式被传入。
+- 一个包含一个或多个变量、属性、Type 类型下标引用的 in-out 表达式。表达式会以指向左起首位参数内存地址的指针形式被传入。
 - ［Type］（一个含有Type类型元素的数组）,会以指向数组首地址的指针形式传入。
 
 传入函数的指针，仅保证在函数调用期间有效。不要尝试持有或在函数返回后访问该指针。
@@ -586,10 +585,10 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 
 上面的例子中，CFArrayCallBacks的构造函数，把 nil 分别赋值给 retain 和 release 参数，把 `customCopyDescription(_:)` 函数作为参数赋给 copyDescription，并把一个闭包体作为参数赋值 equal。
 
-注意：
-Only Swift function types with C function reference calling convention may be used for function pointer arguments. Like a C function pointer, a Swift function type with the @convertions(c) attribute does not capture the context of its surrounding scope.
+	注意：
+	Only Swift function types with C function reference calling convention may be used for function pointer arguments. Like a C function pointer, a Swift function type with the @convertions(c) attribute does not capture the context of its surrounding scope.
 
-For more information, see Type Attributes in _The Swift Programming Language (Swift 4)
+	For more information, see Type Attributes in _The Swift Programming Language (Swift 4)
 
 #### 缓存指针（Buffer Pointers）
 
@@ -661,7 +660,7 @@ Swift 有一下几种缓存指针类型：
 
 欲了解更多信息，请参见 MemoryLayout
 
-### 仅初始化一次（One-Time Initialization）
+### 仅一次的初始化（One-Time Initialization）
 
 在 C 语言中，POSIX 的 `pthread_once()` 函数和 Grand Central Dispatch 中的 `dipatch_once()`、`dispatch_once_f()` 函数都有保证代码仅被初始化一次的机制。在 Swift 中，全局常量和存储型属性即使被多个线程同时交替存取，也能保证仅初始化一次。这是由语言自身特点来实现的, 因此 POSIX 和 Grand Central Dispatch 中相应的 C 函数未在 Swift 开放。
 
