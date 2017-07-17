@@ -541,7 +541,7 @@ takesAMutableRawPointer(&b)
 - 一个 AutoreleasingUnsafeMutablePointer\<Type\> 类型的值
 - 一个含有一个或多个变量、属性、Type类型下标引用的 in-out 表达式，它会被按位拷贝到一个非持有的临时缓存，随之指向该缓存的指针会被传入，并且在返回时，缓存中的值会被加载，持有，并赋值到操作数中。
 
-注意：上表 _不包含数组_。
+注意：上表_不包含数组_。
 
 例如下面这个函数：
 
@@ -562,7 +562,7 @@ AutoreleasingUnsafeMutablePointer(&x)
 
 #### 函数指针
 
-通过 @convention(c) 标注，Swift 会根据 C 函数指针调用规则将其引入为闭包。例如，一个 `int (x) (void)`类型的 C 函数指针，在 Swift 中会被导入为 `@convertion(c) () -> Int32` 。当调用一个接受函数指针类型参数的函数时，可以直接传入一个顶级的 Swift 函数，一个 closure literal，或者nil。还可以传入一个泛型闭包属性，或者一个闭包参数列表和者闭包体中都没有引用泛型参数的泛型函数。例如，Core Foundation中的CFArrayCreateMutable(\_:\_:\_:)函数。CFArrayCreateMutable(\_:\_:\_:)函数，接受一个初始化为函数指针的CFArrayCallBacks结构体：
+通过 @convention(c) 标注，Swift 会根据 C 函数指针调用规则将其引入为闭包。例如，一个 `int (x) (void)`类型的 C 函数指针，在 Swift 中会被导入为 `@convertion(c) () -> Int32` 。当调用一个接受函数指针类型参数的函数时，可以直接传入一个顶级的 Swift 函数，一个 closure literal，或者 nil。还可以传入一个泛型闭包属性，或者一个闭包参数列表和者闭包体中都没有引用泛型参数的泛型函数。例如，Core Foundation 中的 `CFArrayCreateMutable(_:_:_:)` 函数。`CFArrayCreateMutable(_:_:_:)` 函数，接受一个初始化为函数指针的 CFArrayCallBacks 结构体：
 
 ``` Swift
 func customCopyDescription(_ p: UnsafeRawPointer?) -> Unmanaged<CFString>? {
@@ -587,7 +587,7 @@ var mutableArray = CFArrayCreateMutable(nil, 0, &callbacks)
 	注意：
 	Only Swift function types with C function reference calling convention may be used for function pointer arguments. Like a C function pointer, a Swift function type with the @convertions(c) attribute does not capture the context of its surrounding scope.
 
-	For more information, see Type Attributes in _The Swift Programming Language (Swift 4)
+	欲了解跟多详情，请访问 _The Swift Programming Language (Swift 4) 中有关 Type Attributes 一节。
 
 #### 缓存指针（Buffer Pointers）
 
@@ -602,7 +602,7 @@ Swift 有一下几种缓存指针类型：
 
 类型明确的缓存指针，UnsafeBufferPointer 和 UnsafeMutableBufferPointer 允许你查看或者改变一个相邻的内存块儿。该类型允许你把内存作为一个集合来访问，where each item is an instance of the buffer type's Element generic type parameter.
 
-原始缓存指针类型，UnsafeRawBufferPointer 和 UnsafeMutableRawBufferPointer，允许你把一整块儿的内存作为一个包含 Uint8 值的集合进行查看和修改，在这块内存中，每个值与一个字节的内存相对应。These types let you use low-level programming patterns, such as operating on raw memory without compiler-checked type safety, or switching between several different typed interpretations of the same memory.
+原始缓存指针类型，UnsafeRawBufferPointer 和 UnsafeMutableRawBufferPointer，允许你把一整块儿的内存作为一个含有 Uint8 值的集合进行查看和修改，在这块内存中，每个值与一个字节的内存相对应。这些类型允许你进入底层编程模式，与此同时直接内存操作也将得不到来自编译器类型安全检查帮助的，相应的对同一内存进行不同类型的解释也是不受限的（译者注：最后一句这里翻译地不准去）。
 
 
 #### 空指针
