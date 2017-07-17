@@ -43,50 +43,49 @@
 通过 NS\_STRING\_ENUM 宏声明的一组常量，会被导入为结构体。例如，下面这段在 Objective-C 中 被声明为字符串常量的 TraficLightColor 类型：
 
 ``` Objective-C
-	typedef NSString * TrafficLightColor NS_STRING_ENUM;
-	TrafficLightColor const TraficLightColorRed;
-	TrafficLightColor const TraficLightColorYellow;
-	TrafficLightColor const TraficLightColorGreen;
+typedef NSString * TrafficLightColor NS_STRING_ENUM;
+TrafficLightColor const TraficLightColorRed;
+TrafficLightColor const TraficLightColorYellow;
+TrafficLightColor const TraficLightColorGreen;
 ```
 
 下面是 Swift 导入后结果: 
 
 ``` Swift
-	struct TrafficLightColor: RawRepresentable {//注意区别，Swift 3 中是导入为枚举的
-		typealias RawValue = String
+struct TrafficLightColor: RawRepresentable {//注意区别，Swift 3 中是导入为枚举的
+	typealias RawValue = String
 
-		init(rawValue: RawValue)
-		var rawValue: RawValue { get }
-
-		static var red: TrafficLightColor { get }
-		static var yellow: TrafficLightColor { get }
-		static var green: TrafficLIghtColor { get }
-	}
+	init(rawValue: RawValue)
+	var rawValue: RawValue { get }
+	static var red: TrafficLightColor { get }
+	static var yellow: TrafficLightColor { get }
+ 	static var green: TrafficLIghtColor { get }
+}
 ```
 	
 通过 NS\_EXTENSIBLE\_STRING\_ENUM 宏声明的一组可扩展的常量值，同样会被导入为结构体。例如，下面这段在 Objective-C 中被声明为字符串常量的 StateOfMatter 类型：
 
 ``` Objective-C
-	typedef NSString * StateOfMatter NS_EXTENSIBLE_STRING_ENUM;
-	StateOfMatter const StateOfMatterSolid;
-	StateOfMatter const StateOfMatterLiquid;
-	StateOfMatter const StateOfMatterGas;
+typedef NSString * StateOfMatter NS_EXTENSIBLE_STRING_ENUM;
+StateOfMatter const StateOfMatterSolid;
+StateOfMatter const StateOfMatterLiquid;
+StateOfMatter const StateOfMatterGas;
 ```
 
 下面是 Swift 导入后结果:
 
 ``` Swift
-	struct StateOfMatter: RawRepresentable {
-		typealias RawValue = String
-		
-		init(_ rawValue: RawValue) //注意该构造器在 Swift 3中是没有的。
-		init(rawValue: RawValue)
-		var rawValue: RawValue { get }
-		
-		static var solid: StateOfMatter { get }
-		static var liquid: StateOfMatter { get }
-		static var gas: StateOfMatter { get }
-	}
+struct StateOfMatter: RawRepresentable {
+	typealias RawValue = String
+	
+	init(_ rawValue: RawValue) //注意该构造器在 Swift 3中是没有的。
+	init(rawValue: RawValue)
+	var rawValue: RawValue { get }
+	
+	static var solid: StateOfMatter { get }
+	static var liquid: StateOfMatter { get }
+	static var gas: StateOfMatter { get }
+}
 ```
 
 以可扩展形式声明的常量，在被导入后，会额外添加一个可忽略参数标签的构造器，以便扩展添加新值。
@@ -94,11 +93,11 @@
 通过 NS\_EXTENSIBLE\_STRING\_ENUM 宏声明的常量，导入后，可在 Swift 代码中扩展添加新值。
 
 ``` Swift
-	extension StateOfMatter {
-		static var plasma: StateOfMatter {
-			return StateOfMatter(rawValue: "plasma")
-		}
+extension StateOfMatter {
+	static var plasma: StateOfMatter {
+		return StateOfMatter(rawValue: "plasma")
 	}
+}
 ```
 	
 ###函数
@@ -106,21 +105,21 @@
 Swift可以把任何声明在 C 头文件中的函数作为全局函数导入。例如，下面的 C 函数声明：
 
 ``` C
-	int product(int multiplier, int multiplicand);
-	int quotient(int dividend, int devisor, int *remainder);
-	
-	struct Point2D createPoint2D(float x, float y);
-	float distance(struct Point2D from, struct Point2D to);
+int product(int multiplier, int multiplicand);
+int quotient(int dividend, int devisor, int *remainder);
+
+struct Point2D createPoint2D(float x, float y);
+float distance(struct Point2D from, struct Point2D to);
 ```
 
 下面是 Swift 导入后结果:
 	
 ``` Swift
-	func product(_ multiplier: Int32, _ multiplicand: Int32) -> Int32
-	func quotient(_ dividen: Int32, _ devison: Int32, UnsafeMutablePointer<Int32>!) -> Int32
-	
-	func createPoint2D(_ x: Float, _ y: Float) -> Point2D
-	func distance(_ from: Point2D, _ to: Point2D) -> Float
+func product(_ multiplier: Int32, _ multiplicand: Int32) -> Int32
+func quotient(_ dividen: Int32, _ devison: Int32, UnsafeMutablePointer<Int32>!) -> Int32
+
+func createPoint2D(_ x: Float, _ y: Float) -> Point2D
+func distance(_ from: Point2D, _ to: Point2D) -> Float
 ```
 	
 #### 变参函数(Variadic Functions)
@@ -130,21 +129,21 @@ Swift可以把任何声明在 C 头文件中的函数作为全局函数导入。
 例如，下面的代码展示了如何在 Swift 中调用 vasprintf 函数：
 
 ``` Swift
-	func Swiftprintf(format: String, argument: CVarArg...) -> String? {
-		return withValist(arguments) { va_list in
-			var buffer: UnsafeMutablePointer<Int8>? = nil
-			return format.withCstring { CString in 
-				guard vasprintf(&buffer, CString, va_list) != 0 else {
-					return nil
-				}
-				
-				return String(validatingUTF8: buffer!)
+func Swiftprintf(format: String, argument: CVarArg...) -> String? {
+	return withValist(arguments) { va_list in
+		var buffer: UnsafeMutablePointer<Int8>? = nil
+		return format.withCstring { CString in 
+			guard vasprintf(&buffer, CString, va_list) != 0 else {
+				return nil
 			}
+			
+			return String(validatingUTF8: buffer!)
 		}
 	}
-	
-	print(Swiftprintf(format: "√2 ≅ %g", arguments: sqrt(2.0))!)
-	// Prints "√2 ≅ 1.41421"
+}
+
+print(Swiftprintf(format: "√2 ≅ %g", arguments: sqrt(2.0))!)
+// Prints "√2 ≅ 1.41421"
 ```
 
 	注意
@@ -156,24 +155,24 @@ Swift可以把任何声明在 C 头文件中的函数作为全局函数导入。
 Swift 可以把任何头文件中声明的 C 结构体引入为 Swift 结构体，引入后的结构体会为每一个原 C 结构体成员生成一个存储型属性和一个逐一成员构造器。如果被引入的成员均有默认值，那么 Swift 同时会生成一个无参数的默认构造器。例如下面这个 C 结构体：
 
 ``` C
-	struct Color {
-		float r, g, b;
-	}:
-	
-	typedef struct Color Color;
+struct Color {
+	float r, g, b;
+}:
+
+typedef struct Color Color;
 ```
 
 下面是与之相应的 Swift 结构体：
 
 ``` Swift
-	public struct Color {
- 		var r: Float
- 		var g: Float
- 		var b: Float
- 	
- 		init()
- 		init(r: Float, g: Float, b: Float)
-	 }
+public struct Color {
+	var r: Float
+	var g: Float
+	var b: Float
+
+	init()
+	init(r: Float, g: Float, b: Float)
+}
 ```
 
 #### 将函数引入为类型成员
@@ -181,34 +180,34 @@ Swift 可以把任何头文件中声明的 C 结构体引入为 Swift 结构体�
 CoreFoundation 框架中的 C API，大都提供了用于创建、存取、以及修改 C 结构体的函数。可以通过在代码添加CF\_SWIFT\_NAME 宏标记，来让 Swift 将这些 C 函数引入为结构体的成员函数。例如，下面这段C函数声明：
 
 ``` C
-	Color ColorCreateWithCMYK(float c, float m, float y, float k) CF_SWFIT_NAME(Color.init(c:m:y:k:));
+Color ColorCreateWithCMYK(float c, float m, float y, float k) CF_SWFIT_NAME(Color.init(c:m:y:k:));
 
-	float ColorGetHue(Color color) CF_SWIFT_NAME(getter:Color.hue(self:));
+float ColorGetHue(Color color) CF_SWIFT_NAME(getter:Color.hue(self:));
 
-	void ColorSetHue(Color color, float hue) CF_SWIFT_NAME(setter:Color.hue(self:newvalue));
+void ColorSetHue(Color color, float hue) CF_SWIFT_NAME(setter:Color.hue(self:newvalue));
 
-	Color ColorDarkenColor(Color color, flaot amout) CF_SWIFT_NAME(Color.Darken(self:amount:));
+Color ColorDarkenColor(Color color, flaot amout) CF_SWIFT_NAME(Color.Darken(self:amount:));
 
-	extern const Color ColorBondiBlue CF_SWIFT_NAME(Color.boundiBlue);
+extern const Color ColorBondiBlue CF_SWIFT_NAME(Color.boundiBlue);
 
-	Color ColorGetCalibrationColor(void) CF_SWIFT_NAME(getter:Color.calibration());
+Color ColorGetCalibrationColor(void) CF_SWIFT_NAME(getter:Color.calibration());
 
-	Color ColorSetCalibrationColor(Color color) CF_SWIFT_NAME(setter:Color.calibration(newValue:));
+Color ColorSetCalibrationColor(Color color) CF_SWIFT_NAME(setter:Color.calibration(newValue:));
 ```
 下面展示了 Swift 如何将它们以类型成员的方式导入：
 
 ``` Swift
-	extension color {
-		init(c: Float, m: Float, y: Float, k: Float)
-	
-		var hue: Float { get set }
-	
-		func darken(amount: Float) -> Color
-	
-		static var bondiBlue: Color
-	
-		static var calibration: Color
-	}
+extension color {
+	init(c: Float, m: Float, y: Float, k: Float)
+
+	var hue: Float { get set }
+
+	func darken(amount: Float) -> Color
+
+	static var bondiBlue: Color
+
+	static var calibration: Color
+}
 ```
 
 传入 CF\_SWIFT\_NAME 宏的参数语法与 `#selector` 表达式相同。CF\_SWIFT\_NAME 宏中的 self，表示接收该方法的实例对象。
@@ -223,28 +222,28 @@ Swift 可以把任何使用 NS\_ENUM 宏标记的 C 枚举引入为 Int 类型�
 例如，下面这个通过 NS\_ENUM 宏声明的 C 枚举:
 
 ``` C
-	typedef NS_ENUM(NSInteger, UITableViewCellStyle){
-		UITableViewCellStyleDefault, 
-		UITableViewCellStyleValue1, 
-		UITableViewCellStyleValue2, 
-		UITableViewCellStyleSubtitle
-	}
+typedef NS_ENUM(NSInteger, UITableViewCellStyle){
+	UITableViewCellStyleDefault, 
+	UITableViewCellStyleValue1, 
+	UITableViewCellStyleValue2, 
+	UITableViewCellStyleSubtitle
+}
 ```
 在 Swift 导入后，会呈现为以下形式：
 
 ``` Swift
-	enum UITableViewCellStyle: Int {
-		case 'default'
-		case value1
-		case value2
-		case subtitle
-	}
+enum UITableViewCellStyle: Int {
+	case 'default'
+	case value1
+	case value2
+	case subtitle
+}
 ```
 
 通过点语法（译者注：.valueName）来引用一个枚举值。
 
 ``` Swift
-	let cellStyle: UITableViewCellStyle = .default
+let cellStyle: UITableViewCellStyle = .default
 ```
 
 	注意：
@@ -257,21 +256,21 @@ Swift 可以把任何使用 NS\_ENUM 宏标记的 C 枚举引入为 Int 类型�
 例如，下面这个未使用 NS\_ENUM 宏声明的 C 结构体
 
 ``` C
-	typedef enum {
-		MessageDispositionUnread = 0,
-		MessageDispositionRead = 1,
-		MessageDispositionDeleted = -1
-	} MessageDisposition;
+typedef enum {
+	MessageDispositionUnread = 0,
+	MessageDispositionRead = 1,
+	MessageDispositionDeleted = -1
+} MessageDisposition;
 ```
 
 在 Swift 中，它会被导入为以下形式：
 
 ``` Swfit
-	struct MessageDisposition: RawRePresentable, Equatable{}
-	
-	var MessageDispositionUnread: MessageDisposition { get }
-	var MessageDispositionRead: MessageDisposition { get }
-	var MessageDispositionDeleted: MessageDisposition { get }
+struct MessageDisposition: RawRePresentable, Equatable{}
+
+var MessageDispositionUnread: MessageDisposition { get }
+var MessageDispositionRead: MessageDisposition { get }
+var MessageDispositionDeleted: MessageDisposition { get }
 ```
 Swift 会自动为导入的 C 枚举类型适配 Equaltable 协议。
 
@@ -281,30 +280,30 @@ Swift 同样可以把 NS\_OPTIONS 宏标注的 C 选项型枚举导入为 Swift 
 例如，下面这个在 Objective-C 声明的选项：
 
 ``` Objective-C
-	typedef NS_OPTIONS(NSUInteger, UIViewAutoresizing){
-		UIViewAutoresizingNone = 0,
-		UIViewAutoresizingFlexibleLeftMargin = 1 << 0,
-		UIViewAutoresizingFlexibleWidth = 1 << 1, 
-		UIViewAutoresizingFlexibleRightMargin = 1 << 2,
-		UIViewAutoresizingFlexibleTopMargin = 1 << 3,
-		UIViewAutoresizingFlexibleHeight = 1 << 4,
-		UIViewAutoresizingFlexibleBottomMargin = 1 << 5
-	};
+typedef NS_OPTIONS(NSUInteger, UIViewAutoresizing){
+	UIViewAutoresizingNone = 0,
+	UIViewAutoresizingFlexibleLeftMargin = 1 << 0,
+	UIViewAutoresizingFlexibleWidth = 1 << 1, 
+	UIViewAutoresizingFlexibleRightMargin = 1 << 2,
+	UIViewAutoresizingFlexibleTopMargin = 1 << 3,
+	UIViewAutoresizingFlexibleHeight = 1 << 4,
+	UIViewAutoresizingFlexibleBottomMargin = 1 << 5
+};
 ```
 
 在 Swift 中会被导入为以下形式：
 
 ``` Swift
-	public struct UIViewAutoresizing : OptionSet {
-		public init(rawValue: UInt)
-		
-		public static var flexibleLeftMargin: UIViewAutoresizing { get }
-		public static var flexibleWidth: UIViewAutoresizing { get }
-		public static var flexibleRightMargin: UIViewAutoresizing { get }
-		public static var flexibleTopMargin: UIViewAutoresizing { get }
-		public static var flexibleHeight: UIViewAutoresizing { get }
-		public static var flexibleBottomMargin: UIViewAutoresizing { get }
-	}
+public struct UIViewAutoresizing : OptionSet {
+	public init(rawValue: UInt)
+	
+	public static var flexibleLeftMargin: UIViewAutoresizing { get }
+	public static var flexibleWidth: UIViewAutoresizing { get }
+	public static var flexibleRightMargin: UIViewAutoresizing { get }
+	public static var flexibleTopMargin: UIViewAutoresizing { get }
+	public static var flexibleHeight: UIViewAutoresizing { get }
+	public static var flexibleBottomMargin: UIViewAutoresizing { get }
+}
 ```
 在 Objective-C 中，选项型枚举实际上是整型位掩码。既可以通过位或运算符（｜）来组合选项值，又可以通过位与运算符（&)检查选项值。我们还可以通过常量或表达式来创建选项，空选项用常量零（0）表示。
 
@@ -317,12 +316,12 @@ Swift 同样可以把 NS\_OPTIONS 宏标注的 C 选项型枚举导入为 Swift 
 选项与 Swift 中的 Set 集合类型相似，可以通过 `insert(\_:)` 或 `formUnion(\_:)` 函数添加选项值，也可以通过 `remove(\_:)` 或 `substract(\_:)` 函数删除一个选项值，还可以通过 `contains(\_:)` 来查验选项值。
 
 ``` Swift
-	let options: Data.Base64EncodingOptions = [
-		.lineLength64Characters,
-		.endLineWithLineFeed
-	]
+let options: Data.Base64EncodingOptions = [
+	.lineLength64Characters,
+	.endLineWithLineFeed
+]
 	
-	let string = data.base64EncodedString(options:options)
+let string = data.base64EncodedString(options:options)
 ```
 
 #### 联合体（Unions）（译者注：该部分为新增加内容个，Swift 3 是不支持的）
@@ -330,24 +329,24 @@ Swift 同样可以把 NS\_OPTIONS 宏标注的 C 选项型枚举导入为 Swift 
 Swift 会把 C 联合体导入为 Swift 的结构体。虽然 Swift 不支持联合体，但是被导入后其使用仍与 C 联合体非常相似。例如，下面这个拥有 isAlive 和 isDead 两个域的联合体 SchroedingersCat:
 
 ```C
-	union SchroedingersCat {
-		bool isAlive;
-		bool isDead;
-	}
+union SchroedingersCat {
+	bool isAlive;
+	bool isDead;
+}
 ```
 
 在 Swift 中会将其导入为一下形式：
 
 ```Swift
-	sturct SchroedingsCat {
-		var isAlive: Bool { get set }
-		var isDead: Bool { get set }
+sturct SchroedingsCat {
+	var isAlive: Bool { get set }
+	var isDead: Bool { get set }
 
-		init(isAlive: Bool)
-		init(isDead: Bool)
+	init(isAlive: Bool)
+	init(isDead: Bool)
 
-		init()
-	}
+	init()
+}
 ```
 
 由于 C 中的联合体所有域共享一段内存，所以被 Swift 导入后生成的所有计算型属性也具有相同的内存结构。因此，当改变任何一个该结构体实例的计算型属性时，那么该实例的其它属性也会发生相应改变。
@@ -355,14 +354,14 @@ Swift 会把 C 联合体导入为 Swift 的结构体。虽然 Swift 不支持联
 例如下面这个例子，当改变 SchroedingersCat 实例上的 isAlive 计算型属性时，其另一个计算型属性 isDead 也发生来相应的变化：
 
 ```Swift
-	var mittens = SchroedingersCat(isAlive: fasle)
+var mittens = SchroedingersCat(isAlive: fasle)
 
-	print(mittens.isAlive, mittens.isDead)
-	// Prints "fasle false"
+print(mittens.isAlive, mittens.isDead)
+// Prints "fasle false"
 
-	mittens.isAlive = true
-	print(mittens.isDead)
-	// Prints "true"
+mittens.isAlive = true
+print(mittens.isDead)
+// Prints "true"
 ```
 
 #### 位域（Bit Fields）
@@ -378,37 +377,37 @@ C 中的 Struct 和 union 类型可定义成匿名或者匿名类型，匿名域
 例如，这个名为 Cake 的 C 结构体，它包含一个拥有 layers 和 height 两个相邻域的匿名联合体，以及一个域为 toppings的匿名结构题类型：
 
 ``` C
-	struct Cake {
-		union {
-			int layers;
-			double height;
-		}
-
-		struct {
-			bool icing;
-			bool sprinkles;
-		} toppings;
+struct Cake {
+	union {
+		int layers;
+		double height;
 	}
+
+	struct {
+		bool icing;
+		bool sprinkles;
+	} toppings;
+}
 ```
 
 在 Cake 被导入后，可以这样初始化并调用它：
 
 ```Swift
-	var simpleCake = Cake()
-	simpleCake.layers = 5
-	print(simpleCake.toppings.icing)
-	//	Prints "false"
+var simpleCake = Cake()
+simpleCake.layers = 5
+print(simpleCake.toppings.icing)
+//	Prints "false"
 ```
 
 Cake 在被导入后，会生成一个逐一成员构造器，可为其域传自定义值来构造该结构体，例如：
 
 ```Swift
-	let cake = Cake( .init(layers: 2), toppings: .init(icing: true, sprinkles: false))
+let cake = Cake( .init(layers: 2), toppings: .init(icing: true, sprinkles: false))
 
-	print("The cake has \(cake.layers) layers")
-	// Prints "The cake has 2 layers."
-	print("Does it have sprinkes?", cake.toppings.sprinkles ? "Yes." : "No.")
-	// Prints "Does it have sprinkles? No."
+print("The cake has \(cake.layers) layers")
+// Prints "The cake has 2 layers."
+print("Does it have sprinkes?", cake.toppings.sprinkles ? "Yes." : "No.")
+// Prints "Does it have sprinkles? No."
 ```
 
 由于 Cake 结构体的第一个域是匿名的，所以它的构造器的第一个参数也没有标签。由于 Cake 结构体的域含有匿名类型，所以使用 .init 构造器，通过类型推断的方式来为结构体的每个匿名域设置初始值。
@@ -457,16 +456,16 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 例如，这样一个函数：
 
 ``` Swift
-	func takesAPointer(_ p: UnsafePointer<Float>) {
-		// ...
-	}
+func takesAPointer(_ p: UnsafePointer<Float>) {
+	// ...
+}
 ```
 可以这样调用它：
 
 ``` Swift
-	var x: Float = 0.0
-	takesAPointer(&x)
-	takesAPointer([1.0, 2.0, 3.0])
+var x: Float = 0.0
+takesAPointer(&x)
+takesAPointer([1.0, 2.0, 3.0])
 ```
 
 一个接受 UnsafePointer\<Void\> 类型参数的函数，同样可以接受相同操作数的任意 Type 类型的 UnsafePointer\<Type\> 指针。
@@ -474,19 +473,19 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 例如下面这个函数：（译者注：注意无类型指针的变动，由Void变成了Raw）
 
 ``` Swift
-	func takesARawPointer(_ p: UnsafeRawPointer?) {
-		// ...
-	}
+func takesARawPointer(_ p: UnsafeRawPointer?) {
+	// ...
+}
 ```
 它可以这样被调用：
 
 ``` Swift
-	var x: Float = 0.0, y: Int = 0
-	takesARawPointer(&x)
-	takesARawPointer(&y)
-	takesARawPointer([1.0, 2.0, 3.0] as [Float])
-	let intArray = [1, 2, 3]
-	takesARawPointer(intArray)
+var x: Float = 0.0, y: Int = 0
+takesARawPointer(&x)
+takesARawPointer(&y)
+takesARawPointer([1.0, 2.0, 3.0] as [Float])
+let intArray = [1, 2, 3]
+takesARawPointer(intArray)
 ```
 
 #### 可变指针（Mutable Pointers）
@@ -499,18 +498,18 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 例如下面这个函数：
 
 ``` Swift
-	func takesAMutablePointer(_ p: UnsafeMutablePointer<Float>) {
-		// ...
-	}
+func takesAMutablePointer(_ p: UnsafeMutablePointer<Float>) {
+	// ...
+}
 ```
 
 它可以这样被调用：
 
 ``` Swift
-	var x: Float = 0.0
-	var a: [Float] = [1.0, 2.0, 3.0]
-	takesAMutablePointer(&x)
-	takesAMutablePointer(&a)
+var x: Float = 0.0
+var a: [Float] = [1.0, 2.0, 3.0]
+takesAMutablePointer(&x)
+takesAMutablePointer(&a)
 ```	
 
 一个接受 UnsafeMutableRawPointer\<Void\> 类型参数的函数，同样可以接受相同操作数的任意 Type 类型 的 UnsafeMutablePointer\<Type\> 指针。
@@ -518,21 +517,21 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 例如下面这个函数：
 
 ``` Swift
-	//译者注：注意无类型指针的变化。
-	func takesAMutableRawPointer(_ p: UnsafeMutableRawPointer?) {
-		// ...
-	}
+//译者注：注意无类型指针的变化。
+func takesAMutableRawPointer(_ p: UnsafeMutableRawPointer?) {
+	// ...
+}
 ```
 
 它可以这样被调用：
 
 ``` Swift
-	var x: Float = 0.0, y: Int = 0
-	var a: [Float] = [1.0, 2.0, 3.0], b: [Int] = [1, 2, 3]
-	takesAMutableRawPointer(&x)
-	takesAMutableRawPointer(&y)
-	takesAMutableRawPointer(&a)
-	takesAMutableRawPointer(&b)
+var x: Float = 0.0, y: Int = 0
+var a: [Float] = [1.0, 2.0, 3.0], b: [Int] = [1, 2, 3]
+takesAMutableRawPointer(&x)
+takesAMutableRawPointer(&y)
+takesAMutableRawPointer(&a)
+takesAMutableRawPointer(&b)
 ```	
 
 #### 自释放指针（autoreleasing Pointers）
@@ -547,16 +546,16 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 例如下面这个函数：
 
 ``` Swift
-	func takesAnAutoreleasingPointer(_ p: AutoreleasingUnsafeMutablePointer<NSDate?>) {
-		// ...
-	}
+func takesAnAutoreleasingPointer(_ p: AutoreleasingUnsafeMutablePointer<NSDate?>) {
+	// ...
+}
 ```
 
 它可以这样被调用：
 
 ``` Swift
-	var x: NSDate? = nil
-	AutoreleasingUnsafeMutablePointer(&x)
+var x: NSDate? = nil
+AutoreleasingUnsafeMutablePointer(&x)
 ```	
 
 指针所指的类型不会被转换（bridged）。例如，NSString \*\* 会被 Swift 导入为 AutoreleasingUnsafeMutablePointer\<NSString?\>，而不是 AutoreleasingUnsafeMutablePointer\<String?\>。
@@ -566,21 +565,21 @@ Swift 还提供来用于操作缓存的指针类型，请参见 缓存指针(Buf
 通过 @convention(c) 标注，Swift 会根据 C 函数指针调用规则将其引入为闭包。例如，一个 `int (x) (void)`类型的 C 函数指针，在 Swift 中会被导入为 `@convertion(c) () -> Int32` 。当调用一个接受函数指针类型参数的函数时，可以直接传入一个顶级的 Swift 函数，一个 closure literal，或者nil。还可以传入一个泛型闭包属性，或者一个闭包参数列表和者闭包体中都没有引用泛型参数的泛型函数。例如，Core Foundation中的CFArrayCreateMutable(\_:\_:\_:)函数。CFArrayCreateMutable(\_:\_:\_:)函数，接受一个初始化为函数指针的CFArrayCallBacks结构体：
 
 ``` Swift
-	func customCopyDescription(_ p: UnsafeRawPointer?) -> Unmanaged<CFString>? {
-		// return an Unmanaged<CFString>? value
-	}
+func customCopyDescription(_ p: UnsafeRawPointer?) -> Unmanaged<CFString>? {
+	// return an Unmanaged<CFString>? value
+}
 	
- 	var callBacks = CFArrayCallBacks(
- 		version: 0,
- 		retain: nil,
- 		release: nil,
- 		copyDescription: customCopyDescription,
- 		equal: { (p1, p2) -> DarwinBoolean in 
- 			// return Bool value
- 		}
- 	)
+var callBacks = CFArrayCallBacks(
+	version: 0,
+	retain: nil,
+	release: nil,
+	copyDescription: customCopyDescription,
+	equal: { (p1, p2) -> DarwinBoolean in 
+		// return Bool value
+	}
+)
  	
- 	var mutableArray = CFArrayCreateMutable(nil, 0, &callbacks)
+var mutableArray = CFArrayCreateMutable(nil, 0, &callbacks)
 ```	
 
 上面的例子中，CFArrayCallBacks的构造函数，把 nil 分别赋值给 retain 和 release 参数，把 `customCopyDescription(_:)` 函数作为参数赋给 copyDescription，并把一个闭包体作为参数赋值 equal。
@@ -625,10 +624,10 @@ Swift 有一下几种缓存指针类型：
 当处理未知数据类型时，可能会用到不安全的指针操作。在Swift中，可通过运算符对一个指针的值进行位运算，以此来创建一个指定偏移量的新指针。
 
 ``` Swift
-	let pointer: UnsafePointer<Int8>
-	let offsetPointer = pointer + 24
-	// offsetPointer is 24 strides ahead of pointer
-	// offsetPointer 是一个向前偏移了24位的新指针
+let pointer: UnsafePointer<Int8>
+let offsetPointer = pointer + 24
+// offsetPointer is 24 strides ahead of pointer
+// offsetPointer 是一个向前偏移了24位的新指针
 ```
 	注意
 	如欲了解更多关于 Swift 是如何计算不同数据类型和值的空间大小的，请参考 数据类型空间计算（Data Type Size Calculation）。
@@ -639,23 +638,23 @@ Swift 有一下几种缓存指针类型：
 在 C 语言中，可以通过 sizeof 和 alignof 操作符来获取任意变量或数据类型的内存占用大小及对齐情况。在 Swift 中可以通过访问 MemoryLayout<T> 的 size, stride 和 alignment 属性来了解 T 类型的相应情况。例如，timeval 结构体在 Darwin 系统上所占的空间大小和步长是 16, 对齐为 8:
 
 ```Swift
-	print(MemoryLayout<timeval>.size)
-	// Prints "16"
-	print(MemoryLayout<timeval>.stride)
-	// Prints "16"
-	print(MemoryLayout<timeval>.alignment)
-	// Prints "8"
+print(MemoryLayout<timeval>.size)
+// Prints "16"
+print(MemoryLayout<timeval>.stride)
+// Prints "16"
+print(MemoryLayout<timeval>.alignment)
+// Prints "8"
 ```
 
 当在 Swift 中调用的 C 函数需要传入类型大小或值大小的时候，这些就派上用场了。例如，setsockopt(\_:\_:\_:\_:\_:)函数，可以通过接受一个 timeval 指针和指针所指值的大小来设置sokect接收超时选项（SO_RCVTIMEO）：
 
 ``` Swift
-	let sokfd = socket(AF_INET, SOCK_STREAM, 0)
-	var optval = timeval(tv_sec: 30, tv_usec: 0)
-	let optlen = socklen_t（MemoryLayout<timeval>.size)
-	if setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &optavl, optlen) == 0 {
-		// ...
-	}
+let sokfd = socket(AF_INET, SOCK_STREAM, 0)
+var optval = timeval(tv_sec: 30, tv_usec: 0)
+let optlen = socklen_t（MemoryLayout<timeval>.size)
+if setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &optavl, optlen) == 0 {
+	// ...
+}
 ```
 
 欲了解更多信息，请参见 MemoryLayout
@@ -680,9 +679,9 @@ Swift 没有与 C 或 Objective-C 中的复杂宏命令相应的构功能特性�
 Swift 和 Objective-C 通过不同的方式实现了代码的条件编译。Swift 通过_条件编译代码块_来实现。例如，如果通过 swift -D DEBUG_LOGGING 设置 DEBUG_LOGGING 条件编译标识，那么编译器就会引入位于条件代码块中的代码。
 
 ``` Swift
-	#if DEBUG_LOGGING
-	print("Flag enabled.")
-	#endif
+#if DEBUG_LOGGING
+print("Flag enabled.")
+#endif
 ```
 
 编译条件判断中可以包含 true 和 false 字面值，自定义条件判断标识（通过 -D <#flag#>指定)，和下表所列的平台判断标识。
@@ -699,17 +698,17 @@ Swift 和 Objective-C 通过不同的方式实现了代码的条件编译。Swif
 通过逻辑与 && 和逻辑或 || 符号可以混合判断条件，通过逻辑否 ！可以做假条件判断，还可以通过 #elseif 和 #else 来添加条件判断分支，此外在一个选择编译代码块儿中还能嵌套另一个选择编译代码块儿。
 
 ``` Swift
-	#if arch(arm) || arch(arm64)
+#if arch(arm) || arch(arm64)
 	#if Swift(>=3.0)
-	print("Using Swift 3 ARM code")
-		#else
+		print("Using Swift 3 ARM code")
+	#else
 		print("Using Swift 2.2 ARM code")
 	#endif
-	#elseif arch(x86_64)
+#elseif arch(x86_64)
 	print("Using 64-bit x86 code.")
-	#else
+#else
 	print("Using general code.")
-	#endif
+#endif
 ```
 
 与 C 语言的预编译不同，Swift 的条件编译代码块儿必须完整且语法正确，这是因为 Swift 代码即使尚未被编译，也会进行语法检查。
