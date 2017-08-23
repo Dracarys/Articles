@@ -1,0 +1,3 @@
+iOS Notifications
+
+iOS 的推送服务起始于 iOS 3.x（来源：https://en.wikipedia.org/wiki/Apple_Push_Notification_Service#cite_note-appledev-2） ，iOS 5.x 开始引入通知中心，iOS 6.x 本地推送， payload增至 256byte；iOS 7.x 开始引入静默推送，payload增至1KB；iOS 8.x 开始引入自定义提示音、用户权限、增强交互，提供更多的按钮懂多，本地推送提供地理围栏，payload增至2KB。iOS 9.x 开始引入手表，推送将同时推送只手表上。同时引入了文本输入功能。远程推送更新协议为HTTP／2，将多种证书合为一种。payload增至4KB。iOS 10.x开始整合，推送UserNotifications framework，将以前的功能统统整合进来，并进一步增强了交互。丰富内容，允许自定义UI，允许应用内展示，扩展载体，氛围Title，Subtitle，body三部分。通知可以队列添加，移除，更新。在推送协议中添加新的头部表示：apns-collapse-id。 iOS 11.x 隐藏内容，更丰富的自定义UI，自定义输入，支持分类。
