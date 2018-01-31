@@ -101,4 +101,5 @@ personal.unlockAccount(acc0, "密码")
 
 交易命令执行完毕后，日志里可看到Submitted transaction，以及完整的hash，但此时交易并为真正的完整，需要通过矿工挖矿后，方能被记入区块中。
 
-acc0 = eth.accounts[0] 给账户设置别名
+acc0 = eth.accounts[0] 给账户设置别名，注意新设置的别名仅存在于当前环境，并未持久化。
+
