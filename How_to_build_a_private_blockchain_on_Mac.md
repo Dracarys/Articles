@@ -1,6 +1,6 @@
-#Mac环境下搭建以太坊私有链
+# Mac环境下搭建以太坊私有链
 
-##第一步 以太命令行工具安装
+## 第一步 以太命令行工具安装
 
 在以太坊的[官方网站](https://www.ethereum.org)上有详细的[教程](https://www.ethereum.org/cli)，所以这里仅简单的列出 Mac 平台的操作命令，其他平台的操作，请参见[官方教程](https://www.ethereum.org/cli)
 
@@ -20,7 +20,7 @@ brew install ethereum
 
 注意，这个过程可能很长，尤其是最后检查和编译的时间，以我的 Mac mini 2012 来说，光检查和编译就用了大概45分钟，所以请耐心等待，或者去喝杯咖啡休息休息。
 
-##第二步 建立目录和genesis.json
+## 第二步 建立目录和genesis.json
 
 新建一个路径，用于存储区块链相关数据，这里我的路径是：
 
@@ -64,7 +64,7 @@ Genesis.json文件的键说明：
 |parentHash|上一区块的hash，创世块是没有的，所以为0|
 |timstamp|创世块的时间戳|
 
-##第三步 生成创世块
+## 第三步 生成创世块
 
 注意我当前目录是 `~/Documents/Ethereum`，且 `genesis.json` 文件恰好在该目录下，区块链相关数据我要放入该目录下的 chain 目录中，所以在终端中键入如下命令：
 
@@ -80,7 +80,7 @@ geth --datadir "./chain" init genesis.json
 |geth|保存区块链相关数据，如：数据库|
 |keystore|保存账户信息|
 
-##第四步 创建私有链
+## 第四步 创建私有链
 
 在终端中键入如下命令，来启动我们的区块链，并将结果输入到日志 `eth_output.log` 中。注意我这里终端的当前目录是 `~/Documents/Ethereum`，如果你的跟我不同，那么你可能需要指明绝对路径才行。
 
@@ -93,7 +93,7 @@ geth --datadir "./chain" --nodiscover console 2>>eth_output.log
 - console 进入JavaScript 命令行模式，注意后续如无特别说明，所有命令都是在这里键入的
 - 2>>eth_output.log 指定日志文件
 
-##第五步 创建账户
+## 第五步 创建账户
 
 通过 `eth.accounts` 命令查看已有账户情况，由于我们在创世块配置文件的 alloc 中没有制定任何信息，所以这里的账户为空，即返回 []
 
@@ -102,7 +102,7 @@ geth --datadir "./chain" --nodiscover console 2>>eth_output.log
 - `personal.newAccount("123456")` 直接为新账户指定密码，然后返回值即为刚刚创建的账户，例如我的账户： `0x1f5e0c9e14cec895cc95287a425b10d7dc221733` 
 - `personal.newAccount()` 不指定密码，但是接下来会要求你输入两次密码，之后才返回给你账户。
 
-##第六步 开始挖矿
+## 第六步 开始挖矿
 
 `miner.start()` 开始挖矿，挖矿奖励的币会默认保存到第一个创建的账户中。
 
@@ -120,7 +120,7 @@ tail -f eth_output.log
 
 `miner.stop()` 停止挖矿
 
-##第七部 查询余额与交易
+## 第七部 查询余额与交易
 
 获取指定账户的余额，例如，获取我的账户：
 
@@ -152,7 +152,7 @@ personal.unlockAccount(A, "密码")//注意只解锁花费一方
 ```
 然后再次执行交易命令，即可成功发出交易。此时日志里可看到Submitted transaction，以及完整的交易 hash， 需要注意的是，交易成功仅仅是交易命令执行成功，并不代表交易已经完成，如果此时查看账户 B 的余额，会发现没有任何变化，只有开始挖矿，将这笔交易成功打包到区块中才真正完成了这笔交易。
 
-###引用：
+### 引用：
 1. [GETH & ETH Command line tools for the Ethereum Network](https://www.ethereum.org/cli)
 2. [使用 Go-Ethereum 1.7.2搭建以太坊私有链](https://mshk.top/2017/11/go-ethereum-1-7-2/) by [迦壹](https://mshk.top/about-me/) 
 3. [以太坊执行miner.start返回null](http://blog.csdn.net/wo541075754/article/details/78735711)
