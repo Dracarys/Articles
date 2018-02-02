@@ -154,6 +154,9 @@ personal.unlockAccount(A, "密码")//注意只解锁花费一方
 ```
 然后再次执行交易命令，即可成功发出交易。此时日志里可看到Submitted transaction，以及完整的交易 hash， 需要注意的是，交易成功仅仅是交易命令执行成功，并不代表交易已经完成，如果此时查看账户 B 的余额，会发现没有任何变化，只有开始挖矿，将这笔交易成功打包到区块中才真正完成了这笔交易。
 
+## 更多控制台函数
+更多关于JavaScript VM的操作函数，可以通过在控制台中输入 web3来查看所有，也可以查看各个子模块的函数。
+
 ### 引用：
 1. [GETH & ETH Command line tools for the Ethereum Network](https://www.ethereum.org/cli)
 2. [使用 Go-Ethereum 1.7.2搭建以太坊私有链](https://mshk.top/2017/11/go-ethereum-1-7-2/) by [迦壹](https://mshk.top/about-me/) 
