@@ -106,7 +106,7 @@ geth --datadir "./chain" --nodiscover console 2>>eth_output.log
 
 `miner.start()` 开始挖矿，挖矿奖励的币会默认保存到第一个创建的账户中。
 
-如何查看挖矿的过程呢？还记得我嘛在第四步中制定的日志吗？可以在终端中键入如下命令来查看日志输出：
+如何查看挖矿的过程呢，还记得我们在第四步中指定的输出日志吗？可以在终端中键入如下命令来查看：
 
 ```
 tail -f eth_output.log
