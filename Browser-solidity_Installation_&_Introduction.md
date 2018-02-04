@@ -1,8 +1,8 @@
 # Browser-Solidity的本地安装及使用介绍
 
-正所谓工欲善其事必先利其器，巧妇也难为无米之炊，所以在编辑我们自己的智能合约之前，必须要先把工具安装好。
+正所谓工欲善其事必先利其器，巧妇也难为无米之炊，所以在编辑我们自己的智能合约之前，必须要先把工具准备好。
 
-Browser-Solidity官方称为Remix，是一个基于浏览器的编译工具，可以让你非常方便地对solidity进行编辑、编译、debug等工作。
+Browser-Solidity 官方称为 Remix，是一个基于浏览器的编译工具，可以让你非常方便地对 Solidity 进行编辑、编译、debug等工作。
 
 基于浏览器的编译器，哪有在线版吗？有，就是这里[https://remix.ethereum.org](https://remix.ethereum.org)。那既然有在线版为什么还要安装？你亲身访问一下一定会发现答案的。
 
@@ -84,8 +84,18 @@ npm start
 [onchange] > standard | notify-error
 [onchange] 
 ```
-这时打开浏览器，在地质栏中输入：[http://127.0.0.1:8080](http://127.0.0.1:8080)即可。
+这时打开浏览器，在地址栏中输入：[http://127.0.0.1:8080](http://127.0.0.1:8080)即可。
 
 ## 界面介绍
+
+Browser-Solidity 看上去就是下面的样式，配色略有不同。
+![截图](/Users/will/Desktop/Remix_snap_shot/compile.png)
+
+相信所有接触过IDE的朋友对这个界面都不陌生，因为它跟其它编译器都差不多，下面我们就简单介绍下各个区域：
+
+- 左边栏，文件选择区，可以在在这里选择、打开目标文件；
+- 中上区域，代码编辑区，我们就是在这里编写自己的智能合约了；
+- 中下区域，console输出、输入区域，这里可以看到有关输出和输入的相关信息；
+- 左边栏，属性编辑区，这个有六个分页，分别是：Compile、Run、Setting、Analysis、Debug、Support。
 
 
