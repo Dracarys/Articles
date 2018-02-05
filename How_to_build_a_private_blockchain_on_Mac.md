@@ -44,7 +44,7 @@ brew install ethereum
   },
   "alloc"      : {},
   "coinbase"   : "0x0000000000000000000000000000000000000000",
-  "difficulty" : "0x02000000",
+  "difficulty" : "0x0200000",
   "extraData"  : "",
   "gasLimit"   : "0x2fefd8",
   "nonce"      : "0x0000000000000042",
@@ -116,13 +116,6 @@ geth --datadir "./chain" --nodiscover console 2>>eth_output.log
 tail -f eth_output.log
 ```
 注意我这里终端的当前目录是 `~/Documents/Ethereum`，如果你的跟我不同，那么你需要指明路径才行。
-
-    ⚠️注意，网上有教程说，如果返回null，表示挖矿不成功，教你设置 coinbase什么的，但通过我对 Eth V1.7.3这个版本实操发现：
-    首次挖矿确实返回了 null 也没有成功，而且停止挖矿命令也不能停止，日志持续输出。但是当退出后，再次开启（第四步），
-    就可以正常挖矿了，而且每次调用挖矿命令返回也都是 null。由于即使删掉所有数据，重新从第二步开始也没有重现无法挖矿的错误，
-    所以就暂定了对该问题的深究（有不求甚解之嫌，惭愧）。如果你有新的发现，望告知。
-    
-    补充，之所以首次挖矿失败，是因为看到命令传参错误，错误地使用了：`miner.start(1)` 
 
 `miner.stop()` 停止挖矿
 
