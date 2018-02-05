@@ -149,7 +149,7 @@ Run界面如下图所示：
 ### Compile 编译设置
 
 Compile 界面如下图所示：
-<center>![Compile](https://github.com/Dracarys/Articles/raw/master/Images/compile.png)</center>
+![Compile](https://github.com/Dracarys/Articles/raw/master/Images/compile.png)
 
 - Start to compile 点击该按钮即开始编译，这里我们勾选 auto compile，这样就不用我们每次都点了，而且还能及时帮我们发现语法上的错误。
 
