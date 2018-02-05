@@ -4,7 +4,7 @@
 
 *受限于译者英语、技术知识水平及翻译经验，译文难免有词不达意，甚至错误的地方，还望不吝赐教，予以指正*
 
-为了更好的分享，接受更多的批评和指正，现已开始支持githubpages，[欢迎访问](https://dracarys.github.io)
+为了更好的分享，接受更多的批评和指正，现已开始支持 Github Pages，欢迎访问[dracarys.github.io](https://dracarys.github.io)
 
 
 ## 许可协议
