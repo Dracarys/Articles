@@ -123,8 +123,8 @@ Run界面如下图所示：
 
 #### 红色区域
 
-- Environment 运行环境选择，默认为本地 JavaScript VM，此外它还支持 Injected Web3 和连接到 Web3 Provider公共环境
-- Account 账户，本地提供了 5 个虚拟账户，每个账户有100 ether
+- Environment 运行环境选择，默认为本地 JavaScript VM，Web3 Provider 用于连接指定的虚拟机服务，可以用来本地测试或者小范围的局域网测试。还有一个 Injected Web3 功能暂时不明，望高人告知。
+- Account 账户，默认的 JavaScript VM 提供了 5 个虚拟账户，每个账户有100 ether，如果连接到 Web3 Provider，那么这里会显示你在这台 Provider 上的账户。
 - Gas limit Gas上限，并不是越大越好，当然也不能太小，否则会影响交易。有关Gas的进一步信息，你可以访问这里[Gas and ether](http://www.ethdocs.org/en/latest/ether.html#gas-and-ether)
 - Value 即Gas price，输入后不要忘记在右侧的下拉列表中设置价格单位。如果你不熟悉 Wei 和 Ether 之间的换算可以参见下表
 
@@ -172,3 +172,4 @@ Compile 界面如下图所示：
 1. [browser-solidity Github 项目](https://github.com/ethereum/browser-solidity)
 2. [What is ether?](http://www.ethdocs.org/en/latest/ether.html)
 3. [编译和部署合约的第一种姿势：使用 Remix](http://ethfans.org/posts/deploying-smart-contract-with-remix)
+4. [一步一步使用remix开发智能合约](http://www.cnblogs.com/baizx/p/7280224.html)
