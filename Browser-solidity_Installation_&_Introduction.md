@@ -105,7 +105,7 @@ Remix 界面入下图所示：
 
 Setting界面如下图所示：
 
-[Setting](https://github.com/Dracarys/Articles/raw/master/Images/setting.png)
+<center> ![Setting](https://github.com/Dracarys/Articles/raw/master/Images/setting.png) </center>
 
 Solidity version，首先是设置 Solidity 的版本，这个的版本必须高于或者与你在源码中指定的版本相同，否则可能会导致一些无法预料的行为，非常关键；
 
