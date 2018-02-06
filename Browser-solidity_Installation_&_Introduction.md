@@ -107,13 +107,13 @@ Setting界面如下图所示：
 
 ![Setting](https://github.com/Dracarys/Articles/raw/master/images/setting.png)
 
-Solidity version，首先是设置 Solidity 的版本，这个的版本必须高于或者与你在源码中指定的版本相同，否则可能会导致一些无法预料的行为，非常关键；
+`Solidity version` 设置 Solidity 的版本，这个的版本必须高于或者与你在源码中指定的版本相同，否则可能会导致一些无法预料的行为，非常关键；
 
-General setting，通用设置，这里可以设置在加载时就使用以太坊的VM，以及文本断行和是否启用优化等信息；
+`General setting` 通用设置，这里可以设置在加载时就使用以太坊的VM，以及文本断行和是否启用优化等信息；
 
-Theme，主题设置，没什么好介绍的，只有2个主题，选择一个自己喜欢的即可。
+`Theme` 主题设置，没什么好介绍的，只有2个主题，选择一个自己喜欢的即可。
 
-Plugin，插件，目前还处于Alpha阶段，如果不了解，请不要更改。（我就是那个不了解的，还望各位大牛指点）
+`Plugin` 插件，目前还处于Alpha阶段，如果不了解，请不要更改。（我就是那个不了解的，还望各位大牛指点）
 
 ### Run 运行设置
 
@@ -123,10 +123,10 @@ Run界面如下图所示：
 
 #### 红色区域
 
-- Environment 运行环境选择，默认为本地 JavaScript VM，Web3 Provider 用于连接指定的虚拟机服务，可以用来本地测试或者小范围的局域网测试。还有一个 Injected Web3 功能暂时不明，望高人告知。
-- Account 账户，默认的 JavaScript VM 提供了 5 个虚拟账户，每个账户有100 ether，如果连接到 Web3 Provider，那么这里会显示你在这台 Provider 上的账户。
-- Gas limit Gas上限，并不是越大越好，当然也不能太小，否则会影响交易。有关Gas的进一步信息，你可以访问这里[Gas and ether](http://www.ethdocs.org/en/latest/ether.html#gas-and-ether)
-- Value 即Gas price，输入后不要忘记在右侧的下拉列表中设置价格单位。如果你不熟悉 Wei 和 Ether 之间的换算可以参见下表
+- `Environment` 运行环境选择，默认为本地 JavaScript VM，Web3 Provider 用于连接指定的虚拟机服务，可以用来本地测试或者小范围的局域网测试。还有一个 Injected Web3 功能暂时不明，望高人告知。
+- `Account` 账户，默认的 JavaScript VM 提供了 5 个虚拟账户，每个账户有100 ether，如果连接到 Web3 Provider，那么这里会显示你在这台 Provider 上的账户。
+- `Gas limit` Gas上限，并不是越大越好，当然也不能太小，否则会影响交易。有关Gas的进一步信息，你可以访问这里[Gas and ether](http://www.ethdocs.org/en/latest/ether.html#gas-and-ether)
+- `Value` 即Gas price，输入后不要忘记在右侧的下拉列表中设置价格单位。如果你不熟悉 Wei 和 Ether 之间的换算可以参见下表
 
 |单位|换算率|Wei|
 |:--|:--|:--|
@@ -140,9 +140,9 @@ Run界面如下图所示：
 
 #### 橙色区域
 
-- 选择合约 如果你有多个合约，那么可以在这里选择运行那个合约
-- Create 有些合约有初始值，那么可以在这里设置，然后在点击 Create 按钮，成功后才会出现绿色区域
-- At Address 从指定的地址加载一个已经存在的合约
+- `选择合约` 如果你有多个合约，那么可以在这里选择运行那个合约
+- `Create` 有些合约有初始值，那么可以在这里设置，然后在点击 Create 按钮，成功后才会出现绿色区域
+- `At Address` 从指定的地址加载一个已经存在的合约
 
 #### 黄色区域
 
@@ -155,14 +155,14 @@ Compile 界面如下图所示：
 
 ![Compile](https://github.com/Dracarys/Articles/raw/master/images/compile.png)
 
-- Start to compile 点击该按钮即开始编译，这里我们勾选 auto compile，这样就不用我们每次都点了，而且还能及时帮我们发现语法上的错误。
+- 	`Start to compile` 点击该按钮即开始编译，这里我们勾选 auto compile，这样就不用我们每次都点了，而且还能及时帮我们发现语法上的错误。
 
-- 选择合约 可以在多个合约间进行切换，注意，这里只有编译才能显示，如果未编译，这里将为空。
-- Detail 点击可以查看上一步已选择合约的详细信息(如下图)
+- `选择合约` 可以在多个合约间进行切换，注意，这里只有编译才能显示，如果未编译，这里将为空。
+- `Detail` 点击可以查看上一步已选择合约的详细信息(如下图)
 
 ![Detail](https://github.com/Dracarys/Articles/raw/master/images/detail.png)
 
-- Publish on Swarm 发布到 Swarm，这个暂时没找到资料，*猜测:跟选择的运行环境有关，发不到官方的测试链或者正式链？*还不是很清楚，望高人告知。
+- `Publish on Swarm` 发布到 Swarm？*还不是很理解，猜测:跟选择的运行环境有关，发不到官方的测试链或者正式链？*望大牛提点。
 
 ### Debug
 
