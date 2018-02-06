@@ -85,7 +85,7 @@ npm start
 
 Remix 界面入下图所示：
 
-![Remix IDE](https://github.com/Dracarys/Articles/raw/master/Images/full.png)
+![Remix IDE](https://github.com/Dracarys/Articles/raw/master/images/full.png)
 
 如果您熟悉编程，接触过很多IDE，那么 Remix 的界面你一定也不陌生，所以你可以跳过该部分，对 Remix 的理解不会受到任何影响。
 
@@ -99,13 +99,13 @@ Remix 界面入下图所示：
 
 ## 功能介绍
 
-前四个区域没什么好介绍的，大家只要上手简单操作一下就能明白。这里我们着重介绍下区域5，属性编辑区。这里我么只介绍Setting、Run、Compile前三个分页，剩余两个分页功能非常直观，如果不是理解建议大家自行查询字典，不再赘述。
+前四个区域没什么好介绍的，大家只要上手简单操作一下就能明白。这里我们着重介绍下区域5，属性编辑区。这里我么只介绍Setting、Run、Compile、Debug 四个个分页，剩余两个分页功能非常直观，如果不是理解建议大家自行查询，不再赘述。
 
 ### Setting IDE设置
 
 Setting界面如下图所示：
 
-![Setting](https://github.com/Dracarys/Articles/raw/master/Images/setting.png)
+![Setting](https://github.com/Dracarys/Articles/raw/master/images/setting.png)
 
 Solidity version，首先是设置 Solidity 的版本，这个的版本必须高于或者与你在源码中指定的版本相同，否则可能会导致一些无法预料的行为，非常关键；
 
@@ -119,7 +119,7 @@ Plugin，插件，目前还处于Alpha阶段，如果不了解，请不要更改
 
 Run界面如下图所示：
 
-![Run](https://github.com/Dracarys/Articles/raw/master/Images/run.png)
+![Run](https://github.com/Dracarys/Articles/raw/master/images/run.png)
 
 #### 红色区域
 
@@ -153,18 +153,24 @@ Run界面如下图所示：
 
 Compile 界面如下图所示：
 
-![Compile](https://github.com/Dracarys/Articles/raw/master/Images/compile.png)
+![Compile](https://github.com/Dracarys/Articles/raw/master/images/compile.png)
 
 - Start to compile 点击该按钮即开始编译，这里我们勾选 auto compile，这样就不用我们每次都点了，而且还能及时帮我们发现语法上的错误。
 
 - 选择合约 可以在多个合约间进行切换，注意，这里只有编译才能显示，如果未编译，这里将为空。
 - Detail 点击可以查看上一步已选择合约的详细信息(如下图)
 
-![Detail](https://github.com/Dracarys/Articles/raw/master/Images/detail.png)
+![Detail](https://github.com/Dracarys/Articles/raw/master/images/detail.png)
 
 - Publish on Swarm 发布到 Swarm，这个暂时没找到资料，*猜测:跟选择的运行环境有关，发不到官方的测试链或者正式链？*还不是很清楚，望高人告知。
 
+### Debug
 
+Debug 界面如下图所示：
+
+![Debug](https://github.com/Dracarys/Articles/raw/master/images/debug.png)
+
+未完待续
 
 
 
