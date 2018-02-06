@@ -107,7 +107,7 @@ Setting界面如下图所示：
 
 ![Setting](https://github.com/Dracarys/Articles/raw/master/images/setting.png)
 
-`Solidity version` 设置 Solidity 的版本，这个的版本必须高于或者与你在源码中指定的版本相同，否则可能会导致一些无法预料的行为，非常关键；
+`Solidity version` 设置 Solidity 的版本，这个的版本必须高于或者与你在源码中指定的版本相同，否则可能会导致一些无法预料的行为，非常关键。这里建议大家选择名字较短的稳定版，以减少不必要的麻烦。
 
 `General setting` 通用设置，这里可以设置在加载时就使用以太坊的VM，以及文本断行和是否启用优化等信息；
 
