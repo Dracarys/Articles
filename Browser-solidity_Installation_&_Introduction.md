@@ -170,9 +170,11 @@ Debug 界面如下图所示：
 
 ![Debug](https://github.com/Dracarys/Articles/raw/master/images/debug.png)
 
-未完待续
+## 最后
 
+IDE的某些功能会随着使用逐渐加深了解，所以请不要在IDE的熟悉上花费太多时间，能上手操作即可，就像小时候我们学说话一样，相信你我都绝不是在能说绕口令之后才叫爸爸妈妈的。
 
+未完待续！
 
 ## 引用
 1. [browser-solidity Github 项目](https://github.com/ethereum/browser-solidity)
