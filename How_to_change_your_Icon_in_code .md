@@ -107,7 +107,7 @@ OK，再次运行，还是找不到文件，why？是时候祭出谷歌大法了
 
 修改完成后，在此运行，终于可以更新了。
 
-参考：[苹果官方论坛 giveme5 的回复](https://forums.developer.apple.com/thread/71463)
+## 参考：[苹果官方论坛 giveme5 的回复](https://forums.developer.apple.com/thread/71463)
 
 
 

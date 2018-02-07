@@ -154,7 +154,7 @@ personal.unlockAccount(A, "密码")//注意只解锁花费一方
 ## 更多控制台函数
 更多关于JavaScript VM的操作函数，可以通过在控制台中输入 web3来查看所有，也可以查看各个子模块的函数。
 
-### 引用：
+## 参考
 1. [GETH & ETH Command line tools for the Ethereum Network](https://www.ethereum.org/cli)
 2. [使用 Go-Ethereum 1.7.2搭建以太坊私有链](https://mshk.top/2017/11/go-ethereum-1-7-2/) by [迦壹](https://mshk.top/about-me/) 
 3. [以太坊执行miner.start返回null](http://blog.csdn.net/wo541075754/article/details/78735711)

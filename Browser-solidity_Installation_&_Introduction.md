@@ -176,7 +176,7 @@ IDE的某些功能会随着使用逐渐加深了解，所以请不要在IDE的�
 
 未完待续！
 
-## 引用
+## 参考
 1. [browser-solidity Github 项目](https://github.com/ethereum/browser-solidity)
 2. [What is ether?](http://www.ethdocs.org/en/latest/ether.html)
 3. [编译和部署合约的第一种姿势：使用 Remix](http://ethfans.org/posts/deploying-smart-contract-with-remix)
