@@ -10,6 +10,8 @@ Browser-Solidity 实际上是项目名称，该名称准确的表述了，它是
 
 我们以 Mac 为开发平台，且 Mac上已经装好了 npm 和 Node.js，如果你的 Mac 上没有安装，那么你可以参考这里的教程：[How to Install npm & Manage npm Versions](https://docs.npmjs.com/getting-started/installing-node)
 
+2017年2月8日补充：今天我手贱更新了一下Browser-solidity，重新执行`npm install`，然后 solc 这个包总是不成功，直到 `brew install wget`。
+
 ## 安装&启动
 
 打开终端，进入你准备的好安装目录，将 browser-solidity 项目 clone 到本地。
