@@ -1,4 +1,4 @@
-# Browser-Solidity的本地安装及使用介绍
+# Remix-ide(Browser-Solidity)的本地安装及使用介绍
 
 正所谓工欲善其事必先利其器，巧妇也难为无米之炊，所以在学习智能合约之前，必须要先把工具准备好。Browser-Solidity 是 Ethereum 官方的一个IDE项目，该名称准确的表述了，它是一款基于浏览器的 Solidity 集成开发环境，官方正式名称称之为 Remix，通过它我们可以编辑、编译、发布我们自己的智能合约。
 
@@ -8,9 +8,30 @@
 
 我们以 Mac 为开发平台，且 Mac上已经装好了 npm 和 Node.js，如果你的 Mac 上没有安装，那么你可以参考这里的教程：[How to Install npm & Manage npm Versions](https://docs.npmjs.com/getting-started/installing-node)
 
-2017年2月8日补充：今天我手贱更新了一下Browser-solidity，重新执行`npm install`，然后 solc 这个包总是不成功，直到 `brew install wget`。
+2018年2月8日补充：今天我手贱更新了一下Browser-solidity，重新执行`npm install`，然后 solc 这个包总是不成功，直到 `brew install wget`。
+2018年4月10日更新：官方的Readme中已经明确指明，如果采用Clone到本地安装到方式，必须先装好 `wget`。
 
 ## 安装&启动
+
+### 通过npm直接安装
+
+以太坊真是日新月异，如新生儿般一天一个样。废话不多说，Remix已正式更名为Remix-ide，官方也已将其发布为npm包，可以通过npm直接安装，方便了很多：
+
+``` Shell
+npm install remix-ide -g
+```
+
+启动Remix-ide，安装成功后，直接在命令行键入如下命令即可。
+
+``` Shell
+remix-ide
+```
+
+然后打开 Chrome，或 Safari，在地址中输入：[localhost:8080](http:localhost:8080)即可。
+
+下面的clone安装选择阅读，无心浏览可直接跳过，无任何影响。
+
+### clone到本地安装
 
 打开终端，进入你准备的好安装目录，将 browser-solidity 项目 clone 到本地。
 
