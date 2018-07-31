@@ -36,7 +36,7 @@ remix-ide
 
 
 
-### clone到本地安装
+### clone项目到本地安装
 
 打开终端，进入你准备的好安装目录，将 browser-solidity 项目 clone 到本地。
 
