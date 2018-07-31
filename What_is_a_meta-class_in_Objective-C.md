@@ -6,7 +6,7 @@
 
 －－－－－－－－－－－－－－－－－－－
 
-本文我们将剖析一个在 Objective-C 中比较陌生的概念——元类（meta-class）。Objective-C 中的每个类都有和自己相关联的元类，但你可能从来没有直接使用过它，它始终罩着一层神秘的面纱。为了一探究竟我们首先看看怎么在运时（runtime）创建一个类。然后通过创建的“class pair”（这里的pair做成双理解），我会解释什么是元类，然后探讨它对于 Objective-C 中对象和类的意义。
+本文我们将剖析一个在 Objective-C 中比较陌生的概念——元类（meta-class）。Objective-C 中的每个类都有和自己相关联的元类，但你可能从来没有直接使用过它，它始终罩着一层神秘的面纱。为了一探究竟我们首先看看怎么在运时（runtime）创建一个类。然后透过创建的“class pair”（这里的pair做成双理解），我会解释什么是元类，然后探讨它对于 Objective-C 中对象和类的意义。
 
 ### 在运行时创建一个类
 
@@ -17,7 +17,8 @@ Class newClass = objc_allocateClassPair([NSError class], "RuntimeErrorSubclass",
 class_addMethod(newClass, @selector(report), (IMP)ReportFunction, "v@:");
 objc_registerClassPair(newClass);
 ```
-上面添加的方法，以 ReportFunction 函数作为它的实现，具体定义如下：
+
+上面添加的方法，以`ReportFunction`函数作为它的实现，具体定义如下：
 
 ``` Objective-C
 void ReportFunction(id self, SEL _cmd)
@@ -36,6 +37,7 @@ void ReportFunction(id self, SEL _cmd)
     NSLog(@"NSObject's meta class is %p", object_getClass([NSObject class]));
 }
 ```
+
 表面上看来，这相当简单。在运行时创建一个类只需要简单三步:
 
 1. 为”class pair”分配内存 (使用`objc_allocateClassPair`);
@@ -172,4 +174,4 @@ NSObject's meta class is 0x7fff71038480
 
 元类总是会确保类对象和基类的所有实例和类方法。对于从`NSObject`继承下来的类，这意味着所有的`NSObject`实例和`protocol`方法在所有的类（和meta-class）中都可以使用。
 
-所有元类都用基类作为自己的类，对于顶层基类的元类也是如此，只是它指向自己而已（译者注:看文中的图，一目了然）。
+所有元类都用基类作为自己的类，对于顶层基类的元类也是如此，只是它指向自己而已（译者注:请参照文中引用的关系图，一目了然）。
