@@ -9,6 +9,7 @@
 我们以 Mac 为开发平台，且 Mac上已经装好了 npm 和 Node.js，如果你的 Mac 上没有安装，那么你可以参考这里的教程：[How to Install npm & Manage npm Versions](https://docs.npmjs.com/getting-started/installing-node)
 
 2018年2月8日补充：今天我手贱更新了一下Browser-solidity，重新执行`npm install`，然后 solc 这个包总是不成功，直到 `brew install wget`。
+
 2018年4月10日更新：官方的Readme中已经明确指明，如果采用Clone到本地安装到方式，必须先装好 `wget`。
 
 ## 安装&启动
@@ -21,7 +22,7 @@
 npm install remix-ide -g
 ```
 
-启动Remix-ide，安装成功后，直接在命令行键入如下命令即可。
+启动Remix-ide，安装成功后，直接在命令行键入如下命令启动。
 
 ``` Shell
 remix-ide
@@ -29,7 +30,11 @@ remix-ide
 
 然后打开 Chrome，或 Safari，在地址中输入：[localhost:8080](http:localhost:8080)即可。
 
-下面的clone安装选择阅读，无心浏览可直接跳过，无任何影响。
+*下面的clone安装方法已不在推荐，可以选择性阅读。*
+
+------------------------------------------------------------------------------------
+
+
 
 ### clone到本地安装
 
