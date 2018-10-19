@@ -3,15 +3,15 @@
 
 [TOC]
 
-### 1. 如何给代码分段
+## 1. 如何给代码分段
 熟悉Objective-C的同学都知道可以通过`#pragma mark escription` 宏标记，在代码的方法导航中添加描述语句。此外，还可以在描述语句前添加一条中划线，例如`＃pragma mark － Description`，这样在方法导航中，会显示一条横线将代码段分隔开，令分段显示更加清晰。
 
 那么怎么在Swift中使用呢？可以通过`//MARK: description`,`//????: description `,`//FIXME: description `这样的注释来添加分段说明，同样的，也可以在冒号后添加中划线，例如：`//MARK: - description`,`//????: - description `,`//FIXME: - description `，将代码分段用横线隔开。
 
-### 2.如何在Swift中使用保留关键字
+## 2.如何在Swift中使用保留关键字
 通常一种编程语言都是不允许使用关键字作为变量名的，那么在SWift中如果非要用到关键字怎么办呢？可以通过用\`\`将关键字括起的方式来使用，例如：\`self\`，当然，这是最后的手段，但有一线希望都不应该用关键字来作为变量名。
 
-### 3.几个常见数值字面量
+## 3.几个常见数值字面量
 - 十进制 `let decimalInteger = 17` 
 - 二进制 `let binaryInterger = 0b10001` 等价于17
 - 八进制 `let octalInteger = 0o21` 等价于17
@@ -20,10 +20,10 @@
 - 十六进制指数式 `0xFp2`表示$15 * 2^2$，`0xFp-2`表示$15 * 2^-2$
 - 十进制格式增强 `let paddedDobule = 000123.456`，`let oneMillion = 1_000_000`，`let justOverOneMillion = 1_000_000.000_000_1`
 
-### 4.lazy属性的线程安全问题
+## 4.lazy属性的线程安全问题
 我们知道 Swift 通过其语言自身的特点，保证了全局常量和存储型属性，即使被多个线程交替存取，也仅初始化一次，但是这里有一个特例，就是 lazy 属性，当多个线程同时访问一个尚未初始化的 lazy 属性时，则不能保证仅初始化一次。
 
-### 5.如何便捷的在Swift中获取指针
+## 5.如何便捷的在Swift中获取指针
 Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是保留了指针，但是我们不能像在 C 中一样通过`&`便捷的获取某个常量或变量的指针，例如：
 
 ``` Swift
@@ -51,7 +51,7 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 ```
 哈哈，成功了，顺利通过编译。
 
-### 6.Swift错误处理原则
+## 6.Swift错误处理原则
 *来源:[Magical Error Handling in Swift](https://www.raywenderlich.com/130197/magical-error-handling-swift)，由  [Gemma Barlow](https://www.raywenderlich.com/u/gemmakbarlow) 发表于Raywenderliche*
 
 - 错误类型的命名要清晰无歧义
@@ -59,7 +59,7 @@ Swift虽然在极力避免指针，但是为了 Object-C 和 C 兼容，还是�
 - 当可能出现多种错误时，用自定义的错误类型来处理
 - 不要让抛除的错误传播过远
 
-### 7.Swift数组指针的妙用
+## 7.Swift数组指针的妙用
 
 ``` Swift
 	let numbers = [1, 2, 3, 4, 5]
@@ -73,7 +73,7 @@ let sum = numbers.withUnsafeBufferPointer { buffer -> Int in
 // 'sum' == 9
 ```
 
-### 8.简写闭包参数名
+## 8.简写闭包参数名
 *来源《The Swift Programming Language (SWift 3.0.1)》Closure 一章Shorthand Argument Names 小节*
 
 Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`等参数简写。
@@ -86,7 +86,7 @@ Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`
 ```
 在这个例子中，`$0`和`$1`分别表示闭包中第一个和第二个String类型的参数。
 
-### 9.绘制虚线
+## 9.绘制虚线
 
 ```Swift
 		if let context = UIGraphicsGetCurrentContext() {
@@ -105,7 +105,7 @@ Swift 自动为内联闭包提供了依次代表代表参数值的`$0`,`$1`,`$2`
         }
 ```
 
-### 10.访问控制
+## 10.访问控制
 Swift 3.0更新了访问控制，添加了open和fileprivate两个新控制权限，这里摘录了[《The Swift Programming Language (Swift 3)》](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/AccessControl.html#//apple_ref/doc/uid/TP40014097-CH41-ID3)书中部分内容：
 
 Swift 为代码中的实体提供了5种不同的访问权限。访问权限同时取决于源文件中的实体定义及源文件所属模块。
@@ -127,7 +127,7 @@ open访问权限仅适用于类和类成员，它与public访问权限的区别�
 
 将一个类标记为 open 访问权限，即表明你已充分考虑到该类会被其它模块当作父类继承，并为此妥善的编写了该类的代码。
 
-### 11.@objc & dynamic
+## 11.@objc & dynamic
 关键字，摘录自王巍 [《Swift tips》](http://swifter.tips/objc-dynamic/)
 @objc 当 Objective-C 需要引用 Swift 代码，我们可以将需要暴露给 Objective-C 使用的任何地方 (包括类，属性和方法等) 的声明前面加上 @objc 修饰符。
 @objc 修饰符的另一个作用是为 Objective-C 重新声明方法或者变量的名字
@@ -136,10 +136,10 @@ open访问权限仅适用于类和类成员，它与public访问权限的区别�
 扩展阅读：[《Swift Runtime动态性分析》](http://www.infoq.com/cn/articles/dynamic-analysis-of-runtime-swift)由尹峥伟发表于[InfoQ](http://www.infoq.com/cn/)。该文更好的从运行时介绍了Swift的“动态性”。
 
 
-### 12.@escaping & @noescape
+## 12.@escaping & @noescape
 摘录自[《What Do @escaping and @noescape Mean In Swift 3》](https://cocoacasts.com/what-do-escaping-and-noescaping-mean-in-swift-3/)
 
-### 13.溢出运算符
+## 13.溢出运算符
 当向一个整型常量或变量赋一个超出其所允许范围的数值时，默认情况下，Swift不会生成一个无效的数值，而是报错。该做法为过大或过小数值地操作提供了额外的安全性。
 
 例如，Int16 整型能容纳从 -32768 到 32767 的有符号整型。如果尝试向 Int16 有符号整型的常量或变量赋超过其容纳范围的数值，则会报错：
@@ -156,7 +156,7 @@ potentialOverflow += 1
 - 溢出减 &-
 - 溢出乘 &*
 
-### 14.特殊的字面量
+## 14.特殊的字面量
 
 在 C 中调试时我们经常会用到 `__FILE__`，`__FUNCTION__` 等特殊字面量，来获取一些信息，那么在 Swift 中怎么用呢？
 
@@ -175,7 +175,7 @@ potentialOverflow += 1
 
 通过上面的例子可以看出，Swift 采用 `#` + 关键字小写的方式，很好的照顾了那些从其它语言转过来的朋友们。
 
-# 15.用函数做参数以简化代码
+## 15.用函数做参数以简化代码
 摘录自：[@南峰子_老驴](http://m.weibo.cn/3321824014/4060979186247385)
 
 ```Swift
@@ -186,13 +186,13 @@ potentialOverflow += 1
 	print(getInt("Ten"))
 ```
 
-# 16.包名冲突
+## 16.包名冲突
 
 今天在尝试项目中引入“NetworkExtension”的时候，发现编译器提示“File 'NameOfCrrentFile.Swift is a part of module 'NetworkExtension' ; ignoring import”， 后来在苹果[官方论坛](https://forums.developer.apple.com/thread/45186)上找到了答案，原来是工程名“NetworkExtension”与要引入的包名冲突了，由于**.swift已经是“NetworkExtension”工程（实际也是一个包）一部分，所以Swift拒绝再在该包中引入一个同名的包。
 
 Swift虽然支持命名空间，但是随即也带来了类似的问题，看来接下来有必要好好了解下Swift的包管理和命名空间问题。
 
-# 17. #keyPath语法糖
+## 17. #keyPath语法糖
 摘录自：[@南峰子_老驴](http://m.weibo.cn/3321824014/4060979186247385)
 
 在使用KVC或KVO时，经常会犯一些因KeyPath拼写不正确，从而导致应用崩溃的错误。为此，Swift 3中引入了 #keyPath()表达式，不多解释，直接看代码：
@@ -211,7 +211,7 @@ let chris = Person(firstName: "Chris")
 let keyPath = #keyPath(Person.firstName)
 chris.value(forKey: keyPath)
 ```
-# 18. as、as?、as!
+## 18. as、as?、as!
 
 从字面理解`as`作为什么的意思，那也在Swift中它的作用就是类型转换（type casting）,那么三个as分别有什么不同呢？
 
@@ -292,7 +292,7 @@ let someOne: Any = "Who are you"
 let people = someOne as! People // 转换失败，崩溃。
 
 ```
-# 19.闭包的几种表达
+## 19.闭包的几种表达
 
 闭包不是什么新生事物，但 Swift 仿佛对此情有独衷，提高了非常丰富的支持（效仿茴字吗？）：
 
@@ -322,7 +322,7 @@ let scoreSorted5 = score.sorted{$0 < $1}
 
 	注意：不是所有的闭包都可以采用上面的任意一种写法。
 	
-# 20.@discardableResult
+## 20.@discardableResult
 
 摘录自 [Use Your Loaf](https://useyourloaf.com/) 的 [SWift 3 Warning of Unused Result](https://useyourloaf.com/blog/swift-3-warning-of-unused-result/)
 
