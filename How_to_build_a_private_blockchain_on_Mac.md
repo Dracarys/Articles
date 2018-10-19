@@ -1,5 +1,9 @@
 # Mac环境下搭建以太坊私有链
 
+2018年初区块链大火，各种币也层出不穷，但是怎么建立一条自己的私有链呢？接下来我们就动手一步一步的搭建一条自己的私有链。
+
+知识储备，阅读本文不需要你具备区块链知识基础，但是如果你对区块链有所了解，那么你就能更好地理解本文中有关创世块的相关设置。此外如果在具备一些 JavaScript 基础，那么你就能更快熟悉有关 Geth 的命令行操作。
+
 ## 第一步 以太命令行工具安装
 
 在以太坊的[官方网站](https://www.ethereum.org)上有详细的[教程](https://www.ethereum.org/cli)，所以这里仅简单的列出 Mac 平台的操作命令，其他平台的操作，请参见[官方教程](https://www.ethereum.org/cli)
@@ -40,7 +44,7 @@ brew install ethereum
   },
   "alloc"      : {},
   "coinbase"   : "0x0000000000000000000000000000000000000000",
-  "difficulty" : "0x02000000",
+  "difficulty" : "0x0200000",
   "extraData"  : "",
   "gasLimit"   : "0x2fefd8",
   "nonce"      : "0x0000000000000042",
@@ -63,6 +67,15 @@ Genesis.json文件的键说明：
 |mixhash|与nonce配合用于挖矿，由上一区块儿的部分生成的hash，同样需要班组黄皮书中的条件|
 |parentHash|上一区块的hash，创世块是没有的，所以为0|
 |timstamp|创世块的时间戳|
+
+开局送黄金示例：
+
+``` JSON
+"alloc": {
+  "0x0000000000000000000000000000000000000001": {"balance": "111111111"},
+  "0x0000000000000000000000000000000000000002": {"balance": "222222222"}
+}
+```
 
 ## 第三步 生成创世块
 
@@ -106,17 +119,12 @@ geth --datadir "./chain" --nodiscover console 2>>eth_output.log
 
 `miner.start()` 开始挖矿，挖矿奖励的币会默认保存到第一个创建的账户中。
 
-如何查看挖矿的过程呢？还记得我嘛在第四步中制定的日志吗？可以在终端中键入如下命令来查看日志输出：
+如何查看挖矿的过程呢，还记得我们在第四步中指定的输出日志吗？可以在终端中键入如下命令来查看：
 
 ```
 tail -f eth_output.log
 ```
 注意我这里终端的当前目录是 `~/Documents/Ethereum`，如果你的跟我不同，那么你需要指明路径才行。
-
-    ⚠️注意，网上有教程说，如果返回null，表示挖矿不成功，教你设置 coinbase什么的，但通过我对 Eth V1.7.3这个版本实操发现：
-    首次挖矿确实返回了 null 也没有成功，而且停止挖矿命令也不能停止，日志持续输出。但是当退出后，再次开启（第四步），
-    就可以正常挖矿了，而且每次调用挖矿命令返回也都是 null。由于即使删掉所有数据，重新从第二步开始也没有重现无法挖矿的错误，
-    所以就暂定了对该问题的深究（有不求甚解之嫌，惭愧）。如果你有新的发现，望告知。
 
 `miner.stop()` 停止挖矿
 
@@ -152,8 +160,12 @@ personal.unlockAccount(A, "密码")//注意只解锁花费一方
 ```
 然后再次执行交易命令，即可成功发出交易。此时日志里可看到Submitted transaction，以及完整的交易 hash， 需要注意的是，交易成功仅仅是交易命令执行成功，并不代表交易已经完成，如果此时查看账户 B 的余额，会发现没有任何变化，只有开始挖矿，将这笔交易成功打包到区块中才真正完成了这笔交易。
 
-### 引用：
-1. [GETH & ETH Command line tools for the Ethereum Network](https://www.ethereum.org/cli)
-2. [使用 Go-Ethereum 1.7.2搭建以太坊私有链](https://mshk.top/2017/11/go-ethereum-1-7-2/) by [迦壹](https://mshk.top/about-me/) 
-3. [以太坊执行miner.start返回null](http://blog.csdn.net/wo541075754/article/details/78735711)
-4. [geth配置中，genesis.json的几个问题](http://blog.csdn.net/superswords/article/details/75049323)
+## 更多控制台函数
+更多关于JavaScript VM的操作函数，可以通过在控制台中输入 web3来查看所有，也可以查看各个子模块的函数。
+
+## 参考
+1. [Go Ethereum](https://github.com/ethereum/go-ethereum)
+2. [GETH & ETH Command line tools for the Ethereum Network](https://www.ethereum.org/cli)
+3. [使用 Go-Ethereum 1.7.2搭建以太坊私有链](https://mshk.top/2017/11/go-ethereum-1-7-2/) by [迦壹](https://mshk.top/about-me/) 
+4. [以太坊执行miner.start返回null](http://blog.csdn.net/wo541075754/article/details/78735711)
+5. [geth配置中，genesis.json的几个问题](http://blog.csdn.net/superswords/article/details/75049323)
