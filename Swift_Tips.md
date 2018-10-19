@@ -321,3 +321,26 @@ let scoreSorted5 = score.sorted{$0 < $1}
 ``` 
 
 	注意：不是所有的闭包都可以采用上面的任意一种写法。
+	
+# 20.@discardableResult
+
+摘录自 [Use Your Loaf](https://useyourloaf.com/) 的 [SWift 3 Warning of Unused Result](https://useyourloaf.com/blog/swift-3-warning-of-unused-result/)
+
+在 Swift 2.x的时候，带有返回值的方法，如果在调用时没有使用返回值，编译器是不会给任何警告提示的，但是可以通过添加一下关键字来让编译器给予提示：
+
+``` Swift
+@warn_unused_result func doSomething() -> Bool {
+	return true
+}
+```
+这是在调用该方法，就可以正确的收到警告信息了——“Result of call to 'doSomething()' is unused”。
+
+到了 Swift 3.0 就不需要这么操作了，因为编译器已经可以默认检查。但那问题又来了，如果不想要警告怎么办？那就要用到@discardableResult:
+
+``` Swift
+@discardableResult func doSomething() -> Bool {
+    return true
+}
+```
+
+如此就不会在收到提示了。
