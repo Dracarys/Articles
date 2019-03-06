@@ -65,7 +65,7 @@ def login():
 
 ### 6、渲染模板
 
-这里 flask 跟 Django 一样，都采用了模板的方式，免去用户自己转义的麻烦。一个简单例子：
+这里 flask 跟 Django 一样，都采用了模板的方式，免去用户自己转义的麻烦。但是 Django 的模板引擎是自己的（这个没有深入验证），而 flask 的模板引擎采用的是 jinja2，提供更丰富的功能（正在学）。一个简单例子：
 
 ``` python
 from flask import render_template
@@ -92,6 +92,34 @@ Flask 会在 templates 文件夹内寻找模板。因此，如果你的应用是
     /templates
         /hello.html
 ```
+
+### 7、请求对象
+
+通过 `method` 属性可以操作当前请求方法，通过使用 `form` 属性处理（在 POST或者PUT请求中传输的）表单数据
+
+例如：
+
+``` python
+from flask import Flask
+from flask import request
+from flask import render_template
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+	error = None
+	if request.method == 'POST':
+		if valid_login(request.form['username'], request.form['password']):
+			return log_the_user_in(request.form['username'])
+		else:
+		    error = 'Invalid username/password'
+    return render_template('login.html', error=error)
+```
+
+获取 GET 方法中的参数：
+
+    searchword = request.args.get('key', '')
+    
+与上面会自动生成一个 HTTP 400 Bad Request 不同，这里如果出现 *keyError* 错误，需要自行捕捉以提升用户体验。
 
 
 
