@@ -204,6 +204,19 @@ def page_not_found(error):
 3. 如果返回的是一个元组，那么元组中的项目可以提供额外的信息。元组中必须至少 包含一个项目，且项目应当由 (response, status, headers) 或者 (response, headers) 组成。 status 的值会重载状态代码， headers 是一个由额外头部值组成的列表或字典。
 4. 如果以上都不是，那么 Flask 会假定返回值是一个有效的 WSGI 应用并把它转换为 一个响应对象
 
+### 12、日志
+
+Flask 0.3 后就已经配置好一个日志工具。logger 是一个标准的 Logger 类，下面是一些调用的实例
+
+``` Python
+app.logger.debug('A value for debugging')
+app.logger.warning('A warning occurred (%d apples)', 42)
+app.logger.error('An error occurred')
+```
+
+### 13、WSGI
+
+
 
 
 [学习原文](https://dormousehole.readthedocs.io)
