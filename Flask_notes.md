@@ -1,6 +1,6 @@
 # 【整理】Flask 学习笔记之一
 
-
+这是学习 flask 的第一篇笔记，重在快速概览，了解上手的一些基础知识。
 
 ### 1、如何启动 falsk
 
@@ -41,10 +41,58 @@ $ python -m flask run
 
 `@app.route('/projects/')` 和 `@app.route('/about')` 只有一个斜杠的区别，前者如果在地址中未加斜杠，flask 也会帮你重定向到正确位置，但后者如果加了斜杠则会 404 错误！
 
+### 4、URL构建
+`url_for()`函数用于构建指定函数的URL。为什么用它呢？
+
+- 翻转通常比硬编码URL的表述性更好
+- 便于集中处理，减少散落
+- URL创建会处理特殊字符的转移和 Unicode 数据
+- 生产的路径总是绝对路径，可以避免相对路径产生副作用
+- 即是应用不在URL根路径，那么它也会妥善处理 
+
+### 5、响应不同的HTTP方法
+
+通过装饰器的 Methods 参数来指定响应的方法，例如：
+
+``` python
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST'
+        return your_post()
+    else:
+        return your_get()
+```
+
+### 6、渲染模板
+
+这里 flask 跟 Django 一样，都采用了模板的方式，免去用户自己转义的麻烦。一个简单例子：
+
+``` python
+from flask import render_template
+
+@app.route('/hello/')
+@app.route('/hello/<name>')
+def hello(name=None):
+    return render_template('hello.html', name=name)
+```
+Flask 会在 templates 文件夹内寻找模板。因此，如果你的应用是一个模块， 那么模板文件夹应该在模块旁边；如果是一个包，那么就应该在包里面：
+
+情形 1 : 一个模块:
+
+``` Shell
+/application.py
+/templates
+    /hello.html
+```
+情形 2 : 一个包:
+
+``` Shell
+/application
+    /__init__.py
+    /templates
+        /hello.html
+```
 
 
 
-
-
-
-[参考](https://dormousehole.readthedocs.io)
+[学习原文](https://dormousehole.readthedocs.io)
