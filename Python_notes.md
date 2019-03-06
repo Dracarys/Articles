@@ -1,6 +1,8 @@
 # 【整理】Python 笔记
 
-### 1. Python虚拟环境
+Python 其实已经断断续续使用很久了，也写过博客项目和小的爬虫项目，但是因为不是主要的开发语言，有些知识点总是随看随忘，如今创笔记一篇，与遗忘抗争到底。
+
+### 1. Python 虚拟环境
 
 为什么要虚拟环境？虚拟环境可以为每个Python工程提供一个独立的运行环境。
 
@@ -34,7 +36,7 @@ $ source .env/bin/deactivate
 
 
 
-### 2. Python工程目录结构
+### 2. Python 工程目录结构
 
 ``` Python
 .tx/                        如果你使用Transifex进行国际化的翻译工作，创建此目录
@@ -60,3 +62,9 @@ setup.py                    python模块的安装脚本
 ```
 
 [参考](http://www.cnblogs.com/holbrook/archive/2012/02/24/2366386.html)
+
+### 3.with 关键字
+
+with 语句是从 Python 2.5 开始引入的一种与异常处理相关的功能（2.5 版本中要通过 from \_\_future__ import with_statement 导入后才可以使用），从 2.6 版本开始缺省可用（参考 What's new in Python 2.6? 中 with 语句相关部分介绍）。with 语句适用于对资源进行访问的场合，确保不管使用过程中是否发生异常都会执行必要的“清理”操作，释放资源，比如文件使用后自动关闭、线程中锁的自动获取和释放等。(出自参考)
+
+[引用原文](https://www.ibm.com/developerworks/cn/opensource/os-cn-pythonwith/)
