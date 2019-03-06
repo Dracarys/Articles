@@ -121,6 +121,89 @@ def login():
     
 与上面会自动生成一个 HTTP 400 Bad Request 不同，这里如果出现 *keyError* 错误，需要自行捕捉以提升用户体验。
 
+### 8、文件上传
+
+上传文件无比要在HTML表单中设置 `enctype="multipart/form-data"` 属性，浏览器不会上传。
+
+``` Python
+from flask import request
+from werkzeug.utils import secure_filename
+
+@app.route('/upload', methods=['POST', 'GET'])
+def upload_file():
+	if request.method == 'POST':
+		file = request.files['the_file']
+		f.save('/var/www/uploads/' + secure_filename(f.filename))
+```
+上传完毕的文件被存储在内存或文件系统的临时位置，需要自行保存。
+
+### 9、Cookies
+
+读取：
+
+``` Python
+from flask import request
+
+@app.route('/')
+def index():
+    username = request.cookies.get('username')
+    # 通过get取值不会产生 KeyError 问题
+```
+
+写入：
+
+
+``` Python
+from flask import make_response
+
+@app.route('/')
+def index():
+    response = make_response(render_template(...))
+    response.set_cookie('username', 'the username')
+    return response
+```
+
+实际上可以对 response 的 header 进行任何修改。
+
+### 10、重定向和错误
+
+使用 redirect() 函数可以重定向。使用 abort() 可以 更早退出请求，并返回错误代码:
+
+``` Python
+from flask import abort, redirect, url_for
+
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
+    # 注意上面再次用到了 url_for
+
+@app.route('/login')
+def login():
+    abort(401) # 这里提前结束了请求，并返回401错误
+    this_is_never_executed()
+```
+
+通过 `errorhandler()` 装饰器定制出错页面：
+
+``` Python
+from flask import render_template
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404
+```
+
+如此所有的 404 错误都会返回一个固定的页面，有点类似于切面。
+
+### 11、关于响应
+
+通过前面学习可以发现，无论返回内容是字符串，还是 `render_template()` 结果，亦或是 `make_response()`，都会被转换为一个 response，下面是转换的规则：
+
+1. 如果视图返回的是一个响应对象，那么就直接返回它。
+2. 如果返回的是一个字符串，那么根据这个字符串和缺省参数生成一个用于返回的 响应对象。
+3. 如果返回的是一个元组，那么元组中的项目可以提供额外的信息。元组中必须至少 包含一个项目，且项目应当由 (response, status, headers) 或者 (response, headers) 组成。 status 的值会重载状态代码， headers 是一个由额外头部值组成的列表或字典。
+4. 如果以上都不是，那么 Flask 会假定返回值是一个有效的 WSGI 应用并把它转换为 一个响应对象
+
 
 
 [学习原文](https://dormousehole.readthedocs.io)
