@@ -216,7 +216,20 @@ app.logger.error('An error occurred')
 
 ### 13、WSGI
 
+WSGI即 Web Server Gateway Interface，是一个规范，它定义了Web服务器如何与Python应用进行交互，使得Python应用（就是我们借助 flask 写的这个东西）可以和 Web 服务器相互对接。简单概括：
 
+```
+ --------        request       ------------     parsed request        -----------------
+|        |------------------->|            | ----------------------> |                 |
+| Clinet |                    | Web server |                         | Web Application |     
+|        |<-------------------|            | <---------------------- |                 |
+ --------   packaged response  ------------         response          -----------------
 
+```
+WSGI Middleware（中间件）也是WSGI规范的一部分，即处于 Web server 与 Web Application 之间的
 
-[学习原文](https://dormousehole.readthedocs.io)
+### 参考
+
+- [Flask中文文档](https://dormousehole.readthedocs.io)
+- [WSGI简介](https://segmentfault.com/a/1190000003069785)
+- [李雪峰--Python教程](https://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/001432012393132788f71e0edad4676a3f76ac7776f3a16000)
