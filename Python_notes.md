@@ -65,6 +65,20 @@ setup.py                    python模块的安装脚本
 
 ### 3.with 关键字
 
-with 语句是从 Python 2.5 开始引入的一种与异常处理相关的功能（2.5 版本中要通过 from \_\_future__ import with_statement 导入后才可以使用），从 2.6 版本开始缺省可用（参考 What's new in Python 2.6? 中 with 语句相关部分介绍）。with 语句适用于对资源进行访问的场合，确保不管使用过程中是否发生异常都会执行必要的“清理”操作，释放资源，比如文件使用后自动关闭、线程中锁的自动获取和释放等。(出自参考)
+with 语句是从 Python 2.5 开始引入的一种与异常处理相关的功能（2.5 版本中要通过 from \_\_future__ import with_statement 导入后才可以使用），从 2.6 版本开始缺省可用（参考 What's new in Python 2.6? 中 with 语句相关部分介绍）。with 语句适用于对资源进行访问的场合，确保不管使用过程中是否发生异常都会执行必要的“清理”操作，释放资源，比如文件使用后自动关闭、线程中锁的自动获取和释放等。([出自：浅谈 Python 的 with 语句](https://www.ibm.com/developerworks/cn/opensource/os-cn-pythonwith/))
 
-[引用原文](https://www.ibm.com/developerworks/cn/opensource/os-cn-pythonwith/)
+### 4. 模块、包、库
+
+#### 模块（module）
+自我包含且有组织的代码片段。例如：hello.py，这个文件就是一个模块，hello 即为模块名字。
+
+模块属性 `__name__` 的值是由 Python 解释器设定的，如果作为主程序调用，那么就会设为 `__main__`，如果是被倒入的，那么就是文件名。可以通过内建函数 `dir()` 查看模块定义了哪些名字，包括变量名、模块名、函数名等。
+
+#### 包（package）
+包是一个有层次的文件目录接哦股，其中包含了 n 个模块或者 n 个子包，可以构成一个 python 应用的执行环境。
+
+包的目录下必须有一个 `__init__.py` 文件，如果包内某个文件目录下还有 `__init__.py`，那么该目录就是一子包。
+
+### 库（library）
+库不是 Python 的概念，是借鉴自其它编程语言，通常指具有某种功能完备的包或模块的集合。
+
