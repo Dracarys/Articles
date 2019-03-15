@@ -12,6 +12,10 @@
 
 ### 2、nonatomic、atomic区别？atomic为什么不是绝对线程安全的？
 
+### self、super 关键字作用与区别
+
+### volatile 关键字
+
 ### 3、@property 相关
 
 #### 本质是什么？
@@ -24,7 +28,9 @@
 
 #### 在有了自动合成属性实例变量之后， @synthersize还有哪些使用场景？
 
+### 聊聊 Class extension
 
+### isKindOfClass VS isMemberOfClass
 
 ### 关于Block
 
@@ -54,16 +60,7 @@ Block如何修改外部变量：
 
 #### 在block里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个NSInteger，那么是否需要？
 
-#### Objective-C的优点和不足有哪些，对于不足现在有哪些方法可以绕过吗？
-优点：
-- 动态语言
-- 消息转发系统
-- 兼容C，可与C++混编
-缺点：
-- 不支持命名空间，容易出现冲突
-- 不支持运算符重载
-- 不支持多重继承（个人不认为这是缺点）
-- 性能相对较低
+#### 对于Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
 
 #### buildSetting link flag 解决命名冲突。
 
@@ -82,9 +79,97 @@ Block如何修改外部变量：
 指针常量：`int * const ptr` 指针本身是一个敞亮。在声明的时候初始化，里面的值（存放的地址）不能更改；
 常量指针：`const int * ptr`指针本身是一个常量，通过常量地址初始化，它可以再指向另一个常量地址。
 
-``` Python
-print('Hello world')
+### 运行完Test函数后会有什么结果
+
+``` C
+void getMemory(char *p) {
+	p = (char *)malloc(100);
+}
+
+void test(void) {
+	char *str = NULL;
+	getMemory(str);
+	strcpy(str, "hello, world");
+	printf(str);
+}
 ```
+参考答案：程序崩溃，应为 `getMemory()` 并不能传递动态内存，Test 函数中的 str 一直都是 NULL，copy将发生错误，导致崩溃
+
+另一个
+
+``` C
+void getMemory(char *p) {
+	char p[] = "hello world";
+	return p;
+}
+
+void test(void) {
+	char *str = NULL;
+	str = getMemory();
+	printf(str);
+}
+```
+参考答案：可能乱码。因为 `getMemory()` 返回的是 “栈内存” 指针，该指针的地址不是 NULL，但其原先的内容已经被清除了，新内容不可知。
+
+再一个：
+
+``` C
+void getMemory(char **p, int num) {
+	*p = (char *)malloc(num);
+}
+
+void test(void) {
+	char *str = NULL;
+	getMemory(&str, 100);
+	strcpy(str, "hello");
+	printf(str);
+}
+```
+参考答案：输出 “hello”，单丝会导致内存泄漏
+
+还一个：
+
+``` C
+void test(void) {
+	char *str = (char *)malloc(100);
+	strcpy(str, "hello");
+	free(str);
+	if (str != NULL) {
+		strcpy(str, "world");
+		printf(str);
+	}
+}
+```
+参考答案：篡改动态内存区的内容，后果难以预料，非常危险，因为 `free` 之后，str成为野指针，条件语句将不能按预定逻辑运行。
+
+
+## 二、关于 Swift
+
+### 什么是 Optional 类型，它用来解决什么问题？
+
+#### 什么情况下不得不使用隐式拆包？为什么？
+
+#### 可选类型解包的方式有哪些？安全性如何？
+
+### 什么时候用 Structure，什么时候用 Class
+
+### 什么是泛型？用来解决什么问题的？
+
+### 闭包是引用类型吗？
+
+### 搜索关键词 Swift Interview Questions
+
+### what is the type of x? And what is its value?
+
+``` Swift
+let d = ["john": 23, "james": 24, "vincent": 34, "louis": 29]
+let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
+```
+
+### what's the differences between `unowned` and `weak`?
+
+- unowned: the reference is assumed to always have a value during its lifetime - as a consequence, the property must be of non-optional type
+- weak: at some point it's possible for the reference to have no value - as a consequence, the property must be of optional type.
 
 
 
@@ -143,6 +228,11 @@ print('Hello world')
 
 ### class的载入过程
 
+### 如何访问并修改一个类的私有属性
+
+1. 通过 KVC 获取
+2. 通过 runtime 访问并修改私有属性
+
 ### weak实现机制？为什么对象释放后会自动置为nil？
 
 ### autorealse 如何实现的
@@ -200,13 +290,19 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 #### runloop和线程的关系？各个mode是做什么的？如何实现一个runloop
 
+#### 用过NSOperationQueue么？如果用过或者了解的话，为什么要使用 NSOperationQueue，实现了什么？跟 GCD 之间的区别和类似得地方
+
 
 
 ### 数据库
 
 #### CoreData的原理，与SQLite相比优劣？
 
+#### CoreData的6个成员类
+
 #### CoreData 多线程中处理大量数据同步时的操作？
+
+#### NSpersistentStoreCoordinator，NSManagedObjectContext 和 NSManagedObject 中的哪些需要在线程中创建或者传递？你用过什么样的策略实现的？
 
 #### SQLite中插入特殊字符的方法和接受的处理方法？
 
@@ -230,6 +326,8 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 ### 单例
 
 ### Delegate、Notification、KOV的区别，优缺点
+
+#### NSNotification和KVO的区别和用法是什么？什么时候应该使用通知，什么时候应该使用KVO，它们的实现上有什么区别吗？如果用protocol和delegate（或者delegate的Array）来实现类似的功能可能吗？如果可能，会有什么潜在的问题？如果不能，为什么？
 
 ### 设计一个方案来检测KVO的同步一步问题，willChange和didChange的不同点
 
@@ -256,6 +354,8 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 ### 项目组件化用过吗？怎么接耦的？[解答](http://www.code4app.com/blog-822715-1562.html)
 
+### 你实现过一个框架或者库以供别人使用么？如果有，请谈一谈构建框架或者库时候的经验；如果没有，请设想和设计框架的public的API，并指出大概需要如何做、需要注意一些什么方面，来使别人容易地使用你的框架
+
 
 ## CocoTouch
 
@@ -271,6 +371,16 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 ### View哪些属性时 animatable 的？
 
+### LayouSubviews 何时会被调用？
+
+- 初始化时不会触发
+- 滚动 UIScrollView 时会触发
+- 旋转 UIScreen 时会触发
+- 当 view 的 frame 发生变化时会触发
+- 
+
+### 为什么动画完成后，layer会恢复到原先的状态？
+
 #### 给一个View设置圆角的方法有哪些，各有什么不同？
 
 #### 响应链、如何扩大View的响应范围
@@ -284,6 +394,10 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 #### 一般使用的图标内存为多大？200x300的图片，内存应该占用多少比较合理？
 
 #### 自线程中调用connection方法，为什么不回调？没加入runloop，子线程被销毁了
+
+#### UI框架和CA、CG框架的关系是什么？做过哪些内容？
+
+#### Quartz 框架
 
 
 ## iOS SDK
@@ -299,6 +413,8 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 ### 静态库和动态库之间的区别
 
 ### iOS从什么时候开始支持动态库的？
+
+### iOS 的签名机制如何？
 
 
 
@@ -321,21 +437,42 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 ### 从点击图标到应用启动的过程？
 
+### DSYM文件是什么，你是如何分析的？
+
+### 如何把异步线程转换成同步任务进行单元测试？[参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
+
 
 
 
 ### 操作系统
 
 #### 堆和栈的区别，为什么要分堆和栈？如何优化？那种会造成内存碎片化？
-管理方式：对于栈来讲，是由编译器自动管理，无需我们手工控制；对于堆来说，释放工作由程序员控制，容易产生memory leak。
-申请大小：
-栈： 在Windows下,栈是向低地址扩展的数据结构，是一块连续的内存的区域。这句话的意思是栈顶的地址和栈的最大容量是系统预先规定好的，在 WINDOWS下，栈的大小是2M（也有的说是1M，总之是一个编译时就确定的常数），如果申请的空间超过栈的剩余空间时，将提示overflow。因 此，能从栈获得的空间较小。
-堆：堆是向高地址扩展的数据结构，是不连续的内存区域。这是由于系统是用链表来存储的空闲内存地址的，自然是不连续的，而链表的遍历方向是由低地址向高地址。堆的大小受限于计算机系统中有效的虚拟内存。由此可见，堆获得的空间比较灵活，也比较大。
-碎片问题：对于堆来讲，频繁的new/delete势必会造成内存空间的不连续，从而造成大量的碎片，使程序效率降低。对于栈来讲，则不会存在这个问题，因为栈是先进后出的队列，他们是如此的一一对应，以至于永远都不可能有一个内存块从栈中间弹出
-分配方式：堆都是动态分配的，没有静态分配的堆。栈有2种分配方式：静态分配和动态分配。静态分配是编译器完成的，比如局部变量的分配。动态分配由alloca函数进行分配，但是栈的动态分配和堆是不同的，他的动态分配是由编译器进行释放，无需我们手工实现。
-分配效率：栈是机器系统提供的数据结构，计算机会在底层对栈提供支持：分配专门的寄存器存放栈的地址，压栈出栈都有专门的指令执行，这就决定了栈的效率比较高。堆则是C/C++函数库提供的，它的机制是很复杂的
+- 栈区(stack)由编译器自动分配释放 ,存放方法(函数)的参数值, 局部变量的值等，栈是向低地址扩展的数据结构，是一块连续的内存的区域。即栈顶的地址和栈的最大容量是系统预先规定好的。
+
+- 堆区(heap)一般由程序员分配释放, 若程序员不释放,程序结束时由OS回收，向高地址扩展的数据结构，是不连续的内存区域，从而堆获得的空间比较灵活。
+
+- 碎片问题：对于堆来讲，频繁的new/delete势必会造成内存空间的不连续，从而造成大量的碎片，使程序效率降低。对于栈来讲，则不会存在这个问题，因为栈是先进后出的队列，他们是如此的一一对应，以至于永远都不可能有一个内存块从栈中间弹出.
+
+- 分配方式：堆都是动态分配的，没有静态分配的堆。栈有2种分配方式：静态分配和动态分配。静态分配是编译器完成的，比如局部变量的分配。动态分配由alloca函数进行分配，但是栈的动态分配和堆是不同的，他的动态分配是由编译器进行释放，无需我们手工实现。
+
+- 分配效率：栈是机器系统提供的数据结构，计算机会在底层对栈提供支持：分配专门的寄存器存放栈的地址，压栈出栈都有专门的指令执行，这就决定了栈的效率比较高。堆则是C/C++函数库提供的，它的机制是很复杂的。
+
+- 全局区(静态区)(static),全局变量和静态变量的存储是放在一块 的,初始化的全局变量和静态变量在一块区域, 未初始化的全局变量和未初始化的静态变量在相邻的另一块区域。程序结束后有系统释放。
+
+- 文字常量区—常量字符串就是放在这里的。程序结束后由系统释放。
+
+- 程序代码区—存放函数体的二进制代码
 
 #### 线程和进程的区别，内存共享、进程买哦树、写时复制、操作系统启动《深入理解计算机系统》
+
+-  一个程序至少要有进城,一个进程至少要有一个线程.
+进程:资源分配的最小独立单元,进程是具有一定独立功能的程序关于某个数据集合上的一次运行活动,进程是系统进行资源分配和调度的一个独立单位.
+- 线程:进程下的一个分支,是进程的实体,是CPU调度和分派的基本单元,它是比进程更小的能独立运行的基本单位,线程自己基本不拥有系统资源,只拥有一点在运行中必不可少的资源(程序计数器、一组寄存器、栈)，但是它可与同属一个进程的其他线程共享进程所拥有的全部资源。
+- 进程和线程都是由操作系统所体会的程序运行的基本单元，系统利用该基本单元实现系统对应用的并发性。
+- 进程和线程的主要差别在于它们是不同的操作系统资源管理方式。进程有独立的地址空间，一个进程崩溃后，在保护模式下不会对其它进程产生影响，而线程只是一个进程中的不同执行路径。线程有自己的堆栈和局部变量，但线程之间没有单独的地址空间，一个线程死掉就等于整个进程死掉，所以多进程的程序要比多线程的程序健壮，但在进程切换时，耗费资源较大，效率要差一些。
+- 但对于一些要求同时进行并且又要共享某些变量的并发操作，只能用线程，不能用进程。
+
+#### 静态常量去访问的过程
 
 #### 进程间如何通信，方式有哪些
 
@@ -417,7 +554,7 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 ### Kingfisher
 
-### Pod
+### Pod 的工作原理
 
 #### Pod update和 Pod install的区别
 
@@ -512,3 +649,10 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 ### 如何防止别人反编译你的 App？
 
 	以 Clang 和 LLVM 为例，什么是静态语言和动态语言的区别？
+	
+## Git
+
+### 常用命令
+
+
+[iOS-Developer-and-Designer-Interview-Questions](https://github.com/9magnets/iOS-Developer-and-Designer-Interview-Questions)
