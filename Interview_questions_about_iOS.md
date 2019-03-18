@@ -439,6 +439,8 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 ### DSYM文件是什么，你是如何分析的？
 
+### 如果进行网络、内存、性能优化？
+
 ### 如何把异步线程转换成同步任务进行单元测试？[参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
 
 
