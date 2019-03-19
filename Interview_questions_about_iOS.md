@@ -1,36 +1,99 @@
-# iOS 面试题
+# Interview questions of iOS
 
-## 一、关于 Objective-C
+## 1 Objective-C
 
-### 1、Ojective-C的对象模型
+### 1.1 Objective-C 对象
+Objective-C 是基于 C 实现的，因此是 C 的超集，通过下面的一些定义可以发现：objc中所有关于类的实现都是基于结构体的。
 
-#### 一个 Objective-C 对象的结构？
+下面是 `obj.h` 的定义：
 
-#### 一个 Objective-C 对象是如何进行内存布局的？有父类的情况呢？
+``` Objective-C
+#if !OBJC_TYPES_DEFINED
+/// An opaque type that represents an Objective-C class.
+typedef struct objc_class *Class;
 
-#### 一个 Objective-C 对象的 isa 指针指向什么？有什么作用？
+/// Represents an instance of a class.
+struct objc_object {
+    Class _Nonnull isa  OBJC_ISA_AVAILABILITY;
+};
 
-### 2、nonatomic、atomic区别？atomic为什么不是绝对线程安全的？
+/// A pointer to an instance of a class.
+typedef struct objc_object *id;
+#endif
 
-### self、super 关键字作用与区别
+/// An opaque type that represents a method selector.
+typedef struct objc_selector *SEL;
 
-### volatile 关键字
+/// A pointer to the function of a method implementation. 
+#if !OBJC_OLD_DISPATCH_PROTOTYPES
+typedef void (*IMP)(void /* id, SEL, ... */ ); 
+#else
+typedef id _Nullable (*IMP)(id _Nonnull, SEL _Nonnull, ...); 
+#endif
+```
+
+#### 1.1.1关于 Class 的实现：
+
+``` Objective-C
+struct objc_class 
+{
+    Class isa;
+    Class super_class;// 指向父类                                   
+    const char *name;                                         
+    long version;                                             
+    long info;                                                
+    long instance_size;                                       
+    struct objc_ivar_list *ivars;// internal varables? 成员变量列表                             
+    struct objc_method_list **methodLists; // 方法列表                  
+    struct objc_cache *cache; // 方法缓存                              
+    struct objc_protocol_list *protocols; // 协议                 
+}
+```
+
+#### 1.1.2 isa 指针指向什么？有什么作用？
+
+指向：实例的 `isa` 指针指向其类，其类指向元类，元类指向根元类，根元类指向自己。
+
+作用：运行时借此可以查看实例的类，查找类定义了哪些方法，进而找到实现。
+
+#### 1.1.3 `isKindOfClass` VS `isMemberOfClass`
+
+
+### 1.2 Objective-C 的关键字
+
+#### 1.2.1 @property 属性
+
+属性本质就是声明一个存取器（getter、setter），编译器会根据声明自动生成实现。声明时涉及很多关键字，这些关键字会影响到存取器最终的行为。
+
+默认的关键字有：Strong/retain, assign, atomic, nonnull。
+
+##### nonatomic、atomic区别？atomic为什么不是绝对线程安全的？
+`atomic` 和 `nonatomic` 的区别向编译器表明，生成的 `getter` 和 `setter` 方法是否为原子操作，即是否需要多线程安全特性，默认是 `atomic`。
+
+修饰一些可变集合时不是安全的。
+##### @synthesize 和 @dynamic 分别有什么作用？有了自动合成属性实例变量之后， @synthersize还有哪些使用场景？
+
+- synthesize
+- dynamic 
+
+#### 1.2.2 self、super 关键字作用与区别
+
+- self 是类的隐藏参数，指向调用方法的实例，与 this 类似，区别是工厂方法也可以使用。
+- supper 时一个 Magic 关键字，它本质上是一个编译器标识符，告诉编译器到该类的父类中查找该方法。
+
+#### 1.2.3 volatile 关键字
+
+
 
 ### 3、@property 相关
 
-#### 本质是什么？
 
 #### ivar、getter、setter 是如何生成并添加到这个类中的？
 
-#### @proptery 默认的属性关键字是什么？
-
-#### @synthesize 和 @dynamic 分别有什么作用
-
-#### 在有了自动合成属性实例变量之后， @synthersize还有哪些使用场景？
 
 ### 聊聊 Class extension
 
-### isKindOfClass VS isMemberOfClass
+
 
 ### 关于Block
 
@@ -93,7 +156,7 @@ void test(void) {
 	printf(str);
 }
 ```
-参考答案：程序崩溃，应为 `getMemory()` 并不能传递动态内存，Test 函数中的 str 一直都是 NULL，copy将发生错误，导致崩溃
+*参考答案：程序崩溃，应为 `getMemory()` 并不能传递动态内存，Test 函数中的 str 一直都是 NULL，copy将发生错误，导致崩溃*
 
 另一个
 
@@ -109,7 +172,7 @@ void test(void) {
 	printf(str);
 }
 ```
-参考答案：可能乱码。因为 `getMemory()` 返回的是 “栈内存” 指针，该指针的地址不是 NULL，但其原先的内容已经被清除了，新内容不可知。
+*参考答案：可能乱码。因为 `getMemory()` 返回的是 “栈内存” 指针，该指针的地址不是 NULL，但其原先的内容已经被清除了，新内容不可知*。
 
 再一个：
 
@@ -125,7 +188,7 @@ void test(void) {
 	printf(str);
 }
 ```
-参考答案：输出 “hello”，单丝会导致内存泄漏
+*参考答案：输出 “hello”，单丝会导致内存泄漏*
 
 还一个：
 
@@ -291,6 +354,8 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 #### runloop和线程的关系？各个mode是做什么的？如何实现一个runloop
 
 #### 用过NSOperationQueue么？如果用过或者了解的话，为什么要使用 NSOperationQueue，实现了什么？跟 GCD 之间的区别和类似得地方
+
+### Dispatch_p
 
 
 
