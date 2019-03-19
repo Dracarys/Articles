@@ -57,7 +57,7 @@ struct objc_class
 作用：运行时借此可以查看实例的类，查找类定义了哪些方法，进而找到实现。
 
 #### 1.1.3 `isKindOfClass` VS `isMemberOfClass`
-
+#?
 
 ### 1.2 Objective-C 的关键字
 
@@ -73,8 +73,19 @@ struct objc_class
 修饰一些可变集合时不是安全的。
 ##### @synthesize 和 @dynamic 分别有什么作用？有了自动合成属性实例变量之后， @synthersize还有哪些使用场景？
 
-- synthesize
-- dynamic 
+- synthesize 告知编译器，需要自动合成属性实例变量，2.0 之后已经可以自动合成了，
+- dynamic 告知编译器不要自动合成，我自己来实现。
+
+有了自动合成需要的地方：
+
+- eadwrite property with custom getter and setter
+- readonly property with custom getter
+- when using @dynamic propertyName, the property won't be automatically synthesized (pretty obvious, since @dynamic and @synthesize are mutually exclusive)
+- properties declared in a @protocol
+- properties declared in a category
+- overridden properties，when you override a property of a superclass, you must explicitly synthesize it
+
+[参考](https://stackoverflow.com/questions/19784454/when-should-i-use-synthesize-explicitly)
 
 #### 1.2.2 self、super 关键字作用与区别
 
@@ -83,16 +94,23 @@ struct objc_class
 
 #### 1.2.3 volatile 关键字
 
+#### 1.3 ivar、getter、setter 是如何生成并添加到这个类中的？
+
+#### 1.4 聊聊 Class extension
+
+#### 1.5 designated initializer，怎么用，注意内容？
+即指定构造器，该宏时在 Swift 出现后出现的，用法与 SWift 的指定构造器用法相同：
+
+1. 子类如果有指定构造器，那么该指定构造器必须调用直接父类的指定构造器
+2. 如果子类有指定构造器，那么便利构造器必须调用自己的其它构造器（包括制定构造器及其它便利构造器），不能调用supper的普通构造器
+3. 子类如何好实现了指定构造器，那么必须实现所有父类的指定构造器。
+
+### instancetype 和 id 区别？
 
 
-### 3、@property 相关
+#### 多态
 
-
-#### ivar、getter、setter 是如何生成并添加到这个类中的？
-
-
-### 聊聊 Class extension
-
+#### Objective-C的反射机制
 
 
 ### 关于Block
@@ -113,13 +131,7 @@ Block如何修改外部变量：
 
 ### 函数指针
 
-### designated initializer，怎么用，注意内容？
 
-### instancetype 和 id 区别？
-
-#### 多态
-
-#### Objective-C的反射机制
 
 #### 在block里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个NSInteger，那么是否需要？
 
