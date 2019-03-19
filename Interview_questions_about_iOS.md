@@ -87,30 +87,38 @@ struct objc_class
 
 [参考](https://stackoverflow.com/questions/19784454/when-should-i-use-synthesize-explicitly)
 
-#### 1.2.2 self、super 关键字作用与区别
+##### ivar、getter、setter 是如何生成并添加到这个类中的？
+
+是由编译器在编译时根据声明的属性自动合成的，同时会想类中插入一个以“_"开头，与属性名同名的实例变量。
+
+#### 1.2.2 其他关键字
+
+##### self、super 关键字作用与区别
 
 - self 是类的隐藏参数，指向调用方法的实例，与 this 类似，区别是工厂方法也可以使用。
 - supper 时一个 Magic 关键字，它本质上是一个编译器标识符，告诉编译器到该类的父类中查找该方法。
 
-#### 1.2.3 volatile 关键字
+##### instancetype 和 id 区别？
 
-#### 1.3 ivar、getter、setter 是如何生成并添加到这个类中的？
+instancetype 可以最大化的利用编译器的检查功能，协助排查一些类型错误问题，而 id 则不具备。
 
-#### 1.4 聊聊 Class extension
+##### volatile 关键字
 
-#### 1.5 designated initializer，怎么用，注意内容？
-即指定构造器，该宏时在 Swift 出现后出现的，用法与 SWift 的指定构造器用法相同：
+##### designated initializer，怎么用，注意内容？
+即指定构造器，该宏是在 Swift 出现后新增的，用法与 SWift 的指定构造器用法相同：
 
 1. 子类如果有指定构造器，那么该指定构造器必须调用直接父类的指定构造器
 2. 如果子类有指定构造器，那么便利构造器必须调用自己的其它构造器（包括制定构造器及其它便利构造器），不能调用supper的普通构造器
 3. 子类如何好实现了指定构造器，那么必须实现所有父类的指定构造器。
 
-### instancetype 和 id 区别？
+#### 1.3 聊聊 Class extension
 
+- 可以将暴露给外面的只读属性改为读写属性，方便内部使用（但我个人更推荐在内部尽量直接使用变量）
+- 可以添加一些私有的实例变量、私有的属性、私有方法等你不想暴露给外部的内容。
 
 #### 多态
 
-#### Objective-C的反射机制
+
 
 
 ### 关于Block
@@ -136,16 +144,43 @@ Block如何修改外部变量：
 #### 在block里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个NSInteger，那么是否需要？
 
 #### 对于Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
-
+最大的优点是它的运行时特性，不足是没有命名空间，对于命名冲突，可以使用长命名法或特殊前缀解决，如果是引入的第三方库之间的命名冲突，可以使用link命令及flag解决冲突。
 #### buildSetting link flag 解决命名冲突。
 
 #### 实现一个NSString类
 
 #### Objective-C中类方法和实例方法有什么本质的区别和联系？
 
+类方法只能由类来调用，不能访问成员变量，实例方法只能由实例来调用，可以访问成员变量。类方法为该类所有对象共享
+
 #### _objc_msgForward 函数是做什么的，直接调用会发生什么？
 
+消息转发，通常是在目标上无法找到相应方法时处罚；直接调用将跳过查找 IMP 的过程。操作不当容易引起崩溃。
+
 #### 手动出发KVO
+
+首先关系默认：
+``` Objective-C
++ (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key
+{
+    
+    if ([key isEqualToString:@"想要手动控制的key"])return NO;
+    
+    return [super automaticallyNotifiesObserversForKey:key];
+}
+```
+然后重写 setter ：
+
+``` Objective-C
+- (void)setTmpStr:(NSString *)tmpStr
+{
+    [self willChangeValueForKey:@"tmpStr"];
+    
+    _tmpStr = tmpStr;
+    
+    [self didChangeValueForKey:@"tmpStr"];
+}
+```
 
 ### 指针
 
@@ -222,15 +257,20 @@ void test(void) {
 
 ### 什么是 Optional 类型，它用来解决什么问题？
 
+表示可能为空值，解决空值崩溃的问题
+
 #### 什么情况下不得不使用隐式拆包？为什么？
 
 #### 可选类型解包的方式有哪些？安全性如何？
 
 ### 什么时候用 Structure，什么时候用 Class
+值类型和引用类型的区别
 
 ### 什么是泛型？用来解决什么问题的？
 
+
 ### 闭包是引用类型吗？
+是引用类型，不会发生复制。
 
 ### 搜索关键词 Swift Interview Questions
 
@@ -254,13 +294,22 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 
 #### 有哪些导致崩溃的常见问题？如何进行预防？
 
+- 取空值，自定义取值方法，添加到category中
+- 越界，取值时始终进行验证，且永远不要相信后台反馈
+- 不能识别到方法，向错误类型发送消息，预防方法同上，此外还可以通过runtime处理消息转发方法，来减少崩溃
+
 #### 内存泄漏的原因有哪些？如何解决？
+
+- 创建后未释放，通过正确释放解决，重点关注 new、create等方法名
+- 单位时间开辟大量空间，添加 autoreleasepool
+- Corefoundation方法使用不当，持有权转移错误
+- 循环引用，添加weak中间代理
 
 #### 深拷贝、浅拷贝
 
 #### BAD_ACCESS在什么情况下出现？如何调试？
 
-读取了一个不是你管控的内存地址，通常是由于野指针导致的
+读取了一个不是你管控的内存地址，通常是读取了一个已释放的指针
 
 启动僵尸对象，然后结合发生错误时的操作，逐步定位问题根源。
 
@@ -268,7 +317,7 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 ## Runtime
 
 ### 消息相关
-
+#### Objective-C的反射机制
 #### 为什么 Objective—C的方法不叫调用叫发消息：
 
 #### 给一个对象发消息的过程如何，或者说如何通过 selector 找到对应的 IMP 地址：
@@ -277,9 +326,28 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 
 #### 如果消息发送失败有哪些补救措施：
 
+- 你是不是发错了，要不要转发给别人吗？
+- 没人能处理，要不要添加一个吗？
+- 全部内容都在这，你看着处理吧
+
 ### 类别（category）
 
 #### 什么是类别？实现原理如何？
+
+``` C++
+typedef struct category_t *Category;
+
+struct category_t {
+    const char *name;	//category名称
+    classref_t cls; 	//要拓展的类
+    struct method_list_t *instanceMethods; //给类添加的实例方法的列表
+    struct method_list_t *classMethods;  //给类添加的类方法的列表
+    struct protocol_list_t *protocols;  //给类添加的协议的列表
+    struct property_list_t *instanceProperties;  //给类添加的属性的列表
+};
+```
+
+[参考](https://juejin.im/post/5a9d14856fb9a028e52d5568)
 
 #### 类别有哪些作用，有什么局限性？为什么？
 
@@ -299,7 +367,8 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 
 如何突破局限：
 
-#### 使用runtime Associate方法关联的对象，需要在主对象dealloc的时候释放吗？
+#### 使用 runtime Associate 方法关联的对象，需要在主对象dealloc的时候释放吗？
+无论在MRC下还是ARC下均不需要在主对象dealloc的时候释放，被关联的对象在生命周期内要比对象本身释放的晚很多，它们会在被 NSObject -dealloc 调用的object_dispose()方法中释放。
 
 ### class的载入过程
 
@@ -309,6 +378,7 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 2. 通过 runtime 访问并修改私有属性
 
 ### weak实现机制？为什么对象释放后会自动置为nil？
+运行时会维护一张 weak 哈希表， weak对象的地址作为 key，该表记录了每个对象的引用计数，当计数为 0 时就会处罚销毁机制，
 
 ### autorealse 如何实现的
 
@@ -317,15 +387,23 @@ autoreleasePool 是一个Objective-C的义仲内存自动回收机制，它可�
 autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLoop 事件即将结束之前（pop）
 
 #### 子线程中需要加autoreleasepool吗？什么时间释放？
+每个线程都默认有一个autoreleasepool，在线程即将退出前释放。但是如果该线程会产生大量的内存碎片，那么建议创建runloop以及自己的释放池，以便可以及时释放。
 
 #### autorelease 和 @autoreleasepool区别
 
 ### 如何hook一个对象的方法，而不影响其它对象。
 
+methodswazzing，方法替换，有待进一步验证。
+
 ### 设计一个检测主线程卡顿的方案
+
+- 基于runloop，验证一个循环是不是在1/60秒内完成；
+- 我们启动一个worker线程，worker线程每隔一小段时间（delta）ping以下主线程（发送一个NSNotification），如果主线程此时有空，必然能接收到这个通知，并pong以下（发送另一个NSNotification），如果worker线程超过delta时间没有收到pong的回复，那么可以推测UI线程必然在处理其他任务了，此时我们执行第二步操作，暂停UI线程，并打印出当前UI线程的函数调用栈
 
 ### 能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
 
+1. 不可以，因为结构的便宜已经固定了；
+2. 可以，这是新建，当然可以声明并定义了
 
 ## 多线程
 
@@ -345,12 +423,21 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 #### 互斥锁、自旋锁优缺点？
 
+- 互斥锁的代价更高，因为线程有休眠，要唤醒，但是安全性更好，
+- 自旋锁代价小，效率高，但是有优先级反转的可能，且比较耗资源
+
 #### 互斥锁、自旋锁是如何实现的？ 
 
 #### 分别用 C/C++ 和 Objective-C 实现互斥锁、自旋锁。
 
 #### 死锁档四个条件、优先级翻转
 
+1. 条件互斥；
+2. 占有和等待条件；
+3. 不可抢占；
+4. 环路等待；
+
+优先级反转是指：如果一个低优先级的线程获得锁并访问共享资源，这时一个高优先级的线程也尝试获得这个锁，它会处于 spin lock 的忙等状态从而占用大量 CPU。此时低优先级线程无法与高优先级线程争夺 CPU 时间，从而导致任务迟迟完不成、无法释放 lock
 #### 什么时候处理多线程，几种方式，优缺点？
 
 #### 系统有哪些在后台运行的Thread
@@ -363,7 +450,22 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 #### 开启一条线程的方法？线程可以取消吗？
 
+- NSThread
+- pThread
+- GCD
+- NSOperation
+
+一旦提交即不可取消，为提交执行的可以。
+
 #### runloop和线程的关系？各个mode是做什么的？如何实现一个runloop
+
+防止线程退出，
+
+```
+do {
+
+} while()
+```
 
 #### 用过NSOperationQueue么？如果用过或者了解的话，为什么要使用 NSOperationQueue，实现了什么？跟 GCD 之间的区别和类似得地方
 
@@ -462,15 +564,28 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 #### 响应链、如何扩大View的响应范围
 
+view 有一个是否响应事件的方法，重写该方法，对指定范围内的方法返回yes即可。
+
 #### 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView和UIResponse的关系是什么？
 
+Window,然后依次向下传递，
+
+uiview 继承自UIResponse 
 #### 直接用UILabel和自己用DrawRect画UILabel，那个性能好，为什么？那个占用的内存少？为什么？
+直接用更好，调用 coreGraphics 会导致离屏渲染，
 
 #### iOS的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
 
+可以执行，
+- 自己主动保活，如播放无音音频文件；
+- 通过notification 推送唤醒。
+
+可以，有短暂的保存时间。
+
 #### 一般使用的图标内存为多大？200x300的图片，内存应该占用多少比较合理？
 
-#### 自线程中调用connection方法，为什么不回调？没加入runloop，子线程被销毁了
+#### 自线程中调用connection方法，为什么不回调？
+没加入runloop，子线程被销毁了
 
 #### UI框架和CA、CG框架的关系是什么？做过哪些内容？
 
@@ -502,7 +617,11 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 ### 如何检测应用是否卡顿
 
+instrument，animation测试
+
 ### 如何编写单元测试，例如测试一个网络库，如何提高覆盖率
+
+尽量覆盖方法的每一个分支
 
 ### images.xcassetsa和直接使用图片有什么不一样？
 
@@ -515,6 +634,8 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 ### 从点击图标到应用启动的过程？
 
 ### DSYM文件是什么，你是如何分析的？
+
+符号文件，可以通过Xcode解析后，直接定位到问题代码
 
 ### 如果进行网络、内存、性能优化？
 
@@ -561,7 +682,11 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 #### 一个进程有哪些区
 
+代码区、数据区、堆区、共享库、栈区、
+
 #### 内核态和用户态的区别，为什么要这样分
+
+隔离，
 
 #### 为什么要有page cache，操作系统怎么设计的Page cache
 
@@ -619,7 +744,13 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 
 ### AFNetworking，是否支持IPv6
 
+3.0之后支持
+
 ### AFNetwoking 为什么添加一条常驻线程？
+网络请求是异步的，这会导致获取到请求数据时，线程已经退出，代理方法没有机会执行。因此，AFN 的做法是使用一个 runloop 来保证线程不死~
+然而频繁的创建线程并启动runloop肯定会造成内存泄露(runloop 无法停止.线程无法退出)
+所以AFN就创建了一个单例线程,并且保证线程不退出
+[参考](https://www.jianshu.com/p/7170035a18e8)
 
 ### YYKit
 
@@ -652,6 +783,10 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 你如何实现一个可变的哈希表：
 
 #### 一张图片的内存占用大小是由什么决定的
+
+- 色深
+- 颜色空间；
+- 分辨率
 
 #### 实现一个可变数组
 
