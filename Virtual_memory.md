@@ -48,6 +48,53 @@ DRAM 总是回写，不是直写。
 
 ### 9.3.2 页表
 
+为什么需要页表？因为系统需要一种方法来判断一个虚拟页是不是缓存在 DRAM 中了，是，缓存在哪？不是，即不命中，那么这个虚拟页在磁盘的哪个位置？找到后与要牺牲哪个页？页表就是为了解决这些问题而诞生的方案。
+
 页表负责将虚拟页映射到物理页。其实就是一个页表条目（Page Table Entry，PTE）的数组。
 
 ![Page table](./images/page_table.png)
+
+### 9.3.3 页命中
+
+### 9.3.4 缺页
+
+DRAM 混存不命中称为缺页（page fault）
+
+查询页表->为缓存->触发缺页异常->调用内核缺页异常处理->选择牺牲页->将牺牲页复制回磁盘->将目标页复制到原牺牲页的位置->更新页表->返回重新执行导致缺页的指令
+
+交换（swapping）/页面调度（paging）：在磁盘和内存之间传送页的活动。
+
+### 9.3.5 分配页面
+
+### 9.3.6 局部性
+
+抖动（thrashing）页面不断地换进换出。
+
+## 9.4 虚拟内存作为内存管理的工具
+
+操作系统为每个进程提供了一个独立的页表，因而也就是一个独立的虚拟地址空间。
+
+## 9.5 虚拟内存作为内存保护的工具
+
+PTE（Page table entry）上有权限标识。
+
+如果一条指令违反了这些许可条件，那么 CPU 就会触发一个一般保护故障，将控制传递给一个内核中的异常处理程序。Linux shell一般将这种异常报告为“段错误（segmentation fault）
+
+## 9.6 地址翻译
+
+略
+
+## 9.7 案例研究：Intel Core i7/Linux 内存系统
+
+### 9.7.1 Core i7 地址翻译
+
+### 9.7.2 Linux 虚拟内存系统
+
+![Virtual memory of Linux 01](./images/virtual_memory_of_linux_01.png)
+
+![Virtual memory of Linux 02](./images/virtual_memory_of_linux_02.png)
+
+![Page fault of linux](./images/page_fault_of_linux.png)
+
+## 9.8 内存映射
+
