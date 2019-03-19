@@ -130,7 +130,7 @@ CPU异常：
 
 进程地址空间：
 
-![地址空间](./images/Address space.png)
+![Address space](./images/address_space.png)
 
 ### 8.2.4 用户模式和内核模式
 
