@@ -51,13 +51,30 @@ struct objc_class
 ```
 
 #### 1.1.2 isa 指针指向什么？有什么作用？
+实例的 `isa` 指针指向定义它的类，类的 `isa` 指针指向元类（meta class），这是因为在 Objective-C 中，类也是一个对象，这个类对象正是由元类定义的，每个类都有一个独一无二的元类。元类的 `isa` 指针指向根元类，根元类的 `isa` 指针指向自己。
 
-指向：实例的 `isa` 指针指向其类，其类指向元类，元类指向根元类，根元类指向自己。
+所有元类都用基类作为自己的类，对于顶层基类的元类也是如此，只是它指向自己而已
 
-作用：运行时借此可以查看实例的类，查找类定义了哪些方法，进而找到实现。
+元类总是会确保类对象和基类的所有实例和类方法。对于从 `NSObject` 继承下来的类，这意味着所有的 `NSObject` 实例和 `protocol` 方法在所有的类（和meta-class）中都可以使用
+
+上面所描述的关系正式通过 `isa` 指针实现的。
 
 #### 1.1.3 `isKindOfClass` VS `isMemberOfClass`
-#?
+
+``` Objective-C
+// 向上遍历查找，看是否有相同的父类
++ (Bool)isKindOfClass:(Class)cls {
+	for (Class tcls = object_getClass((id)self); tcls; tcls->superclass){
+		if (tcls == cls) return YES;
+	}
+	return NO;
+}
+
+// 直接比较是否与目标为同一个类
++ (BOOL)isMemberOfClass:(Class)cls {
+    return object_getClass((id)self) == cls;
+}
+```
 
 ### 1.2 Objective-C 的关键字
 
@@ -71,6 +88,9 @@ struct objc_class
 `atomic` 和 `nonatomic` 的区别向编译器表明，生成的 `getter` 和 `setter` 方法是否为原子操作，即是否需要多线程安全特性，默认是 `atomic`。
 
 修饰一些可变集合时不是安全的。
+
+##### nonatomic、aoomic 实现？
+
 ##### @synthesize 和 @dynamic 分别有什么作用？有了自动合成属性实例变量之后， @synthersize还有哪些使用场景？
 
 - synthesize 告知编译器，需要自动合成属性实例变量，2.0 之后已经可以自动合成了，
@@ -286,6 +306,9 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 - unowned: the reference is assumed to always have a value during its lifetime - as a consequence, the property must be of non-optional type
 - weak: at some point it's possible for the reference to have no value - as a consequence, the property must be of optional type.
 
+### Swift 应用了面向协议编程？
+
+
 
 
 ### 内存管理
@@ -329,6 +352,10 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 - 你是不是发错了，要不要转发给别人吗？
 - 没人能处理，要不要添加一个吗？
 - 全部内容都在这，你看着处理吧
+
+### msgsend函数参数
+
+### 消息转发哪些步骤可以被利用
 
 ### 类别（category）
 
@@ -399,6 +426,10 @@ methodswazzing，方法替换，有待进一步验证。
 
 - 基于runloop，验证一个循环是不是在1/60秒内完成；
 - 我们启动一个worker线程，worker线程每隔一小段时间（delta）ping以下主线程（发送一个NSNotification），如果主线程此时有空，必然能接收到这个通知，并pong以下（发送另一个NSNotification），如果worker线程超过delta时间没有收到pong的回复，那么可以推测UI线程必然在处理其他任务了，此时我们执行第二步操作，暂停UI线程，并打印出当前UI线程的函数调用栈
+
+### 渲染 UI 为什么要在主线程
+
+
 
 ### 能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
 
@@ -485,6 +516,8 @@ do {
 
 #### SQLite中插入特殊字符的方法和接受的处理方法？
 
+#### SQLite 与 MySQL 区别
+
 #### 如果不用数据库，只使用普通文件，如何设计亿量级别的日志系统？
 
 #### 索引的作用、优缺点，与主键的区别
@@ -510,6 +543,8 @@ do {
 
 ### 设计一个方案来检测KVO的同步一步问题，willChange和didChange的不同点
 
+### kVO在多线程中的行为。
+
 ### 如果现在要实现一个下载功能，如何设计，每个类都觉题做什么？
 
 ### KVC如何实现的
@@ -521,7 +556,6 @@ do {
 
 #### KVC keyPaht 的集合运算符如何使用？
 #### KVC 和 KVO中的 KeyPath一定是属性吗？
-#### 如何关闭默认的KVO的默认实现，并进入自定义的KVO实现？
 
 ### 如何设计一个网络请求库
 
@@ -534,6 +568,10 @@ do {
 ### 项目组件化用过吗？怎么接耦的？[解答](http://www.code4app.com/blog-822715-1562.html)
 
 ### 你实现过一个框架或者库以供别人使用么？如果有，请谈一谈构建框架或者库时候的经验；如果没有，请设想和设计框架的public的API，并指出大概需要如何做、需要注意一些什么方面，来使别人容易地使用你的框架
+
+#### 设计一个监控App启动速度的模块，说下大体的设计思路
+
+#### 如何捕捉Crash，设计思路。
 
 
 ## CocoTouch
@@ -710,7 +748,7 @@ instrument，animation测试
 
 #### HTTP有哪些部分？HTTPS的原理
 
-#### HTTPS 密钥协商交还的过程
+#### HTTPS 密钥协商交还的过程，中间人攻击，即charles抓包的原理
 
 #### HTTP请求有哪些方法？如何选择？
 
@@ -752,6 +790,10 @@ instrument，animation测试
 所以AFN就创建了一个单例线程,并且保证线程不退出
 [参考](https://www.jianshu.com/p/7170035a18e8)
 
+### AFNetworking d reachability是如何检测到网络状态变化的？
+
+### AFNetworking与MKNetworking区别，优劣？
+
 ### YYKit
 
 #### YYAsyncLayer如何进行异步绘制的？
@@ -760,7 +802,7 @@ instrument，animation测试
 
 #### YYModel
 
-### SDWebImage
+### SDWebImage 源码解析
 
 ### Kingfisher
 
@@ -769,6 +811,8 @@ instrument，animation测试
 #### Pod update和 Pod install的区别
 
 #### malloc函数如何实现的
+
+### FB 的Async库都做了什么？
 
 
 
@@ -798,6 +842,8 @@ instrument，animation测试
 
 #### 二分查找的时间复杂度怎么求的？
 
+#### Swift 中 Array是值类型，他有一个copy on wirte的行为，具体怎么实现的？
+
 
 ### 算法相关
 
@@ -824,6 +870,8 @@ instrument，animation测试
 #### 二叉树迭代中序遍历
 
 #### 二叉树层序遍历，按层输出
+#### 平衡二叉树判断
+#### 子树判断
 
 #### 深度有限和广度优先的使用场景
 
