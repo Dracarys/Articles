@@ -40,3 +40,5 @@ atomic 修饰符用来向编译器表明：在生成指令时要保证同一时�
 [关于 atomic 为何不安全](http://www.cocoachina.com/bbs/read.php?tid-1720812-page-1.html)
 
 [Intel support forums](https://software.intel.com/en-us/forums/intel-moderncode-for-parallel-architectures/topic/305924)
+
+[Atomic vs. Non Atomic Properties Crash Course](https://medium.com/@YogevSitton/atomic-vs-non-atomic-properties-crash-course-d11c23f4366c)
