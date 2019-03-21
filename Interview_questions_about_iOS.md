@@ -62,7 +62,7 @@ struct objc_class
 #### 1.1.3 `isKindOfClass` VS `isMemberOfClass`
 
 ``` Objective-C
-// 向上遍历查找，看是否有相同的父类
+// 向上遍历查找，只要该对象的继承链中有目标类就返回 YES
 + (Bool)isKindOfClass:(Class)cls {
 	for (Class tcls = object_getClass((id)self); tcls; tcls->superclass){
 		if (tcls == cls) return YES;
@@ -70,7 +70,7 @@ struct objc_class
 	return NO;
 }
 
-// 直接比较是否与目标为同一个类
+// 取目标的类，然后直接与目标类比较
 + (BOOL)isMemberOfClass:(Class)cls {
     return object_getClass((id)self) == cls;
 }
@@ -89,7 +89,7 @@ struct objc_class
 
 修饰一些可变集合时不是安全的。
 
-##### nonatomic、aoomic 实现？
+##### nonatomic、atomic 实现？
 
 ##### @synthesize 和 @dynamic 分别有什么作用？有了自动合成属性实例变量之后， @synthersize还有哪些使用场景？
 
