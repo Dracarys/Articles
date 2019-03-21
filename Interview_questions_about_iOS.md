@@ -84,26 +84,28 @@ struct objc_class
 
 默认的关键字有：Strong/retain, assign, atomic, nonnull。
 
-##### nonatomic、atomic区别？atomic为什么不是绝对线程安全的？
-`atomic` 和 `nonatomic` 的区别向编译器表明，生成的 `getter` 和 `setter` 方法是否为原子操作，即是否需要多线程安全特性，默认是 `atomic`。
+##### nonatomic、atomic 区别？atomic 为什么不是绝对线程安全的？
+`atomic` 和 `nonatomic` 的区别向编译器表明，生成的 `getter` 和 `setter` 方法是否为原子操作，默认是 `atomic`。
 
-修饰一些可变集合时不是安全的。
+
 
 ##### nonatomic、atomic 实现？
 
+atomic 实际上相当于一个引用计数器，这个大家很熟悉，如果被标记了atomic，那么被标记了的内存本身就有了一个引用计数器，第一个占用这块内存的线程，会给这个计数器+1，在这个线程操作这块内存期间，其他线程在访问这个内存的时候，如果发现“引用计数器”不为0，则阻塞，实际上阻塞并不等于休眠，他是基于cpu轮询片，休眠除非被叫醒，否则无法继续执行，阻塞则不同，每个cpu 轮询片到这个线程的时候都会尝试继续往下执行，可见 阻塞相对于休眠来讲，阻塞是主动的，休眠是被动的，如果引用计数器为0，轮询片到来，则先给这块内存的引用计数器+1，然后再去操作
+
 ##### @synthesize 和 @dynamic 分别有什么作用？有了自动合成属性实例变量之后， @synthersize还有哪些使用场景？
 
-- synthesize 告知编译器，需要自动合成属性实例变量，2.0 之后已经可以自动合成了，
+- synthesize 告知编译器，需要自动合成属性实例变量，已经可以自动合成了，
 - dynamic 告知编译器不要自动合成，我自己来实现。
 
 有了自动合成需要的地方：
 
-- eadwrite property with custom getter and setter
-- readonly property with custom getter
-- when using @dynamic propertyName, the property won't be automatically synthesized (pretty obvious, since @dynamic and @synthesize are mutually exclusive)
-- properties declared in a @protocol
-- properties declared in a category
-- overridden properties，when you override a property of a superclass, you must explicitly synthesize it
+- 自定义了存取器的 readwrite 属性
+- 同理，自定义了 getter 方法的 readonly 属性
+- 声明为 @dynamic 的属性，因为 @dynamic 就是告诉编译器不要管了，自己处理。
+- @protocol 中声明的属性
+- category 中声明的属性
+- 重写过的继承自父类的属性
 
 [参考](https://stackoverflow.com/questions/19784454/when-should-i-use-synthesize-explicitly)
 
@@ -120,9 +122,33 @@ struct objc_class
 
 ##### instancetype 和 id 区别？
 
-instancetype 可以最大化的利用编译器的检查功能，协助排查一些类型错误问题，而 id 则不具备。
+`id` 数据类型可以存储任何类型的对象，编译器也就无法验证类型是否匹配；
+`instancetype` 是 clang3.5 开始提供的一个关键字，表示一个未知的 Objective-C 对象，类似于id。
+按照 Cocoa 的惯例，Objective-C里所有使用init，alloc等名称的方法都会返回一个接受类类型的实例。这些方法被称为“有一个关联的返回类型”的方法，也就是说发给这些方法中的任意一个的消息都会返回一个以相同的静态类型代替接收类类型的一个实例。
+
+一个关联返回类型也可以通过一些方法推断出来。要确定一个方法是否有一个可以被推断出的关联的返回类型，首先要参考驼峰命名法命名的 `selector`中的第一个单词（如`initWithObjects` 中的 init ），其次要看其返回类型与自己的类的类型是否兼容，并且：
+
+- 第一个单词是 `alloc` 或 `new`，并且方法是一个类方法(+开头)
+- 第一个单词是 `autorelease`，`init`，`retain` 或者 `self`，且方法是一个实例方法(-开头)
+
+如果一个拥有关联返回类型的方法被子类方法复写了，那么子类方法必须返回一个与子类类型兼容的类型。比如：
+
+``` Objective-C
+@interface NSString : NSObject
+- (NSUnrelated *)init; // incorrect usage: NSUnrelated is not NSString or a superclass of NSString
+@end
+```
+
+区别就是，前者会得到编译器的支持，协助检查类型，减少错误。
+
+[参考](http://www.cnblogs.com/rossoneri/p/5100530.html)
 
 ##### volatile 关键字
+volatile提醒编译器它后面所定义的变量随时都有可能改变，因此编译后的程序每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据。如果没有volatile关键字，则编译器可能优化读取和存储，可能暂时使用寄存器中的值，如果这个变量由别的程序更新了的话，将出现不一致的现象
+
+volatile的本意是“易变的”，由于访问寄存器的速度要快过RAM，所以编译器一般都会作减少存取外部RAM的优化
+
+[参考](http://www.cnblogs.com/yc_sunniwell/archive/2010/06/24/1764231.html)
 
 ##### designated initializer，怎么用，注意内容？
 即指定构造器，该宏是在 Swift 出现后新增的，用法与 SWift 的指定构造器用法相同：
@@ -164,12 +190,14 @@ Block如何修改外部变量：
 #### 在block里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个NSInteger，那么是否需要？
 
 #### 对于Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
+
 最大的优点是它的运行时特性，不足是没有命名空间，对于命名冲突，可以使用长命名法或特殊前缀解决，如果是引入的第三方库之间的命名冲突，可以使用link命令及flag解决冲突。
+
 #### buildSetting link flag 解决命名冲突。
 
 #### 实现一个NSString类
 
-#### Objective-C中类方法和实例方法有什么本质的区别和联系？
+#### Objective-C 中类方法和实例方法有什么本质的区别和联系？
 
 类方法只能由类来调用，不能访问成员变量，实例方法只能由实例来调用，可以访问成员变量。类方法为该类所有对象共享
 
@@ -212,7 +240,7 @@ Block如何修改外部变量：
 ### 运行完Test函数后会有什么结果
 
 ``` C
-void getMemory(char *p) {
+void getMemory(char *p) { 
 	p = (char *)malloc(100);
 }
 
@@ -223,12 +251,12 @@ void test(void) {
 	printf(str);
 }
 ```
-*参考答案：程序崩溃，应为 `getMemory()` 并不能传递动态内存，Test 函数中的 str 一直都是 NULL，copy将发生错误，导致崩溃*
+*参考答案：程序崩溃，`getMemory()` 指针 p 与 str 指针并不是同一个指针，修改了指针 p，并不影响指针 str，所以 Test 函数中的 str 一直都是 NULL，copy将发生错误，导致崩溃，如果要修正，可以将 p 修改为一个指向指针的指针，这样就可以修改 str 的指向，让它指向已分配的内存 *
 
 另一个
 
 ``` C
-void getMemory(char *p) {
+char * getMemory(char *p) {
 	char p[] = "hello world";
 	return p;
 }
@@ -277,9 +305,11 @@ void test(void) {
 
 ### 什么是 Optional 类型，它用来解决什么问题？
 
-表示可能为空值，解决空值崩溃的问题
+Swift 是严格类型安全的语言，Optional 表示某中可选类型，即它如果有值那么它就是 x，否则就是没有值，nil。它能避免很多因为意外nil而出现的错误。
 
 #### 什么情况下不得不使用隐式拆包？为什么？
+- 对象属性在初始化的时候不能nil,否则不能被初始化。典型的例子是Interface Builder outlet类型的属性，它总是在它的拥有者初始化之后再初始化。在这种特定的情况下，假设它在Interface Builder中被正确的配置——outlet被使用之前，保证它不为nil。
+- 解决强引用的循环问题——当两个实例对象相互引用，并且对引用的实例对象的值要求不能为nil时候。在这种情况下，引用的一方可以标记为unowned,另一方使用隐式拆包。
 
 #### 可选类型解包的方式有哪些？安全性如何？
 
@@ -300,6 +330,7 @@ void test(void) {
 let d = ["john": 23, "james": 24, "vincent": 34, "louis": 29]
 let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 ```
+复习一些 Swift 的容器，尤其是源码，看看他们的实现方式。
 
 ### what's the differences between `unowned` and `weak`?
 
@@ -314,6 +345,8 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 ### 内存管理
 
 #### 引用计数是如何实现的
+
+auto reference counting，
 
 #### 有哪些导致崩溃的常见问题？如何进行预防？
 
@@ -332,7 +365,7 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 
 #### BAD_ACCESS在什么情况下出现？如何调试？
 
-读取了一个不是你管控的内存地址，通常是读取了一个已释放的指针
+读取了一个不是你管控的内存地址，通常是读取了一个已释放或者为初始化的指针
 
 启动僵尸对象，然后结合发生错误时的操作，逐步定位问题根源。
 
@@ -341,19 +374,35 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 
 ### 消息相关
 #### Objective-C的反射机制
-#### 为什么 Objective—C的方法不叫调用叫发消息：
+
+#### 为什么 Objective—C的方法不叫调用叫发消息?
+
+```
+id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
+```
 
 #### 给一个对象发消息的过程如何，或者说如何通过 selector 找到对应的 IMP 地址：
 
+1. 现在 cache 中查找
+2. 在方法类表中查找
+3. 到父类中查找
+4. 查遍所有直到根类
+
 #### 类对象也是如此吗：
+
+是的，只是实例对象要先通过 isa 指针取得该实例的类，然后就一样了。
 
 #### 如果消息发送失败有哪些补救措施：
 
 - 你是不是发错了，要不要转发给别人吗？
-- 没人能处理，要不要添加一个吗？
+- 这没人能处理，要不要添加一个吗？
 - 全部内容都在这，你看着处理吧
 
-### msgsend函数参数
+### objc_msgSend函数参数
+
+```
+id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
+```
 
 ### 消息转发哪些步骤可以被利用
 
@@ -365,12 +414,21 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 typedef struct category_t *Category;
 
 struct category_t {
-    const char *name;	//category名称
-    classref_t cls; 	//要拓展的类
-    struct method_list_t *instanceMethods; //给类添加的实例方法的列表
-    struct method_list_t *classMethods;  //给类添加的类方法的列表
-    struct protocol_list_t *protocols;  //给类添加的协议的列表
-    struct property_list_t *instanceProperties;  //给类添加的属性的列表
+    const char *name;
+    classref_t cls;
+    struct method_list_t *instanceMethods;
+    struct method_list_t *classMethods;
+    struct protocol_list_t *protocols;
+    struct property_list_t *instanceProperties;
+    // Fields below this point are not always present on disk.
+    struct property_list_t *_classProperties;
+
+    method_list_t *methodsForMeta(bool isMeta) {
+        if (isMeta) return classMethods;
+        else return instanceMethods;
+    }
+
+    property_list_t *propertiesForMeta(bool isMeta, struct header_info *hi);
 };
 ```
 
@@ -410,7 +468,7 @@ struct category_t {
 ### autorealse 如何实现的
 
 这个解释不完善，有待进一步研究
-autoreleasePool 是一个Objective-C的义仲内存自动回收机制，它可以延时家如autoreleasePool中的变量释放的时机。
+autoreleasePool 是一个Objective-C的一种内存自动回收机制，它可以延时家如autoreleasePool中的变量释放的时机。
 autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLoop 事件即将结束之前（pop）
 
 #### 子线程中需要加autoreleasepool吗？什么时间释放？
@@ -428,12 +486,13 @@ methodswazzing，方法替换，有待进一步验证。
 - 我们启动一个worker线程，worker线程每隔一小段时间（delta）ping以下主线程（发送一个NSNotification），如果主线程此时有空，必然能接收到这个通知，并pong以下（发送另一个NSNotification），如果worker线程超过delta时间没有收到pong的回复，那么可以推测UI线程必然在处理其他任务了，此时我们执行第二步操作，暂停UI线程，并打印出当前UI线程的函数调用栈
 
 ### 渲染 UI 为什么要在主线程
+UIKit并不是一个 线程安全 的类，UI操作涉及到渲染访问各种View对象的属性，如果异步操作下会存在读写问题，而为其加锁则会耗费大量资源并拖慢运行速度。另一方面因为整个程序的起点UIApplication是在主线程进行初始化，所有的用户事件都是在主线程上进行传递（如点击、拖动），所以view只能在主线程上才能对事件进行响应。而在渲染方面由于图像的渲染需要以60帧的刷新率在屏幕上 同时 更新，在非主线程异步化的情况下无法确定这个处理过程能够实现同步更新
 
-
+[参考](https://juejin.im/post/5c406d97e51d4552475fe178)
 
 ### 能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
 
-1. 不可以，因为结构的便宜已经固定了；
+1. 不可以，因为结构的便宜已经固定了
 2. 可以，这是新建，当然可以声明并定义了
 
 ## 多线程
@@ -500,7 +559,7 @@ do {
 
 #### 用过NSOperationQueue么？如果用过或者了解的话，为什么要使用 NSOperationQueue，实现了什么？跟 GCD 之间的区别和类似得地方
 
-### Dispatch_p
+### Dispatch_semaphore
 
 
 
@@ -515,6 +574,21 @@ do {
 #### NSpersistentStoreCoordinator，NSManagedObjectContext 和 NSManagedObject 中的哪些需要在线程中创建或者传递？你用过什么样的策略实现的？
 
 #### SQLite中插入特殊字符的方法和接受的处理方法？
+
+```
+public static String sqliteEscape(String keyWord){
+    keyWord = keyWord.replace("/", "//");
+    keyWord = keyWord.replace("'", "''");
+    keyWord = keyWord.replace("[", "/[");
+    keyWord = keyWord.replace("]", "/]");
+    keyWord = keyWord.replace("%", "/%");
+    keyWord = keyWord.replace("&","/&");
+    keyWord = keyWord.replace("_", "/_");
+    keyWord = keyWord.replace("(", "/(");
+    keyWord = keyWord.replace(")", "/)");
+    return keyWord;
+}
+```
 
 #### SQLite 与 MySQL 区别
 
@@ -531,7 +605,11 @@ do {
 
 ### MVC的缺点
 
+容易导致 Controller 过分臃肿
+
 ### 其它架构
+
+MVP、MVVM等
 
 ### MVVM如何实现绑定
 
