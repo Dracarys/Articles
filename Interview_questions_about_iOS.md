@@ -846,7 +846,7 @@ methodswazzing，方法替换，有待进一步验证。
 - 我们启动一个worker线程，worker线程每隔一小段时间（delta）ping以下主线程（发送一个NSNotification），如果主线程此时有空，必然能接收到这个通知，并pong以下（发送另一个NSNotification），如果worker线程超过delta时间没有收到pong的回复，那么可以推测UI线程必然在处理其他任务了，此时我们执行第二步操作，暂停UI线程，并打印出当前UI线程的函数调用栈
 
 ### 渲染 UI 为什么要在主线程
-UIKit并不是一个 线程安全 的类，UI操作涉及到渲染访问各种View对象的属性，如果异步操作下会存在读写问题，而为其加锁则会耗费大量资源并拖慢运行速度。另一方面因为整个程序的起点UIApplication是在主线程进行初始化，所有的用户事件都是在主线程上进行传递（如点击、拖动），所以view只能在主线程上才能对事件进行响应。而在渲染方面由于图像的渲染需要以60帧的刷新率在屏幕上 同时 更新，在非主线程异步化的情况下无法确定这个处理过程能够实现同步更新
+UIKit 并不是一个 线程安全 的类，UI 操作涉及到渲染访问各种 View 对象的属性，如果异步操作下会存在读写问题，而为其加锁则会耗费大量资源并拖慢运行速度。另一方面因为整个程序的起点 UIApplication 是在主线程进行初始化，所有的用户事件都是在主线程上进行传递（如点击、拖动），所以 view 只能在主线程上才能对事件进行响应。而在渲染方面由于图像的渲染需要以60帧的刷新率在屏幕上 同时 更新，在非主线程异步化的情况下无法确定这个处理过程能够实现同步更新
 
 [参考](https://juejin.im/post/5c406d97e51d4552475fe178)
 
@@ -1049,17 +1049,28 @@ MVP、MVVM等
 #### 如何捕捉Crash，设计思路。
 [参考](https://blog.csdn.net/skylin19840101/article/details/50955808)
 
-## CocoTouch
 
-#### keyWindow、UIWindow的layer、UIView的继承关系
+## CocoTouch
+#### keyWindow、UIWindow 的 layer、UIView 的继承关系
 
 #### CoreGraphic、CGPath、maskLayer
 
 #### NSTimer准吗？有哪些替代方案
 
-#### load和initialize方法的调用试机？
+不准确，因为 Runloop mode 的切换有可能导致计时器暂停，从而不准确。
 
-#### 为什么一定要在主线程里更新UI
+解决方案：
+
+- 将计时器添加到自线程，这样就不收 Runloop mode的影响，但是要注意回调的线程问题
+- 将计时器添加到特定的 Runloop Mode 中，例如：NSRunLoopCommonMode
+- 另起炉灶，用 `mach_absolute_time()` 来实现更高精度的定时器
+- CADisplayLink
+- GCD timer
+
+#### load 和 initialize 方法的调用时机？
+
+- load 当类被加载到 runtime 的时候运行，在 main 函数执行之前，也就是类加载器加载时，每个类只会调用一次；通常被用来进行 Method Swizzle，但是这会增加 App 启动时间。
+- initialize 在类接收到第一条消息之前被用调用。每个类只会调用一次。子类未实现会向上查找。一搬用来初始化全局变量或静态变量。
 
 ### View哪些属性时 animatable 的？
 
@@ -1073,10 +1084,22 @@ MVP、MVVM等
 
 ### 为什么动画完成后，layer会恢复到原先的状态？
 
+因为这些产生的动画只是假象,并没有对layer进行改变.那么为什么会这样呢,这里要讲一下图层树里的呈现树.呈现树实际上是模型图层的复制,但是它的属性值表示了当前外观效果,动画的过程实际上只是修改了呈现树,并没有对图层的属性进行改变,所以在动画结束以后图层会恢复到原先状态
+
+复习 layer 的知识
+
 #### 给一个View设置圆角的方法有哪些，各有什么不同？
+
+离屏渲染绘制 layer tree 中的一部分到一个新的缓存里面（这个缓存不是屏幕，是另一个地方），然后再把这个缓存渲染到屏幕上面。一般来说，你需要避免离屏渲染。因为这个开销很大。在屏幕上面直接合成层要比先创建一个离屏缓存然后在缓存上面绘制，最后再绘制缓存到屏幕上面快很多。这里面有 2 个上下文环境的切换（切换到屏幕外缓存环境，和屏幕环境）
+
+- 直接调用 Layer 的方法，会触发离屏渲染
+- 设置 CALayer的mask，同样会触发离屏渲染
+- 通过 Core Graphics 绘制带圆角的视图，同样会触发离屏渲染，此外还将绘图任务转移给了 CPU
+- 设置 View 的背景的 content mode
 
 #### 响应链、如何扩大View的响应范围
 
+hittest，在预计的范围内返回 yes 即可。
 view 有一个是否响应事件的方法，重写该方法，对指定范围内的方法返回yes即可。
 
 #### 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView和UIResponse的关系是什么？
@@ -1102,6 +1125,8 @@ uiview 继承自UIResponse
 
 #### UI框架和CA、CG框架的关系是什么？做过哪些内容？
 
+UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics 和 OpenGL ES 之上。
+
 #### Quartz 框架
 
 
@@ -1117,11 +1142,16 @@ uiview 继承自UIResponse
 
 ### 静态库和动态库之间的区别
 
+- 动态库 \*.dylib 和 \*.framework，连接时不复制，程序运行时由系统动态加载到内存，
+- 静态库 \*.a 和 \*.framework。连接时，静态会被复制到输出目标中
+
 ### iOS从什么时候开始支持动态库的？
+
+Xcode 6 之后支持创建动态库工程。
 
 ### iOS 的签名机制如何？
 
-
+[iOS 签名机制](http://www.cocoachina.com/ios/20181221/25913.html)
 
 
 
@@ -1138,21 +1168,37 @@ instrument，animation测试
 
 ### images.xcassetsa和直接使用图片有什么不一样？
 
+1. 除图标和lancher 外支持多种图片格式
+2. 图片支持[UIImage imagedName:""]的方式实例化，不能从 Bundle 加载
+3. 在编译时，Image.xcassets 中的所有文件hi被打包为 Assets.car 文件，再解包取图片相对增加了一点难度。
+4. 减少 App 包的大小
+5. 支持 PDF 格式的矢量图
+
 ### 平时是怎么进行测试的，内存方面怎么测试
+
+Instrument memory 相关测试。 
 
 ### lldb常用调试命令？
 
-### 如何给一款App瘦身
+- p
+- watchpoint
+
+### 如何给一款 App 瘦身
+
+- 去除不必要的图片；
+- 去除陈旧未使用的类，除了能瘦身还能加快启动速度
+- 
 
 ### 从点击图标到应用启动的过程？
 
 ### DSYM文件是什么，你是如何分析的？
 
-符号文件，可以通过Xcode解析后，直接定位到问题代码
+符号表文件，可以通过Xcode解析后，直接定位到问题代码
 
 ### 如果进行网络、内存、性能优化？
 
-### 如何把异步线程转换成同步任务进行单元测试？[参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
+### 如何把异步线程转换成同步任务进行单元测试？
+[参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
 
 
 
