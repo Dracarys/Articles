@@ -3,55 +3,406 @@
 ## 1 Objective-C
 
 ### 1.1 Objective-C 对象
-Objective-C 是基于 C 实现的，因此是 C 的超集，通过下面的一些定义可以发现：objc中所有关于类的实现都是基于结构体的。
+Objective-C 是在 C 基础之上实现的面向对象功能，因此它是一个 C 的超集，通过下面的一些定义可以发现：objc 中所有关于类的实现都是基于结构体的。
 
-下面是 `obj.h` 的定义：
+下面是 `obj-private.h` 的定义：
 
-``` Objective-C
-#if !OBJC_TYPES_DEFINED
-/// An opaque type that represents an Objective-C class.
+```cpp
+struct objc_class;
+struct objc_object;
+
 typedef struct objc_class *Class;
+typedef struct objc_object *id;
 
-/// Represents an instance of a class.
-struct objc_object {
-    Class _Nonnull isa  OBJC_ISA_AVAILABILITY;
+namespace {
+    struct SideTable;
 };
 
-/// A pointer to an instance of a class.
-typedef struct objc_object *id;
+#include "isa.h"
+
+union isa_t {
+    isa_t() { }
+    isa_t(uintptr_t value) : bits(value) { }
+
+    Class cls;
+    uintptr_t bits;
+#if defined(ISA_BITFIELD)
+    struct {
+        ISA_BITFIELD;  // defined in isa.h
+    };
+#endif
+};
+
+
+struct objc_object {
+private:
+    isa_t isa;
+
+public:
+
+    // ISA() assumes this is NOT a tagged pointer object
+    Class ISA();
+
+    // getIsa() allows this to be a tagged pointer object
+    Class getIsa();
+
+    // initIsa() should be used to init the isa of new objects only.
+    // If this object already has an isa, use changeIsa() for correctness.
+    // initInstanceIsa(): objects with no custom RR/AWZ
+    // initClassIsa(): class objects
+    // initProtocolIsa(): protocol objects
+    // initIsa(): other objects
+    void initIsa(Class cls /*nonpointer=false*/);
+    void initClassIsa(Class cls /*nonpointer=maybe*/);
+    void initProtocolIsa(Class cls /*nonpointer=maybe*/);
+    void initInstanceIsa(Class cls, bool hasCxxDtor);
+
+    // changeIsa() should be used to change the isa of existing objects.
+    // If this is a new object, use initIsa() for performance.
+    Class changeIsa(Class newCls);
+
+    bool hasNonpointerIsa();
+    bool isTaggedPointer();
+    bool isBasicTaggedPointer();
+    bool isExtTaggedPointer();
+    bool isClass();
+
+    // object may have associated objects?
+    bool hasAssociatedObjects();
+    void setHasAssociatedObjects();
+
+    // object may be weakly referenced?
+    bool isWeaklyReferenced();
+    void setWeaklyReferenced_nolock();
+
+    // object may have -.cxx_destruct implementation?
+    bool hasCxxDtor();
+
+    // Optimized calls to retain/release methods
+    id retain();
+    void release();
+    id autorelease();
+
+    // Implementations of retain/release methods
+    id rootRetain();
+    bool rootRelease();
+    id rootAutorelease();
+    bool rootTryRetain();
+    bool rootReleaseShouldDealloc();
+    uintptr_t rootRetainCount();
+
+    // Implementation of dealloc methods
+    bool rootIsDeallocating();
+    void clearDeallocating();
+    void rootDealloc();
+
+private:
+    void initIsa(Class newCls, bool nonpointer, bool hasCxxDtor);
+
+    // Slow paths for inline control
+    id rootAutorelease2();
+    bool overrelease_error();
+
+#if SUPPORT_NONPOINTER_ISA
+    // Unified retain count manipulation for nonpointer isa
+    id rootRetain(bool tryRetain, bool handleOverflow);
+    bool rootRelease(bool performDealloc, bool handleUnderflow);
+    id rootRetain_overflow(bool tryRetain);
+    bool rootRelease_underflow(bool performDealloc);
+
+    void clearDeallocating_slow();
+
+    // Side table retain count overflow for nonpointer isa
+    void sidetable_lock();
+    void sidetable_unlock();
+
+    void sidetable_moveExtraRC_nolock(size_t extra_rc, bool isDeallocating, bool weaklyReferenced);
+    bool sidetable_addExtraRC_nolock(size_t delta_rc);
+    size_t sidetable_subExtraRC_nolock(size_t delta_rc);
+    size_t sidetable_getExtraRC_nolock();
 #endif
 
-/// An opaque type that represents a method selector.
-typedef struct objc_selector *SEL;
+    // Side-table-only retain count
+    bool sidetable_isDeallocating();
+    void sidetable_clearDeallocating();
 
-/// A pointer to the function of a method implementation. 
-#if !OBJC_OLD_DISPATCH_PROTOTYPES
-typedef void (*IMP)(void /* id, SEL, ... */ ); 
-#else
-typedef id _Nullable (*IMP)(id _Nonnull, SEL _Nonnull, ...); 
+    bool sidetable_isWeaklyReferenced();
+    void sidetable_setWeaklyReferenced_nolock();
+
+    id sidetable_retain();
+    id sidetable_retain_slow(SideTable& table);
+
+    uintptr_t sidetable_release(bool performDealloc = true);
+    uintptr_t sidetable_release_slow(SideTable& table, bool performDealloc = true);
+
+    bool sidetable_tryRetain();
+
+    uintptr_t sidetable_retainCount();
+#if DEBUG
+    bool sidetable_present();
 #endif
+};
 ```
 
-#### 1.1.1关于 Class 的实现：
+#### 1.1.1 关于 Class 的实现：
 
-``` Objective-C
-struct objc_class 
-{
-    Class isa;
-    Class super_class;// 指向父类                                   
-    const char *name;                                         
-    long version;                                             
-    long info;                                                
-    long instance_size;                                       
-    struct objc_ivar_list *ivars;// internal varables? 成员变量列表                             
-    struct objc_method_list **methodLists; // 方法列表                  
-    struct objc_cache *cache; // 方法缓存                              
-    struct objc_protocol_list *protocols; // 协议                 
-}
+在 Objective-C 中 class 是一个指向 objc_class 结构体的指针，而objc_class 是继承自 objc_object 结构，所以说 Objective-C 的类也是一个对象。
+
+```cpp
+struct objc_class : objc_object {
+    // Class ISA;
+    Class superclass;
+    cache_t cache;             // formerly cache pointer and vtable
+    class_data_bits_t bits;    // class_rw_t * plus custom rr/alloc flags
+
+    class_rw_t *data() { 
+        return bits.data();
+    }
+    void setData(class_rw_t *newData) {
+        bits.setData(newData);
+    }
+
+    void setInfo(uint32_t set) {
+        assert(isFuture()  ||  isRealized());
+        data()->setFlags(set);
+    }
+
+    void clearInfo(uint32_t clear) {
+        assert(isFuture()  ||  isRealized());
+        data()->clearFlags(clear);
+    }
+
+    // set and clear must not overlap
+    void changeInfo(uint32_t set, uint32_t clear) {
+        assert(isFuture()  ||  isRealized());
+        assert((set & clear) == 0);
+        data()->changeFlags(set, clear);
+    }
+
+    bool hasCustomRR() {
+        return ! bits.hasDefaultRR();
+    }
+    void setHasDefaultRR() {
+        assert(isInitializing());
+        bits.setHasDefaultRR();
+    }
+    void setHasCustomRR(bool inherited = false);
+    void printCustomRR(bool inherited);
+
+    bool hasCustomAWZ() {
+        return ! bits.hasDefaultAWZ();
+    }
+    void setHasDefaultAWZ() {
+        assert(isInitializing());
+        bits.setHasDefaultAWZ();
+    }
+    void setHasCustomAWZ(bool inherited = false);
+    void printCustomAWZ(bool inherited);
+
+    bool instancesRequireRawIsa() {
+        return bits.instancesRequireRawIsa();
+    }
+    void setInstancesRequireRawIsa(bool inherited = false);
+    void printInstancesRequireRawIsa(bool inherited);
+
+    bool canAllocNonpointer() {
+        assert(!isFuture());
+        return !instancesRequireRawIsa();
+    }
+    bool canAllocFast() {
+        assert(!isFuture());
+        return bits.canAllocFast();
+    }
+
+
+    bool hasCxxCtor() {
+        // addSubclass() propagates this flag from the superclass.
+        assert(isRealized());
+        return bits.hasCxxCtor();
+    }
+    void setHasCxxCtor() { 
+        bits.setHasCxxCtor();
+    }
+
+    bool hasCxxDtor() {
+        // addSubclass() propagates this flag from the superclass.
+        assert(isRealized());
+        return bits.hasCxxDtor();
+    }
+    void setHasCxxDtor() { 
+        bits.setHasCxxDtor();
+    }
+
+
+    bool isSwiftStable() {
+        return bits.isSwiftStable();
+    }
+
+    bool isSwiftLegacy() {
+        return bits.isSwiftLegacy();
+    }
+
+    bool isAnySwift() {
+        return bits.isAnySwift();
+    }
+
+
+    // Return YES if the class's ivars are managed by ARC, 
+    // or the class is MRC but has ARC-style weak ivars.
+    bool hasAutomaticIvars() {
+        return data()->ro->flags & (RO_IS_ARC | RO_HAS_WEAK_WITHOUT_ARC);
+    }
+
+    // Return YES if the class's ivars are managed by ARC.
+    bool isARC() {
+        return data()->ro->flags & RO_IS_ARC;
+    }
+
+
+#if SUPPORT_NONPOINTER_ISA
+    // Tracked in non-pointer isas; not tracked otherwise
+#else
+    bool instancesHaveAssociatedObjects() {
+        // this may be an unrealized future class in the CF-bridged case
+        assert(isFuture()  ||  isRealized());
+        return data()->flags & RW_INSTANCES_HAVE_ASSOCIATED_OBJECTS;
+    }
+
+    void setInstancesHaveAssociatedObjects() {
+        // this may be an unrealized future class in the CF-bridged case
+        assert(isFuture()  ||  isRealized());
+        setInfo(RW_INSTANCES_HAVE_ASSOCIATED_OBJECTS);
+    }
+#endif
+
+    bool shouldGrowCache() {
+        return true;
+    }
+
+    void setShouldGrowCache(bool) {
+        // fixme good or bad for memory use?
+    }
+
+    bool isInitializing() {
+        return getMeta()->data()->flags & RW_INITIALIZING;
+    }
+
+    void setInitializing() {
+        assert(!isMetaClass());
+        ISA()->setInfo(RW_INITIALIZING);
+    }
+
+    bool isInitialized() {
+        return getMeta()->data()->flags & RW_INITIALIZED;
+    }
+
+    void setInitialized();
+
+    bool isLoadable() {
+        assert(isRealized());
+        return true;  // any class registered for +load is definitely loadable
+    }
+
+    IMP getLoadMethod();
+
+    // Locking: To prevent concurrent realization, hold runtimeLock.
+    bool isRealized() {
+        return data()->flags & RW_REALIZED;
+    }
+
+    // Returns true if this is an unrealized future class.
+    // Locking: To prevent concurrent realization, hold runtimeLock.
+    bool isFuture() { 
+        return data()->flags & RW_FUTURE;
+    }
+
+    bool isMetaClass() {
+        assert(this);
+        assert(isRealized());
+        return data()->ro->flags & RO_META;
+    }
+
+    // NOT identical to this->ISA when this is a metaclass
+    Class getMeta() {
+        if (isMetaClass()) return (Class)this;
+        else return this->ISA();
+    }
+
+    bool isRootClass() {
+        return superclass == nil;
+    }
+    bool isRootMetaclass() {
+        return ISA() == (Class)this;
+    }
+
+    const char *mangledName() { 
+        // fixme can't assert locks here
+        assert(this);
+
+        if (isRealized()  ||  isFuture()) {
+            return data()->ro->name;
+        } else {
+            return ((const class_ro_t *)data())->name;
+        }
+    }
+    
+    const char *demangledName(bool realize = false);
+    const char *nameForLogging();
+
+    // May be unaligned depending on class's ivars.
+    uint32_t unalignedInstanceStart() {
+        assert(isRealized());
+        return data()->ro->instanceStart;
+    }
+
+    // Class's instance start rounded up to a pointer-size boundary.
+    // This is used for ARC layout bitmaps.
+    uint32_t alignedInstanceStart() {
+        return word_align(unalignedInstanceStart());
+    }
+
+    // May be unaligned depending on class's ivars.
+    uint32_t unalignedInstanceSize() {
+        assert(isRealized());
+        return data()->ro->instanceSize;
+    }
+
+    // Class's ivar size rounded up to a pointer-size boundary.
+    uint32_t alignedInstanceSize() {
+        return word_align(unalignedInstanceSize());
+    }
+
+    size_t instanceSize(size_t extraBytes) {
+        size_t size = alignedInstanceSize() + extraBytes;
+        // CF requires all objects be at least 16 bytes.
+        if (size < 16) size = 16;
+        return size;
+    }
+
+    void setInstanceSize(uint32_t newSize) {
+        assert(isRealized());
+        if (newSize != data()->ro->instanceSize) {
+            assert(data()->flags & RW_COPIED_RO);
+            *const_cast<uint32_t *>(&data()->ro->instanceSize) = newSize;
+        }
+        bits.setFastInstanceSize(newSize);
+    }
+
+    void chooseClassArrayIndex();
+
+    void setClassArrayIndex(unsigned Idx) {
+        bits.setClassArrayIndex(Idx);
+    }
+
+    unsigned classArrayIndex() {
+        return bits.classArrayIndex();
+    }
+
+};
 ```
 
 #### 1.1.2 isa 指针指向什么？有什么作用？
-实例的 `isa` 指针指向定义它的类，类的 `isa` 指针指向元类（meta class），这是因为在 Objective-C 中，类也是一个对象，这个类对象正是由元类定义的，每个类都有一个独一无二的元类。元类的 `isa` 指针指向根元类，根元类的 `isa` 指针指向自己。
+对象实例的 `isa` 指针指向定义它的类，类的 `isa` 指针指向元类（meta class），这是因为在 Objective-C 中，类也是一个对象，这个类对象正是由元类定义的，每个类都有一个独一无二的元类。元类的 `isa` 指针指向根元类，根元类的 `isa` 指针指向自己。
 
 所有元类都用基类作为自己的类，对于顶层基类的元类也是如此，只是它指向自己而已
 
@@ -61,7 +412,7 @@ struct objc_class
 
 #### 1.1.3 `isKindOfClass` VS `isMemberOfClass`
 
-``` Objective-C
+```objc
 // 向上遍历查找，只要该对象的继承链中有目标类就返回 YES
 + (Bool)isKindOfClass:(Class)cls {
 	for (Class tcls = object_getClass((id)self); tcls; tcls->superclass){
@@ -133,7 +484,7 @@ atomic 实际上相当于一个引用计数器，这个大家很熟悉，如果�
 
 如果一个拥有关联返回类型的方法被子类方法复写了，那么子类方法必须返回一个与子类类型兼容的类型。比如：
 
-``` Objective-C
+```objectivec
 @interface NSString : NSObject
 - (NSUnrelated *)init; // incorrect usage: NSUnrelated is not NSString or a superclass of NSString
 @end
@@ -187,7 +538,7 @@ Block如何修改外部变量：
 
 
 
-#### 在block里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个NSInteger，那么是否需要？
+#### 在 block 里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个NSInteger，那么是否需要？
 
 #### 对于Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
 
@@ -195,11 +546,13 @@ Block如何修改外部变量：
 
 #### buildSetting link flag 解决命名冲突。
 
-#### 实现一个NSString类
+#### 实现一个 NSString 类
 
 #### Objective-C 中类方法和实例方法有什么本质的区别和联系？
 
 类方法只能由类来调用，不能访问成员变量，实例方法只能由实例来调用，可以访问成员变量。类方法为该类所有对象共享
+
+实例方法都要通过 isa 指针传递，而类方法则不需要。
 
 #### _objc_msgForward 函数是做什么的，直接调用会发生什么？
 
@@ -207,7 +560,7 @@ Block如何修改外部变量：
 
 #### 手动出发KVO
 
-首先关系默认：
+首先关闭默认：
 ``` Objective-C
 + (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key
 {
@@ -237,7 +590,7 @@ Block如何修改外部变量：
 指针常量：`int * const ptr` 指针本身是一个敞亮。在声明的时候初始化，里面的值（存放的地址）不能更改；
 常量指针：`const int * ptr`指针本身是一个常量，通过常量地址初始化，它可以再指向另一个常量地址。
 
-### 运行完Test函数后会有什么结果
+### 运行完 Test 函数后会有什么结果
 
 ``` C
 void getMemory(char *p) { 
@@ -338,6 +691,13 @@ let x = d.sorted{ $0.1 < $1.1 }.map{ $0.0 }
 - weak: at some point it's possible for the reference to have no value - as a consequence, the property must be of optional type.
 
 ### Swift 应用了面向协议编程？
+
+#### Swift 中 Array 是值类型，他有一个 copy on wirte 的行为，具体怎么实现的？
+对于简单值类型 (像是 Int 或 CGPoint) 来说，整个值直接存储在一个变量中，当初始化一个新变量，或是将新值赋给已经存在的变量时，复制都会自动发生。
+
+然而，将一个数组赋给新变量并不会发生底层存储的复制，这只会创建一个新的引用，它指向同一块在堆上分配的缓冲区，所以该操作将在常数时间内完成。直到指向共享存储的变量中有一个值被更改了 (例如：进行 insert 操作)，这时才会发生真正的复制。不过要注意的是，只有在改变时底层存储是共享的情况下，才会发生复制存储的操作。如果数组对它自身存储所持有的引用是唯一的，那么直接修改存储缓冲区也是安全的。
+
+当我们说 Array 实现了写时复制优化时，我们本质上是在对其操作性能进行一系列相关的保证，从而使它们表现得就像上面描述的一样  
 
 
 
@@ -514,11 +874,10 @@ UIKit并不是一个 线程安全 的类，UI操作涉及到渲染访问各种Vi
 #### 互斥锁、自旋锁优缺点？
 
 - 互斥锁的代价更高，因为线程有休眠，要唤醒，但是安全性更好，
-- 自旋锁代价小，效率高，但是有优先级反转的可能，且比较耗资源
-
-#### 互斥锁、自旋锁是如何实现的？ 
+- 自旋锁代价小，效率高，但是有优先级反转的可能，且比较耗资源，因为它会不断尝试读取锁状态
 
 #### 分别用 C/C++ 和 Objective-C 实现互斥锁、自旋锁。
+
 
 #### 死锁档四个条件、优先级翻转
 
@@ -530,11 +889,27 @@ UIKit并不是一个 线程安全 的类，UI操作涉及到渲染访问各种Vi
 优先级反转是指：如果一个低优先级的线程获得锁并访问共享资源，这时一个高优先级的线程也尝试获得这个锁，它会处于 spin lock 的忙等状态从而占用大量 CPU。此时低优先级线程无法与高优先级线程争夺 CPU 时间，从而导致任务迟迟完不成、无法释放 lock
 #### 什么时候处理多线程，几种方式，优缺点？
 
+当有耗时的任务需要处理，在保证流畅的情况下主线程不能满足处理需求时，就需要开辟一个或多个线程处理该任务。
+
+- NSThread
+- NSOperation、NSOperationQueue
+- GCD
+
+[参考](http://www.cnblogs.com/andy-zhou/p/5321842.html)
+
 #### 系统有哪些在后台运行的Thread
 
 #### 队列和线程的关系
+队列以运行方式来分有串行、并行，从功能上分有主队列和全局队列，队列由分为不同的优先级。可以通过队列来管理线程，线程也可以通过队列来管理多个任务。
 
 #### 线程同步的方式
+
+同步多线程（SMT）,
+
+- 事件
+- 临界区
+- 互斥器
+- 信号量
 
 #### 线程池的结构？如何实现的？
 
@@ -545,7 +920,7 @@ UIKit并不是一个 线程安全 的类，UI操作涉及到渲染访问各种Vi
 - GCD
 - NSOperation
 
-一旦提交即不可取消，为提交执行的可以。
+一旦提交运行即不可取消，尚未提交执行的可以。
 
 #### runloop和线程的关系？各个mode是做什么的？如何实现一个runloop
 
@@ -617,11 +992,23 @@ MVP、MVVM等
 
 ### Delegate、Notification、KOV的区别，优缺点
 
-#### NSNotification和KVO的区别和用法是什么？什么时候应该使用通知，什么时候应该使用KVO，它们的实现上有什么区别吗？如果用protocol和delegate（或者delegate的Array）来实现类似的功能可能吗？如果可能，会有什么潜在的问题？如果不能，为什么？
+- Delegate 是单向的委托，你只能委托给一个代理对象；
+- Notification 可以一对多的发送消息，但是需要你主动发送，接收方需要注册；
+- KVO 也可以实现一对多，且不需要主动触发，
 
-### 设计一个方案来检测KVO的同步一步问题，willChange和didChange的不同点
+#### NSNotification 和 KVO 的区别和用法是什么？什么时候应该使用通知，什么时候应该使用KVO，它们的实现上有什么区别吗？如果用protocol和delegate（或者delegate的Array）来实现类似的功能可能吗？如果可能，会有什么潜在的问题？如果不能，为什么？
 
-### kVO在多线程中的行为。
+1. 观察者和被观察者都必须是 NSObject 的子类，因为 OC 中 KVO 的实现基于 KVC 和 runtime 机制，只有是 NSObject 的子类才能利用这些特性；
+2. 观察的属性需要使用 dynamic 关键字修饰，表示该属性的存取都由 runtime 在运行时来决定，由于 Swift 基于效率的考量默认禁止了动态派发机制，因此要加上该修饰符来开启动态派发。
+
+### 设计一个方案来检测 KVO 的同步异步问题，willChange 和 didChange 的不同点
+
+### kVO在多线程中的行为
+- KVO 是同步的，一旦对象的属性发生变化，只有用同步的方式，才能保证所有观察者的方法能够执行完成。KVO 监听方法中，不要有太耗时的操作。
+
+- KVO 的方法调用，是在对应的线程中执行的。在子线程修改观察属性时，观察者回调方法将在子线程中执行。
+
+- 在多个线程同时修改一个观察属性的时候，KVO 监听方法中会存在资源抢夺的问题，需要使用互斥锁。如果涉及到多线程，KVO 要特别小心，通常 KVO 只是做一些简单的观察和处理，千万不要搞复杂了，KVO的监听代码，一定要简单。
 
 ### 如果现在要实现一个下载功能，如何设计，每个类都觉题做什么？
 
@@ -919,8 +1306,6 @@ instrument，animation测试
 #### 小根堆的插入时间负责度
 
 #### 二分查找的时间复杂度怎么求的？
-
-#### Swift 中 Array是值类型，他有一个copy on wirte的行为，具体怎么实现的？
 
 
 ### 算法相关
