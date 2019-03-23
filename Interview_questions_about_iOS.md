@@ -95,58 +95,14 @@ public:
     bool rootIsDeallocating();
     void clearDeallocating();
     void rootDealloc();
-
-private:
-    void initIsa(Class newCls, bool nonpointer, bool hasCxxDtor);
-
-    // Slow paths for inline control
-    id rootAutorelease2();
-    bool overrelease_error();
-
-#if SUPPORT_NONPOINTER_ISA
-    // Unified retain count manipulation for nonpointer isa
-    id rootRetain(bool tryRetain, bool handleOverflow);
-    bool rootRelease(bool performDealloc, bool handleUnderflow);
-    id rootRetain_overflow(bool tryRetain);
-    bool rootRelease_underflow(bool performDealloc);
-
-    void clearDeallocating_slow();
-
-    // Side table retain count overflow for nonpointer isa
-    void sidetable_lock();
-    void sidetable_unlock();
-
-    void sidetable_moveExtraRC_nolock(size_t extra_rc, bool isDeallocating, bool weaklyReferenced);
-    bool sidetable_addExtraRC_nolock(size_t delta_rc);
-    size_t sidetable_subExtraRC_nolock(size_t delta_rc);
-    size_t sidetable_getExtraRC_nolock();
-#endif
-
-    // Side-table-only retain count
-    bool sidetable_isDeallocating();
-    void sidetable_clearDeallocating();
-
-    bool sidetable_isWeaklyReferenced();
-    void sidetable_setWeaklyReferenced_nolock();
-
-    id sidetable_retain();
-    id sidetable_retain_slow(SideTable& table);
-
-    uintptr_t sidetable_release(bool performDealloc = true);
-    uintptr_t sidetable_release_slow(SideTable& table, bool performDealloc = true);
-
-    bool sidetable_tryRetain();
-
-    uintptr_t sidetable_retainCount();
-#if DEBUG
-    bool sidetable_present();
-#endif
 };
 ```
 
 #### 1.1.1 关于 Class 的实现：
 
-在 Objective-C 中 class 是一个指向 objc_class 结构体的指针，而objc_class 是继承自 objc_object 结构，所以说 Objective-C 的类也是一个对象。
+在 Objective-C 中 class 是一个指向 objc_class 结构体的指针，而 objc_class 是继承自 objc_object 结构，所以说 Objective-C 的类也是一个对象。
+
+下面不是 `objc_class` 的实现：
 
 ```cpp
 struct objc_class : objc_object {
@@ -154,250 +110,6 @@ struct objc_class : objc_object {
     Class superclass;
     cache_t cache;             // formerly cache pointer and vtable
     class_data_bits_t bits;    // class_rw_t * plus custom rr/alloc flags
-
-    class_rw_t *data() { 
-        return bits.data();
-    }
-    void setData(class_rw_t *newData) {
-        bits.setData(newData);
-    }
-
-    void setInfo(uint32_t set) {
-        assert(isFuture()  ||  isRealized());
-        data()->setFlags(set);
-    }
-
-    void clearInfo(uint32_t clear) {
-        assert(isFuture()  ||  isRealized());
-        data()->clearFlags(clear);
-    }
-
-    // set and clear must not overlap
-    void changeInfo(uint32_t set, uint32_t clear) {
-        assert(isFuture()  ||  isRealized());
-        assert((set & clear) == 0);
-        data()->changeFlags(set, clear);
-    }
-
-    bool hasCustomRR() {
-        return ! bits.hasDefaultRR();
-    }
-    void setHasDefaultRR() {
-        assert(isInitializing());
-        bits.setHasDefaultRR();
-    }
-    void setHasCustomRR(bool inherited = false);
-    void printCustomRR(bool inherited);
-
-    bool hasCustomAWZ() {
-        return ! bits.hasDefaultAWZ();
-    }
-    void setHasDefaultAWZ() {
-        assert(isInitializing());
-        bits.setHasDefaultAWZ();
-    }
-    void setHasCustomAWZ(bool inherited = false);
-    void printCustomAWZ(bool inherited);
-
-    bool instancesRequireRawIsa() {
-        return bits.instancesRequireRawIsa();
-    }
-    void setInstancesRequireRawIsa(bool inherited = false);
-    void printInstancesRequireRawIsa(bool inherited);
-
-    bool canAllocNonpointer() {
-        assert(!isFuture());
-        return !instancesRequireRawIsa();
-    }
-    bool canAllocFast() {
-        assert(!isFuture());
-        return bits.canAllocFast();
-    }
-
-
-    bool hasCxxCtor() {
-        // addSubclass() propagates this flag from the superclass.
-        assert(isRealized());
-        return bits.hasCxxCtor();
-    }
-    void setHasCxxCtor() { 
-        bits.setHasCxxCtor();
-    }
-
-    bool hasCxxDtor() {
-        // addSubclass() propagates this flag from the superclass.
-        assert(isRealized());
-        return bits.hasCxxDtor();
-    }
-    void setHasCxxDtor() { 
-        bits.setHasCxxDtor();
-    }
-
-
-    bool isSwiftStable() {
-        return bits.isSwiftStable();
-    }
-
-    bool isSwiftLegacy() {
-        return bits.isSwiftLegacy();
-    }
-
-    bool isAnySwift() {
-        return bits.isAnySwift();
-    }
-
-
-    // Return YES if the class's ivars are managed by ARC, 
-    // or the class is MRC but has ARC-style weak ivars.
-    bool hasAutomaticIvars() {
-        return data()->ro->flags & (RO_IS_ARC | RO_HAS_WEAK_WITHOUT_ARC);
-    }
-
-    // Return YES if the class's ivars are managed by ARC.
-    bool isARC() {
-        return data()->ro->flags & RO_IS_ARC;
-    }
-
-
-#if SUPPORT_NONPOINTER_ISA
-    // Tracked in non-pointer isas; not tracked otherwise
-#else
-    bool instancesHaveAssociatedObjects() {
-        // this may be an unrealized future class in the CF-bridged case
-        assert(isFuture()  ||  isRealized());
-        return data()->flags & RW_INSTANCES_HAVE_ASSOCIATED_OBJECTS;
-    }
-
-    void setInstancesHaveAssociatedObjects() {
-        // this may be an unrealized future class in the CF-bridged case
-        assert(isFuture()  ||  isRealized());
-        setInfo(RW_INSTANCES_HAVE_ASSOCIATED_OBJECTS);
-    }
-#endif
-
-    bool shouldGrowCache() {
-        return true;
-    }
-
-    void setShouldGrowCache(bool) {
-        // fixme good or bad for memory use?
-    }
-
-    bool isInitializing() {
-        return getMeta()->data()->flags & RW_INITIALIZING;
-    }
-
-    void setInitializing() {
-        assert(!isMetaClass());
-        ISA()->setInfo(RW_INITIALIZING);
-    }
-
-    bool isInitialized() {
-        return getMeta()->data()->flags & RW_INITIALIZED;
-    }
-
-    void setInitialized();
-
-    bool isLoadable() {
-        assert(isRealized());
-        return true;  // any class registered for +load is definitely loadable
-    }
-
-    IMP getLoadMethod();
-
-    // Locking: To prevent concurrent realization, hold runtimeLock.
-    bool isRealized() {
-        return data()->flags & RW_REALIZED;
-    }
-
-    // Returns true if this is an unrealized future class.
-    // Locking: To prevent concurrent realization, hold runtimeLock.
-    bool isFuture() { 
-        return data()->flags & RW_FUTURE;
-    }
-
-    bool isMetaClass() {
-        assert(this);
-        assert(isRealized());
-        return data()->ro->flags & RO_META;
-    }
-
-    // NOT identical to this->ISA when this is a metaclass
-    Class getMeta() {
-        if (isMetaClass()) return (Class)this;
-        else return this->ISA();
-    }
-
-    bool isRootClass() {
-        return superclass == nil;
-    }
-    bool isRootMetaclass() {
-        return ISA() == (Class)this;
-    }
-
-    const char *mangledName() { 
-        // fixme can't assert locks here
-        assert(this);
-
-        if (isRealized()  ||  isFuture()) {
-            return data()->ro->name;
-        } else {
-            return ((const class_ro_t *)data())->name;
-        }
-    }
-    
-    const char *demangledName(bool realize = false);
-    const char *nameForLogging();
-
-    // May be unaligned depending on class's ivars.
-    uint32_t unalignedInstanceStart() {
-        assert(isRealized());
-        return data()->ro->instanceStart;
-    }
-
-    // Class's instance start rounded up to a pointer-size boundary.
-    // This is used for ARC layout bitmaps.
-    uint32_t alignedInstanceStart() {
-        return word_align(unalignedInstanceStart());
-    }
-
-    // May be unaligned depending on class's ivars.
-    uint32_t unalignedInstanceSize() {
-        assert(isRealized());
-        return data()->ro->instanceSize;
-    }
-
-    // Class's ivar size rounded up to a pointer-size boundary.
-    uint32_t alignedInstanceSize() {
-        return word_align(unalignedInstanceSize());
-    }
-
-    size_t instanceSize(size_t extraBytes) {
-        size_t size = alignedInstanceSize() + extraBytes;
-        // CF requires all objects be at least 16 bytes.
-        if (size < 16) size = 16;
-        return size;
-    }
-
-    void setInstanceSize(uint32_t newSize) {
-        assert(isRealized());
-        if (newSize != data()->ro->instanceSize) {
-            assert(data()->flags & RW_COPIED_RO);
-            *const_cast<uint32_t *>(&data()->ro->instanceSize) = newSize;
-        }
-        bits.setFastInstanceSize(newSize);
-    }
-
-    void chooseClassArrayIndex();
-
-    void setClassArrayIndex(unsigned Idx) {
-        bits.setClassArrayIndex(Idx);
-    }
-
-    unsigned classArrayIndex() {
-        return bits.classArrayIndex();
-    }
-
 };
 ```
 
@@ -408,7 +120,7 @@ struct objc_class : objc_object {
 
 元类总是会确保类对象和基类的所有实例和类方法。对于从 `NSObject` 继承下来的类，这意味着所有的 `NSObject` 实例和 `protocol` 方法在所有的类（和meta-class）中都可以使用
 
-上面所描述的关系正式通过 `isa` 指针实现的。
+上面所描述的关系正式通过 `isa` 指针实现的，可以说正是通过 `isa` 实现了 Objective-C 面向对象的特性。
 
 #### 1.1.3 `isKindOfClass` VS `isMemberOfClass`
 
@@ -438,7 +150,7 @@ struct objc_class : objc_object {
 ##### nonatomic、atomic 区别？atomic 为什么不是绝对线程安全的？
 `atomic` 和 `nonatomic` 的区别向编译器表明，生成的 `getter` 和 `setter` 方法是否为原子操作，默认是 `atomic`。
 
-
+什么是线程安全？
 
 ##### nonatomic、atomic 实现？
 
@@ -495,7 +207,7 @@ atomic 实际上相当于一个引用计数器，这个大家很熟悉，如果�
 [参考](http://www.cnblogs.com/rossoneri/p/5100530.html)
 
 ##### volatile 关键字
-volatile提醒编译器它后面所定义的变量随时都有可能改变，因此编译后的程序每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据。如果没有volatile关键字，则编译器可能优化读取和存储，可能暂时使用寄存器中的值，如果这个变量由别的程序更新了的话，将出现不一致的现象
+volatile 提醒编译器它后面所定义的变量随时都有可能改变，因此编译后的程序每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据。如果没有volatile关键字，则编译器可能优化读取和存储，可能暂时使用寄存器中的值，如果这个变量由别的程序更新了的话，将出现不一致的现象
 
 volatile的本意是“易变的”，由于访问寄存器的速度要快过RAM，所以编译器一般都会作减少存取外部RAM的优化
 
@@ -542,9 +254,13 @@ Block如何修改外部变量：
 
 #### 对于Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
 
-最大的优点是它的运行时特性，不足是没有命名空间，对于命名冲突，可以使用长命名法或特殊前缀解决，如果是引入的第三方库之间的命名冲突，可以使用link命令及flag解决冲突。
+最大的优点是它的运行时特性，不足是没有命名空间，对于命名冲突，可以使用长命名法或特殊前缀解决，如果是引入的第三方库之间的命名冲突，可以使用OtherLinkFlag 参数来进行设置。
 
-#### buildSetting link flag 解决命名冲突。
+#### OtherLinkFlag 解决命名冲突。
+
+- Objc
+- all_load
+- force_load
 
 #### 实现一个 NSString 类
 
@@ -556,7 +272,7 @@ Block如何修改外部变量：
 
 #### _objc_msgForward 函数是做什么的，直接调用会发生什么？
 
-消息转发，通常是在目标上无法找到相应方法时处罚；直接调用将跳过查找 IMP 的过程。操作不当容易引起崩溃。
+消息转发，通常是在目标上无法找到相应方法时触发；直接调用将跳过查找 IMP 的过程。操作不当容易引起崩溃。
 
 #### 手动出发KVO
 
@@ -754,7 +470,7 @@ id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
 
 #### 如果消息发送失败有哪些补救措施：
 
-- 你是不是发错了，要不要转发给别人吗？
+- 你是不是发错人了，要不要转发给别人吗？如果要，那么转给谁？
 - 这没人能处理，要不要添加一个吗？
 - 全部内容都在这，你看着处理吧
 
@@ -768,8 +484,11 @@ id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
 
 ### 类别（category）
 
-#### 什么是类别？实现原理如何？
+#### 什么是 category 
 
+[参考](https://juejin.im/post/5a9d14856fb9a028e52d5568)
+
+下面是 category 的结构体：
 ``` C++
 typedef struct category_t *Category;
 
@@ -792,30 +511,43 @@ struct category_t {
 };
 ```
 
-[参考](https://juejin.im/post/5a9d14856fb9a028e52d5568)
+ category 是 Objective-C 2.0 之后添加的语言特性，主要作用是为已经存在的类追加方法。此外 Apple 还推荐另外两个使用场景：
+ 
+ 1. 可以把类的实现分开在几个不同的文件里，这样可以减少单个文件的体积；可以对功能进行分类，组织到不同的 category 中；可由多人共同开发一个类，减少冲突；按需加载，方便配置；
+ 2. 声明私有方法；
 
-#### 类别有哪些作用，有什么局限性？为什么？
+#### category 的特点
 
-类别主要有3个作用：
+- category 只能给某个已有的类追加方法，不能追加成员变量
+- category 可以追加属性，但只能生成 setter 和 getter 的声明，不能生成 setter 和 getter 的实现即成员变量；
+- 如果 category 中的方法和类已有方法同名，category 中的方法会覆盖掉类中的已有方法；
+- 如果多个 category 中存在同名的方法啊，因为运行时加载时添加的顺序是无法保证的，所以覆盖的顺序也就不能确定，进而导致最终不知道会调用哪个。
 
-- 将类的实现分散到多个不同文件或多个不同框架中。
-- 创建对私有方法的前向引用。
-- 向对象添加非正式协议。
 
-有两方面局限性：
+参考里说由编译器决定，有待验证，因为这跟 runtime 里的注释不符。
 
-- 无法向类中添加新的实例变量，类别没有位置容纳实例变量。
-- 名称冲突，即当类别中的方法与原始类方法名称冲突时，类别具有更高的优先级。类别方法将完全取代初始方法从而无法再使用初始方法。
-无法添加实例变量的局限可以使用字典对象解决
+#### category VS extension
 
-受局限的原因：
+- extension 运行在编译期，它是类的一部分，拓展的方法，属性和变量一起形成一个完整的类。而 category 是运行期决定的，此时对象的内存布局已经确定，无法再追加变量
+- extension 一般用来隐藏类的私有信息，也就说你只能给已有源码的类添加 extension，而 category 则不存在该问题；
+- category 不能添加成员变量，而 extension 则没这个限制。
 
-如何突破局限：
+#### category 原理
 
-#### 使用 runtime Associate 方法关联的对象，需要在主对象dealloc的时候释放吗？
+原理非常简单，运行时准备时，会将 category 中的方法循环添加到类的方法列表中去，包括 protocol 列表， property 列表等，也是同理。同名的方法会被覆盖。
+
+#### 使用 runtime Associate 方法关联的对象，需要在主对象 dealloc 的时候释放吗？
 无论在MRC下还是ARC下均不需要在主对象dealloc的时候释放，被关联的对象在生命周期内要比对象本身释放的晚很多，它们会在被 NSObject -dealloc 调用的object_dispose()方法中释放。
 
-### class的载入过程
+### class 的载入过程
+
+1. read all classes in all new images, add them all to unconnected_hashl;
+2. read all categories in all new images,
+3. try to connected all classes
+4. resolve selector refs and class refs
+5. fix up protocol object
+6. call `+load()` for classes and categories
+7. all classes are ready before any categories are ready.
 
 ### 如何访问并修改一个类的私有属性
 
@@ -823,7 +555,7 @@ struct category_t {
 2. 通过 runtime 访问并修改私有属性
 
 ### weak实现机制？为什么对象释放后会自动置为nil？
-运行时会维护一张 weak 哈希表， weak对象的地址作为 key，该表记录了每个对象的引用计数，当计数为 0 时就会处罚销毁机制，
+运行时会维护一张 weak 哈希表， weak 对象的地址作为 key，该表记录了每个对象的引用计数，当计数为 0 时就会触发销毁机制，
 
 ### autorealse 如何实现的
 
@@ -913,6 +645,162 @@ UIKit 并不是一个 线程安全 的类，UI 操作涉及到渲染访问各种
 
 #### 线程池的结构？如何实现的？
 
+```java
+package mine.util.thread;  
+  
+import java.util.LinkedList;  
+import java.util.List;  
+  
+/** 
+ * 线程池类，线程管理器：创建线程，执行任务，销毁线程，获取线程基本信息 
+ */  
+public final class ThreadPool {  
+    // 线程池中默认线程的个数为5  
+    private static int worker_num = 5;  
+    // 工作线程  
+    private WorkThread[] workThrads;  
+    // 未处理的任务  
+    private static volatile int finished_task = 0;  
+    // 任务队列，作为一个缓冲,List线程不安全  
+    private List<Runnable> taskQueue = new LinkedList<Runnable>();  
+    private static ThreadPool threadPool;  
+  
+    // 创建具有默认线程个数的线程池  
+    private ThreadPool() {  
+        this(5);  
+    }  
+  
+    // 创建线程池,worker_num为线程池中工作线程的个数  
+    private ThreadPool(int worker_num) {  
+        ThreadPool.worker_num = worker_num;  
+        workThrads = new WorkThread[worker_num];  
+        for (int i = 0; i < worker_num; i++) {  
+            workThrads[i] = new WorkThread();  
+            workThrads[i].start();// 开启线程池中的线程  
+        }  
+    }  
+  
+    // 单态模式，获得一个默认线程个数的线程池  
+    public static ThreadPool getThreadPool() {  
+        return getThreadPool(ThreadPool.worker_num);  
+    }  
+  
+    // 单态模式，获得一个指定线程个数的线程池,worker_num(>0)为线程池中工作线程的个数  
+    // worker_num<=0创建默认的工作线程个数  
+    public static ThreadPool getThreadPool(int worker_num1) {  
+        if (worker_num1 <= 0)  
+            worker_num1 = ThreadPool.worker_num;  
+        if (threadPool == null)  
+            threadPool = new ThreadPool(worker_num1);  
+        return threadPool;  
+    }  
+  
+    // 执行任务,其实只是把任务加入任务队列，什么时候执行有线程池管理器觉定  
+    public void execute(Runnable task) {  
+        synchronized (taskQueue) {  
+            taskQueue.add(task);  
+            taskQueue.notify();  
+        }  
+    }  
+  
+    // 批量执行任务,其实只是把任务加入任务队列，什么时候执行有线程池管理器觉定  
+    public void execute(Runnable[] task) {  
+        synchronized (taskQueue) {  
+            for (Runnable t : task)  
+                taskQueue.add(t);  
+            taskQueue.notify();  
+        }  
+    }  
+  
+    // 批量执行任务,其实只是把任务加入任务队列，什么时候执行有线程池管理器觉定  
+    public void execute(List<Runnable> task) {  
+        synchronized (taskQueue) {  
+            for (Runnable t : task)  
+                taskQueue.add(t);  
+            taskQueue.notify();  
+        }  
+    }  
+  
+    // 销毁线程池,该方法保证在所有任务都完成的情况下才销毁所有线程，否则等待任务完成才销毁  
+    public void destroy() {  
+        while (!taskQueue.isEmpty()) {// 如果还有任务没执行完成，就先睡会吧  
+            try {  
+                Thread.sleep(10);  
+            } catch (InterruptedException e) {  
+                e.printStackTrace();  
+            }  
+        }  
+        // 工作线程停止工作，且置为null  
+        for (int i = 0; i < worker_num; i++) {  
+            workThrads[i].stopWorker();  
+            workThrads[i] = null;  
+        }  
+        threadPool=null;  
+        taskQueue.clear();// 清空任务队列  
+    }  
+  
+    // 返回工作线程的个数  
+    public int getWorkThreadNumber() {  
+        return worker_num;  
+    }  
+  
+    // 返回已完成任务的个数,这里的已完成是只出了任务队列的任务个数，可能该任务并没有实际执行完成  
+    public int getFinishedTasknumber() {  
+        return finished_task;  
+    }  
+  
+    // 返回任务队列的长度，即还没处理的任务个数  
+    public int getWaitTasknumber() {  
+        return taskQueue.size();  
+    }  
+  
+    // 覆盖toString方法，返回线程池信息：工作线程个数和已完成任务个数  
+    @Override  
+    public String toString() {  
+        return "WorkThread number:" + worker_num + "  finished task number:"  
+                + finished_task + "  wait task number:" + getWaitTasknumber();  
+    }  
+  
+    /** 
+     * 内部类，工作线程 
+     */  
+    private class WorkThread extends Thread {  
+        // 该工作线程是否有效，用于结束该工作线程  
+        private boolean isRunning = true;  
+  
+        /* 
+         * 关键所在啊，如果任务队列不空，则取出任务执行，若任务队列空，则等待 
+         */  
+        @Override  
+        public void run() {  
+            Runnable r = null;  
+            while (isRunning) {// 注意，若线程无效则自然结束run方法，该线程就没用了  
+                synchronized (taskQueue) {  
+                    while (isRunning && taskQueue.isEmpty()) {// 队列为空  
+                        try {  
+                            taskQueue.wait(20);  
+                        } catch (InterruptedException e) {  
+                            e.printStackTrace();  
+                        }  
+                    }  
+                    if (!taskQueue.isEmpty())  
+                        r = taskQueue.remove(0);// 取出任务  
+                }  
+                if (r != null) {  
+                    r.run();// 执行任务  
+                }  
+                finished_task++;  
+                r = null;  
+            }  
+        }  
+  
+        // 停止工作，让该线程自然执行完run方法，自然结束  
+        public void stopWorker() {  
+            isRunning = false;  
+        }  
+    }  
+}
+```
 #### 开启一条线程的方法？线程可以取消吗？
 
 - NSThread
@@ -923,6 +811,8 @@ UIKit 并不是一个 线程安全 的类，UI 操作涉及到渲染访问各种
 一旦提交运行即不可取消，尚未提交执行的可以。
 
 #### runloop和线程的关系？各个mode是做什么的？如何实现一个runloop
+
+[参考](http://www.cnblogs.com/superYou/p/4645168.html)
 
 防止线程退出，
 
