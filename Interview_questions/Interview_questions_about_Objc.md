@@ -1,4 +1,4 @@
-# iOS 面试题之 Objective-C
+# 面试题系列之 Objective-C
 
 ### 1.1 Objective-C 对象
 Objective-C 是在 C 基础之上实现的面向对象功能，因此它是一个 C 的超集，通过下面的一些定义可以发现：objc 中所有关于类的实现都是基于结构体的。
