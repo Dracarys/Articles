@@ -1,37 +1,16 @@
 # 面试题系列之运行时
 
-#### 为什么 Objective—C的方法不叫调用叫发消息?
+## 一、载入过程
 
-```
-id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
-```
+1. read all classes in all new images, add them all to unconnected_hashl;
+2. read all categories in all new images,
+3. try to connected all classes
+4. resolve selector refs and class refs
+5. fix up protocol object
+6. call `+load()` for classes and categories
+7. all classes are ready before any categories are ready.
 
-#### 给一个对象发消息的过程如何，或者说如何通过 selector 找到对应的 IMP 地址：
-
-1. 现在 cache 中查找
-2. 在方法类表中查找
-3. 到父类中查找
-4. 查遍所有直到根类
-
-#### 类对象也是如此吗：
-
-是的，只是实例对象要先通过 isa 指针取得该实例的类，然后就一样了。
-
-#### 如果消息发送失败有哪些补救措施：
-
-- 你是不是发错人了，要不要转发给别人吗？如果要，那么转给谁？
-- 这没人能处理，要不要添加一个吗？
-- 全部内容都在这，你看着处理吧
-
-### objc_msgSend函数参数
-
-```
-id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
-```
-
-### 消息转发哪些步骤可以被利用
-
-### 类别（category）
+## 一、类别（category）
 
 #### 什么是 category 
 
@@ -87,16 +66,40 @@ struct category_t {
 
 #### 使用 runtime Associate 方法关联的对象，需要在主对象 dealloc 的时候释放吗？
 无论在MRC下还是ARC下均不需要在主对象dealloc的时候释放，被关联的对象在生命周期内要比对象本身释放的晚很多，它们会在被 NSObject -dealloc 调用的object_dispose()方法中释放。
+## 三、消息转发（objc_mgSend）
 
-### class 的载入过程
+#### 为什么 Objective—C的方法不叫调用叫发消息?
 
-1. read all classes in all new images, add them all to unconnected_hashl;
-2. read all categories in all new images,
-3. try to connected all classes
-4. resolve selector refs and class refs
-5. fix up protocol object
-6. call `+load()` for classes and categories
-7. all classes are ready before any categories are ready.
+```
+id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
+```
+
+#### 给一个对象发消息的过程如何，或者说如何通过 selector 找到对应的 IMP 地址：
+
+1. 现在 cache 中查找
+2. 在方法类表中查找
+3. 到父类中查找
+4. 查遍所有直到根类
+
+#### 类对象也是如此吗：
+
+是的，只是实例对象要先通过 isa 指针取得该实例的类，然后就一样了。
+
+#### 如果消息发送失败有哪些补救措施：
+
+- 你是不是发错人了，要不要转发给别人吗？如果要，那么转给谁？
+- 这没人能处理，要不要添加一个吗？
+- 全部内容都在这，你看着处理吧
+
+### objc_msgSend函数参数
+
+```
+id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
+```
+
+### 消息转发哪些步骤可以被利用
+
+## 四、其它
 
 ### 如何访问并修改一个类的私有属性
 
@@ -133,5 +136,5 @@ UIKit 并不是一个 线程安全 的类，UI 操作涉及到渲染访问各种
 
 ### 能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
 
-1. 不可以，因为结构的便宜已经固定了
+1. 不可以，因为结构的偏移已经固定了
 2. 可以，这是新建，当然可以声明并定义了
