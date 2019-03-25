@@ -3,8 +3,6 @@
 ## CocoTouch
 #### keyWindow、UIWindow 的 layer、UIView 的继承关系
 
-#### CoreGraphic、CGPath、maskLayer
-
 #### NSTimer准吗？有哪些替代方案
 
 不准确，因为 Runloop mode 的切换有可能导致计时器暂停，从而不准确。
@@ -139,8 +137,6 @@ Instrument memory 相关测试。
 - 去除陈旧未使用的类，除了能瘦身还能加快启动速度
 - 
 
-### 从点击图标到应用启动的过程？
-
 ### DSYM文件是什么，你是如何分析的？
 
 符号表文件，可以通过Xcode解析后，直接定位到问题代码
@@ -163,9 +159,9 @@ Instrument memory 相关测试。
 所以AFN就创建了一个单例线程,并且保证线程不退出
 [参考](https://www.jianshu.com/p/7170035a18e8)
 
-### AFNetworking d reachability是如何检测到网络状态变化的？
+### AFNetworking 的 reachability是如何检测到网络状态变化的？
 
-### AFNetworking与MKNetworking区别，优劣？
+### AFNetworking 与 MKNetworking 区别，优劣？
 
 ### YYKit
 
@@ -266,47 +262,7 @@ Instrument memory 相关测试。
 
 #### 最短路径算法
 
-#### 排序算法的稳定性极其意义
 
-稳定性的意义
-
-假定在待排序的记录序列中，存在多个具有相同的关键字的记录，若经过排序，这些记录的相对次序保持不变，即在原序列中，ri = rj，且 ri 在 rj 之前，当序列再次排序后，ri 仍在 rj 之前，则称这种排序算法是稳定的，否则不稳定。例如：淘宝搜索，已经按价格排序，现在又需要对结果进行销量排序，那么稳定的排序可以让销量相同的商品依旧保持着价格高低的排序展展示，只有销量不同才会重新排序。
-
-稳定算法必须对算法实现进行分析，从而得到稳定的特性。不稳定的算法在某种条件下可以变得稳定，而稳定的算法在某种条件下也可以变为不稳定的算法。例如：
-
-```c
-void bubbleSort(Datatype a[], int n) {
-	int i, j, flag = 1;
-	DataType temp;
-	for (i = 1; i < n && flag == 1; i++) {
-		flag = 0;
-		for (j = 0; j < n - 1; j++) {
-			if (a[j].key > a[j + 1].key) { // 如果将条件由 “>” 改为 “>=” 就不稳定了。
-				flag = 1;
-				temp = a[j];
-				a[j] = a[j + 1];
-				a[j + 1] = temp;
-			}
-		}
-	}
-}
-
-```
-
-常见的不稳定排序算法：
-
-- 堆排序
-- 快速排序
-- 希尔排序
-- 直接选择排序
-
-常见的稳定排序算法：
-
-- 基数排序
-- 冒泡排序
-- 直接插入排序
-- 折半插入排序
-- 归并排序
 
 
 
