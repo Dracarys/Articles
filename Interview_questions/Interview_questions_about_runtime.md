@@ -87,9 +87,11 @@ id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
 
 #### 如果消息发送失败有哪些补救措施：
 
-- 你是不是发错人了，要不要转发给别人吗？如果要，那么转给谁？
-- 这没人能处理，要不要添加一个吗？
-- 全部内容都在这，你看着处理吧
+- 你不能处理啊，那你要添加一个的吗？实例方法调用 `+(BOOL)resolveInstanceMethod:(SEL)selector`，如果时类方法，那么调用 `+(BOOL)resolveClassMethod:(SEL)selector`，如果要动态添加，就重写响应方法，在方法实现中添加，并返回 YES， 如果不，要记得调用 super；
+- 添加不了啊，那要我转发给别人吗？`-(id)forwardingTargetForSelector:(SEL)selector`，如果有备用处理对象，那么在此返回，否则返回 nil。通过此方法，可以配合 composition（在对象内部封入子对象，将任务交给子对象处理） 来模拟“多重继承”的某些特性。
+- 全部内容都在这里了（NSInvocation），你看着办吧。`-(void)forwardInvocation:(NSInvocation *)invocation`，此方法可以实现的很简单，只需该面调用目标，使消息在新目标上得以调用即可。这就与上一步类似了。还可以在触发消息前，先以某种方式改变消息内容，比如追加另外一个参数，或者该换选择子（selector），等等。
+
+接受者在以上的每一步都有机会处理消息，越往后代价越大。最好能在第一步就处理完毕，这样的话，运行时可以将此方法缓存起来。
 
 ### objc_msgSend函数参数
 
@@ -98,6 +100,8 @@ id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
 ```
 
 ### 消息转发哪些步骤可以被利用
+
+消息转发时可以结合组合来模拟多重继承的某些特性。
 
 ## 四、其它
 
