@@ -230,25 +230,74 @@ volatile的本意是“易变的”，由于访问寄存器的速度要快过RAM
 
 ### 关于Block
 
-Block的底层实现：
+Block 是通过 structrue 实现的，结构如下：
 
-Block的生命周期：
+```c
+struct Descriptor{
+	unsigned long int reserved;
+	unsigned long int size;
+	void (*) (void *, void *) copy;
+	void (*) (void *, void *) dispose;
+};
+	
+struct {
+	void *isa; // 例如 _NSConcreteStackBlock
+	int flags;
+	int  reserved;
+	void (*) (void *, ...) invoke;// 函数指针
+	struct Descriptor *descriptor;
+	// 捕获到的变量
+}
+```
+block 与函数指针非常类似，可以说是“带有自动变量值的匿名函数”，但 block 可以使实现逻辑看上去更紧凑清晰，节省代码量。
 
-Block的三种类型：
-
-- \_NSGlobalBlock_
-- \_NSStackBlock_
-- \_NSMallocBlock_
-
-Block循环引用问题：
-
-Block如何修改外部变量：
-
-### 函数指针
+- \_NSConcreteGlobalBlock_
+- \_NSConcreteStackBlock_
+- \_NSConcreteMallocBlock_
 
 
+如果 block 是定义在栈上的，那么 block 只在定义它的那个范围内有效。例如：
 
-#### 在 block 里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个NSInteger，那么是否需要？
+```c
+void (^block)();
+if (/* some condition */) {
+	block = ^{
+		NSLog(@"Block a");
+	};
+} else {
+	block = ^{
+		NSLog(@"Block b");
+	};
+}
+block();
+```
+上面的两个 block a、b 都分配在栈上。编译器会给每个 block 分配好栈空间，然而等离开了相应的范围后，编译器有可能吧分配给 block 的内存覆盖掉。所以，这两个 block 分别只在对应的语句范围内有效。此代码时而正确，时而错误，完全取决于编译器是否覆盖他们。
+
+可以通过 copy 将其复制到堆上，一旦复制到堆上，那么之后在 copy 将只增加其引用计数，注意 ARC 环境会自动释放。分配在栈上的无此顾虑，编译器已经处理好了。
+
+```objc
+void (^block)();
+if (/* some condition */) {
+	block = [^{
+		NSLog(@"Block a");
+	} copy];
+} else {
+	block = [^{
+		NSLog(@"Block b");
+	} copy];
+}
+block();
+```
+此外还有一种全局 block，此中 block 不会捕捉任何状态（例如外围的变量等），运行时也无须有状态来参与。block 所使用的内存在编译器就已经确定。全局 block 的拷贝是空操作，因为它不会在运行时被系统回收。相当于单例。
+
+block 总能修改实例变量，而无需像修改普通局部变量那样，必须通过添加 `__block` 修饰来实现。但是需要注意如果通过读取或写入捕获了实例变量，那么也会一并将 self 变量捕获，这是因为实例变量是与 self 所指代的实例关联在一起的，所要特别注意“循环持有”的问题。
+
+### 仍然有疑问，就是 __block 到底是如何影响被捕获的变量的？
+
+#### 在 block 里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个 NSInteger，那么是否需要？
+
+- 在 block 中对一个可变数组进行元素的修改不需要用 `__block`，因为不需要修改指针指向的地址；
+- 修改 NSInteger 则需要，因为它是指类型，（需要结合上一题回答）
 
 #### 对于Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
 
