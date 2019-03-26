@@ -146,73 +146,11 @@ Instrument memory 相关测试。
 ### 如何把异步线程转换成同步任务进行单元测试？
 [参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
 
-
-## 三方框架
-
-### AFNetworking，是否支持IPv6
-
-3.0之后支持
-
-### AFNetwoking 为什么添加一条常驻线程？
-网络请求是异步的，这会导致获取到请求数据时，线程已经退出，代理方法没有机会执行。因此，AFN 的做法是使用一个 runloop 来保证线程不死~
-然而频繁的创建线程并启动runloop肯定会造成内存泄露(runloop 无法停止.线程无法退出)
-所以AFN就创建了一个单例线程,并且保证线程不退出
-[参考](https://www.jianshu.com/p/7170035a18e8)
-
-### AFNetworking 的 reachability是如何检测到网络状态变化的？
-
-### AFNetworking 与 MKNetworking 区别，优劣？
-
-### YYKit
-
-#### YYAsyncLayer如何进行异步绘制的？
-
-#### YYCache
-
-#### YYModel
-
-### SDWebImage 源码解析
-
-### Kingfisher
-
-### Pod 的工作原理
-
-#### Pod update和 Pod install的区别
-
-#### malloc函数如何实现的
-
-### FB 的Async库都做了什么？
-
-
-
-## 数据结构
-
-### 哈希表
-
-什么是哈希表：
-
-原理如何：
-
-你如何实现一个可变的哈希表：
-
-#### 一张图片的内存占用大小是由什么决定的
-
-- 色深
-- 颜色空间；
-- 分辨率
-
-#### 实现一个可变数组
-
-#### 如何实现一个 LRU 缓存
-
-### 如何实现栈和队列？
+### 算法相关
 
 #### 小根堆的插入时间负责度
 
 #### 二分查找的时间复杂度怎么求的？
-
-
-### 算法相关
 
 #### 2个集合的交集
 
