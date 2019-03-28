@@ -72,3 +72,5 @@ MVP、MVVM等
 
 #### 如何捕捉Crash，设计思路。
 [参考](https://blog.csdn.net/skylin19840101/article/details/50955808)
+
+### 设计一个异步渲染的框架

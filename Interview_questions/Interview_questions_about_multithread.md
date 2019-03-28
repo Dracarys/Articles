@@ -236,3 +236,7 @@ do {
 #### 用过NSOperationQueue么？如果用过或者了解的话，为什么要使用 NSOperationQueue，实现了什么？跟 GCD 之间的区别和类似得地方
 
 ### Dispatch_semaphore
+
+### 怎么对一个数组进行线程安全的操作？
+
+### `int a = 0`一万个线程并发访问，最终 a 的值？

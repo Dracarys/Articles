@@ -18,9 +18,9 @@
 
 ## 2. 图片库
 
-### 2.1 SDWebImage 源码解析
+### 2.1 SDWebImage 图片编解码
 
-### 2.2 Kingfisher
+### 2.2 Kingfisher 图片编解码
 
 ## 3. 模型库
 
@@ -29,6 +29,8 @@
 ### 3.2 YYMode
 
 ### 3.3 YYAsyncLayer如何进行异步绘制的？
+
+### 3.4 YYImage 图片编解码
 
 ## 4. 三方库管理工具
 
