@@ -238,5 +238,27 @@ do {
 ### Dispatch_semaphore
 
 ### 怎么对一个数组进行线程安全的操作？
+封装成一个模型对象，然后各种操作都通过该模型来完成。；
+
+另一种如下：
+
+```objc
+synchronized(mutableArray) {
+  // 各种数组操作
+}
+// 出来就不要有针对数组的操作了。
+```
+尽量在一次 `synchronized` 内完成所有操作，否则可能导致脏读脏写：
+
+```objc
+synchronized(mapMark) {
+  // 读取了一个元素
+}
+// 计算了下
+synchronized(mapMark) {
+  // 写入了一个元素
+}
+```
+
 
 ### `int a = 0`一万个线程并发访问，最终 a 的值？

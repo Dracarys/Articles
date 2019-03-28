@@ -77,6 +77,24 @@ UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics �
 
 #### Quartz 框架
 
+### 哪些操作会导致离屏渲染
+设置一下属性时都会触发离屏渲染：
+
+- shouldResterize （光栅化）
+- masks
+- shadows
+- edge antialiasing （抗锯齿）
+- group opacity （不透明)
+- corner radious
+- Gradient
+
+### 怎么判断是否存在离屏渲染
+Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查选项：
+
+- Color Offscreen-Rendered Yellow 开启后会把那些需要离屏渲染的图层高亮成黄色，这就意味着黄色图层可能存在性能问题，模拟器也存在该选项。
+- Color Hits Green and Misses Red
+如果shouldRasterize被设置成YES，对应的渲染结果会被缓存，如果图层是绿色，就表示这些缓存被复用；如果是红色就表示缓存会被重复创建，这就表示该处存在性能问题了。 
+
 
 ## iOS SDK
 
