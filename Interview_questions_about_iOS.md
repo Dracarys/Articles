@@ -9,7 +9,7 @@
 
 解决方案：
 
-- 将计时器添加到自线程，这样就不收 Runloop mode的影响，但是要注意回调的线程问题
+- 将计时器添加到自定义线程，这样就不收 Runloop mode的影响，但是要注意子线程的Timer 回调也是在子线程；
 - 将计时器添加到特定的 Runloop Mode 中，例如：NSRunLoopCommonMode
 - 另起炉灶，用 `mach_absolute_time()` 来实现更高精度的定时器
 - CADisplayLink
@@ -17,10 +17,14 @@
 
 #### load 和 initialize 方法的调用时机？
 
-- load 当类被加载到 runtime 的时候运行，在 main 函数执行之前，也就是类加载器加载时，每个类只会调用一次；通常被用来进行 Method Swizzle，但是这会增加 App 启动时间。
+- load 当类被加载到 runtime 的时候运行，在 main 函数执行之前，也就是类加载器加载时，每个类默认只会调用一次；通常被用来进行 Method Swizzle，但是这会增加 App 启动时间。
 - initialize 在类接收到第一条消息之前被用调用。每个类只会调用一次。子类未实现会向上查找。一搬用来初始化全局变量或静态变量。
 
 ### View哪些属性时 animatable 的？
+
+- frame 以及所有可能导致 frame 发生变化的属性
+- transform 仿射变换
+- alpha 透明度
 
 ### LayouSubviews 何时会被调用？
 
@@ -28,7 +32,6 @@
 - 滚动 UIScrollView 时会触发
 - 旋转 UIScreen 时会触发
 - 当 view 的 frame 发生变化时会触发
-- 
 
 ### 为什么动画完成后，layer会恢复到原先的状态？
 
@@ -45,20 +48,20 @@
 - 通过 Core Graphics 绘制带圆角的视图，同样会触发离屏渲染，此外还将绘图任务转移给了 CPU
 - 设置 View 的背景的 content mode
 
-#### 响应链、如何扩大View的响应范围
+### 响应链、如何扩大View的响应范围
 
 hittest，在预计的范围内返回 yes 即可。
 view 有一个是否响应事件的方法，重写该方法，对指定范围内的方法返回yes即可。
 
-#### 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView和UIResponse的关系是什么？
+### 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView和UIResponse的关系是什么？
 
 Window,然后依次向下传递，
 
 uiview 继承自UIResponse 
-#### 直接用UILabel和自己用DrawRect画UILabel，那个性能好，为什么？那个占用的内存少？为什么？
+### 直接用UILabel和自己用DrawRect画UILabel，那个性能好，为什么？那个占用的内存少？为什么？
 直接用更好，调用 coreGraphics 会导致离屏渲染，
 
-#### iOS的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
+### iOS的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
 
 可以执行，
 - 自己主动保活，如播放无音音频文件；
@@ -66,7 +69,7 @@ uiview 继承自UIResponse
 
 可以，有短暂的保存时间。
 
-#### 一般使用的图标内存为多大？200x300的图片，内存应该占用多少比较合理？
+### 一般使用的图标内存为多大？200x300的图片，内存应该占用多少比较合理？
 
 #### 自线程中调用connection方法，为什么不回调？
 没加入runloop，子线程被销毁了
