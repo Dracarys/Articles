@@ -8,7 +8,7 @@ auto reference counting，
 
 #### 有哪些导致崩溃的常见问题？如何进行预防？
 
-- 取空值，自定义取值方法，添加到category中
+- 取空值，自定义取值方法，添加到 category 中
 - 越界，取值时始终进行验证，且永远不要相信后台反馈
 - 不能识别到方法，向错误类型发送消息，预防方法同上，此外还可以通过runtime处理消息转发方法，来减少崩溃
 
@@ -17,7 +17,7 @@ auto reference counting，
 - 创建后未释放，通过正确释放解决，重点关注 new、create等方法名
 - 单位时间开辟大量空间，添加 autoreleasepool
 - Corefoundation方法使用不当，持有权转移错误
-- 循环引用，添加weak中间代理
+- 循环引用，添加 weak 中间代理
 
 #### 深拷贝、浅拷贝
 
