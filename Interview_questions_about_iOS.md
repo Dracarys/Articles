@@ -1,7 +1,11 @@
 # 面试题系列之iOS
 
 ## CocoTouch
-#### keyWindow、UIWindow 的 layer、UIView 的继承关系
+#### KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
+
+UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘以及其它非点击相关事件，同一时间只有能一个 KeyWindow。
+
+简单说 UIView 就是 Layer 的 Agent。负责除绘图意外的任务。UIView 继承自 UIResponder，因此它可以对事件进行响应。例如多层级 View 的响应链传递，那都是通过 UIView 的 HitTest 实现的。而 Layer 则直接继承自 NSObject，承担与视图相关的绘制工作，例如修改 View 的大小，背景颜色等最终都是由 Layer 来最终完成。
 
 #### NSTimer准吗？有哪些替代方案
 
@@ -20,11 +24,14 @@
 - load 当类被加载到 runtime 的时候运行，在 main 函数执行之前，也就是类加载器加载时，每个类默认只会调用一次；通常被用来进行 Method Swizzle，但是这会增加 App 启动时间。
 - initialize 在类接收到第一条消息之前被用调用。每个类只会调用一次。子类未实现会向上查找。一搬用来初始化全局变量或静态变量。
 
-### View哪些属性时 animatable 的？
+### View 哪些属性时 animatable 的？
 
-- frame 以及所有可能导致 frame 发生变化的属性
+- frame
+- bounds
+- center
 - transform 仿射变换
 - alpha 透明度
+- contenStrech 拉伸，已弃用。
 
 ### LayouSubviews 何时会被调用？
 
@@ -35,9 +42,13 @@
 
 ### 为什么动画完成后，layer会恢复到原先的状态？
 
-因为这些产生的动画只是假象,并没有对layer进行改变.那么为什么会这样呢,这里要讲一下图层树里的呈现树.呈现树实际上是模型图层的复制,但是它的属性值表示了当前外观效果,动画的过程实际上只是修改了呈现树,并没有对图层的属性进行改变,所以在动画结束以后图层会恢复到原先状态
+Layer 和 View 一样存在着一个层级树状结构：
 
-复习 layer 的知识
+- 模型树：主要用来记录 Layer 的相关属性状态。
+- 呈现树：是对模型树的一份拷贝，记录的是 Layer 动画过程中的属性状态。
+- 渲染树：是私有的，负责渲染相关。
+
+了解了这一设计模型后，就可以看到动画只不过是呈现树所展示的一种假象，真正持有 Layer 状态的是模型树，因为呈现树只是一个拷贝，在动画过程中的变化不会影响到模型树，所以当动画结束时，Layer 的属性依然是模型树所记录的状态。
 
 #### 给一个View设置圆角的方法有哪些，各有什么不同？
 
@@ -45,21 +56,20 @@
 
 - 直接调用 Layer 的方法，会触发离屏渲染
 - 设置 CALayer的mask，同样会触发离屏渲染
-- 通过 Core Graphics 绘制带圆角的视图，同样会触发离屏渲染，此外还将绘图任务转移给了 CPU
+- 通过 Core Graphics 绘制带圆角的视图，同样会触发离屏渲染。
 - 设置 View 的背景的 content mode
 
 ### 响应链、如何扩大View的响应范围
 
-hittest，在预计的范围内返回 yes 即可。
-view 有一个是否响应事件的方法，重写该方法，对指定范围内的方法返回yes即可。
+重写 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，对那些位于制定范围内的点返回 `YES`，注意潜在的干扰。
 
 ### 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView和UIResponse的关系是什么？
 
-Window,然后依次向下传递，
+第一响应者是 KeyWindow，它通过调用 `- (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，返回最远的后代（包括自己），该方法是通过自顶向下的递归调用 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event ` 方法，来确定具体应该是谁来响应点击事件的。
 
 uiview 继承自UIResponse 
-### 直接用UILabel和自己用DrawRect画UILabel，那个性能好，为什么？那个占用的内存少？为什么？
-直接用更好，调用 coreGraphics 会导致离屏渲染，
+### 直接用 UILabel 和自己用 DrawRect 画 UILabel，那个性能好，为什么？那个占用的内存少？为什么？
+直接用更好，调用 coreGraphics 会导致离屏渲染。原因就是解离屏渲染。
 
 ### iOS的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
 
@@ -69,16 +79,12 @@ uiview 继承自UIResponse
 
 可以，有短暂的保存时间。
 
-### 一般使用的图标内存为多大？200x300的图片，内存应该占用多少比较合理？
-
-#### 自线程中调用connection方法，为什么不回调？
+#### 自线程中调用 connection 方法，为什么不回调？这个问题很老了，现在已经开始用 URLSession。
 没加入runloop，子线程被销毁了
 
 #### UI框架和CA、CG框架的关系是什么？做过哪些内容？
 
 UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics 和 OpenGL ES 之上。
-
-#### Quartz 框架
 
 ### 哪些操作会导致离屏渲染
 设置一下属性时都会触发离屏渲染：
@@ -101,7 +107,7 @@ Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查�
 
 ## iOS SDK
 
-### 蓝牙的围栏功能
+### 蓝牙
 
 ### homeKit
 
