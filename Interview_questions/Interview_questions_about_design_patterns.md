@@ -2,9 +2,35 @@
 
 ### 什么是设计模式？
 
+《设计模式》一书中关于设计模式的定义：对定制来解决特定场景下一半设计问题的类和互相通信的对象的描述。简而言之，设计模式时为特定场景下的问题而定制的解决方案。
+
+常见的设计模式：
+
+- 原型模式
+- 工厂方法模式
+- 抽象工厂模式
+- 生成器模式
+- 单例模式
+- 适配器模式
+- 桥接模式
+- 外观模式
+- 中介者模式
+- 观察者模式
+- 组合模式
+- 迭代器模式
+- 访问者模式
+- 装饰模式
+- 责任链模式
+- 模板方法模式
+- 策略模式
+- 命令模式
+- 共享池模式
+- 代理模式
+- 备忘录模式
+
 ### MVC的缺点
 
-容易导致 Controller 过分臃肿
+容易导致 Controller 过分臃肿。
 
 ### 其它架构
 
@@ -13,6 +39,19 @@ MVP、MVVM等
 ### MVVM如何实现绑定
 
 ### 单例
+
+```objc
++ (instancetype)sharedInstance {
+    static InstanceType *instance;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [[InstanceType alloc] init];
+    });
+    return instance;
+}
+```
+
+Swift 已经不需如此处理，它已经从语义上保证只被初始化一次。
 
 ### Delegate、Notification、KOV的区别，优缺点
 
