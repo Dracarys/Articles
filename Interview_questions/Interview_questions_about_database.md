@@ -32,3 +32,5 @@ public static String sqliteEscape(String keyWord){
 #### 索引的作用、优缺点，与主键的区别
 
 #### 乐观锁VS悲观锁
+
+#### 数据库设计、字段设计等项目方案

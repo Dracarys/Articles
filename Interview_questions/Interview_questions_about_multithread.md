@@ -1,8 +1,8 @@
 # 面试题系列之多线程
 
-### Objective-C 中的锁
+### Objective-C 中的锁，各自原理如何？适用场景？
 
-- @synchronized关键字锁
+- @synchronized 关键字锁
 - NSLock对象锁
 - NSCondition
 - NSConditionLock 条件锁
