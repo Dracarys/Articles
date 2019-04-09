@@ -53,6 +53,8 @@ MVP、MVVM等
 
 Swift 已经不需如此处理，它已经从语义上保证只被初始化一次。
 
+### 多态
+
 ### Delegate、Notification、KOV的区别，优缺点
 
 - Delegate 是单向的委托，你只能委托给一个代理对象；
