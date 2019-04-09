@@ -79,6 +79,33 @@ Swift 已经不需如此处理，它已经从语义上保证只被初始化一�
 
 ### 设计一个方案来检测 KVO 的同步异步问题，willChange 和 didChange 的不同点
 
+### KVO 是如何实现的？
+
+### 手动出发KVO
+
+首先关闭默认：
+``` Objective-C
++ (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key
+{
+    
+    if ([key isEqualToString:@"想要手动控制的key"])return NO;
+    
+    return [super automaticallyNotifiesObserversForKey:key];
+}
+```
+然后重写 setter ：
+
+``` Objective-C
+- (void)setTmpStr:(NSString *)tmpStr
+{
+    [self willChangeValueForKey:@"tmpStr"];
+    
+    _tmpStr = tmpStr;
+    
+    [self didChangeValueForKey:@"tmpStr"];
+}
+```
+
 ### kVO 在多线程中的行为
 - KVO 是同步的，一旦对象的属性发生变化，只有用同步的方式，才能保证所有观察者的方法能够执行完成。KVO 监听方法中，不要有太耗时的操作。
 

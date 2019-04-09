@@ -2,6 +2,7 @@
 
 ## Cocoa
 
+
 ## CocoaTouch
 #### KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
 
