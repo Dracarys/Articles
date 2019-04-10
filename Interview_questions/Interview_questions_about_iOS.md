@@ -125,13 +125,118 @@ Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查�
 
 
 
-## 工具类
+
+## 项目经验
 
 ### 设计一个监控 app 启动速度的模块，大体的设计思路如何？
 
 ### 如何检测应用是否卡顿
+检查卡顿分两种方式：一种是利用 Instrument 的 animation 测试；另一种是 监听 RunLoop。这里重点介绍第二种。（该方法的介绍来自 戴铭--如何利用 RunLoop 原理去监控卡顿）
 
-instrument，animation测试
+监听 RunLoop，首先要创建一个 CFRunLoopOberverContext 观察者。
+
+```objc
+CFRunLoopObserverContext context = {0,(__bridge void*)self,NULL,NULL};
+runLoopObserver = CFRunLoopObserverCreate(kCFAllocatorDefault,kCFRunLoopAllActivities,YES,0,&runLoopObserverCallBack,&context);
+```
+
+将创建好的观察者 runLoopObserver 添加到主线程 RunLoop 的 common 模式下观察。然后创建一个持续的子线程专门用来监控主线程的 RunLoop 状态。
+
+一旦发现进入睡眠前的 kCFRunLoopBeforeSources 状态，或者唤醒后的状态 kCFRunLoopAfterWaiting，在设置的时间阈值内一直没有变化，即可判定为卡顿。之后便可 dump 出堆栈的信息，以便进一步分析具体是哪个方法的执行时间过长。
+
+开启子线程监控的代码如下：
+
+```objc
+// 创建子线程监控
+dispatch_async(dispatch_get_global_queue(0, 0), ^{
+    // 子线程开启一个持续的 loop 用来进行监控
+    while (YES) {
+        long semaphoreWait = dispatch_semaphore_wait(dispatchSemaphore, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
+        if (semaphoreWait != 0) {
+            if (!runLoopObserver) {
+                timeoutCount = 0;
+                dispatchSemaphore = 0;
+                runLoopActivity = 0;
+                return;
+            }
+            //BeforeSources 和 AfterWaiting 这两个状态能够检测到是否卡顿
+            if (runLoopActivity == kCFRunLoopBeforeSources || runLoopActivity == kCFRunLoopAfterWaiting) {
+                // 将堆栈信息上报服务器的代码放到这里
+            } //end activity
+        }// end semaphore wait
+        timeoutCount = 0;
+    }// end while
+});
+```
+代码中的 NSEC_PER_SEC， 表示触发卡顿的时间阈值，单位是秒。这里设置成了 3 秒，其依据的是 WatchDog 的机制来确定的。WatchDog 在不同状态下设置的不同时间如下：
+
+- 启动（Launch）20s；
+- 恢复（Resume）10s；
+- 挂起（Suspend）10s；
+- 退出（Quit）6s；
+- 后台（Background）3min（在 iOS 7 之前，每次申请 10min；之后改为每次申请 3min，可连续申请，最多申请 10min）。
+
+该阈值设定在小于 WatchDog 的时间之余，尽量结合大多数用户的感受而定。
+
+### 如何 dump 堆栈信息
+第一种：通过系统函数获取
+
+```objc
+static int s_fatal_signals[] = {
+    SIGABRT,
+    SIGBUS,
+    SIGFPE,
+    SIGILL,
+    SIGSEGV,
+    SIGTRAP,
+    SIGTERM,
+    SIGKILL,
+};
+
+static int s_fatal_signal_num = sizeof(s_fatal_signals) / sizeof(s_fatal_signals[0]);
+
+void UncaughtExceptionHandler(NSException *exception) {
+    NSArray *exceptionArray = [exception callStackSymbols]; // 得到当前调用栈信息
+    NSString *exceptionReason = [exception reason];       // 非常重要，就是崩溃的原因
+    NSString *exceptionName = [exception name];           // 异常类型
+}
+
+void SignalHandler(int code)
+{
+    NSLog(@"signal handler = %d",code);
+}
+
+void InitCrashReport()
+{
+    // 系统错误信号捕获
+    for (int i = 0; i < s_fatal_signal_num; ++i) {
+        signal(s_fatal_signals[i], SignalHandler);
+    }
+    
+    //oc 未捕获异常的捕获
+    NSSetUncaughtExceptionHandler(&UncaughtExceptionHandler);
+}
+
+int main(int argc, char * argv[]) {
+    @autoreleasepool {
+        InitCrashReport();
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+
+```
+另一种：利用三方开源库 PLCrashReporter 来获取，其可以定位到问题代码的具体位置，且性能消耗不大。
+
+```objc
+// 获取数据
+NSData *lagData = [[[PLCrashReporter alloc]
+                                          initWithConfiguration:[[PLCrashReporterConfig alloc] initWithSignalHandlerType:PLCrashReporterSignalHandlerTypeBSD symbolicationStrategy:PLCrashReporterSymbolicationStrategyAll]] generateLiveReport];
+// 转换成 PLCrashReport 对象
+PLCrashReport *lagReport = [[PLCrashReport alloc] initWithData:lagData error:NULL];
+// 进行字符串格式化处理
+NSString *lagReportString = [PLCrashReportTextFormatter stringValueForCrashReport:lagReport withTextFormat:PLCrashReportTextFormatiOS];
+// 将字符串上传服务器
+NSLog(@"lag happen, detail below: \n %@",lagReportString);
+
+```
 
 ### 如何编写单元测试，例如测试一个网络库，如何提高覆盖率
 
@@ -155,17 +260,14 @@ Instrument memory 相关测试。
 - watchpoint
 
 ### 如何给一款 App 瘦身
-
-- 去除不必要的图片；
-- 去除陈旧未使用的类，除了能瘦身还能加快启动速度
-- 
+- 支持 AppThinning，启用图片AssetCatalog，以便针对不同设备进行图片的分割；
+- 去除无用的图片资源，LSUnuserdResources，非常好用的一个工具；
+- 图片资源压缩，利用 TinyPng 或 ImageOptimism 对 Png 资源进行重新压缩，超过100KB的图片可以采用 WebP 格式，但是会增加一倍的 CPU 解码消耗；
+- 通过 AppCode 分析，去除陈旧未使用的类，除了能瘦身还能加快启动速度
 
 ### DSYM文件是什么，你是如何分析的？
 
 符号表文件，可以通过Xcode解析后，直接定位到问题代码
-
-
-## 项目经验
 
 ### 如果进行网络、内存、性能优化？
 
@@ -179,7 +281,7 @@ Instrument memory 相关测试。
 
 ### 如果现在要实现一个下载功能，如何设计，每个类都觉题做什么？
 
-### 设计一个监控App启动速度的模块，说下大体的设计思路
+### 设计一个监控 App 启动速度的模块，说下大体的设计思路
 
 ### 如何设计一个网络请求库
 
