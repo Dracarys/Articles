@@ -408,11 +408,80 @@ do {
 ```
 
 ## 6. KVC
+KVC 是一种间接访问对象属性的机制，使用字符串识别属性，而不是通过调用一个 setter/getter 方法或直接访问实例变量。在本质上，KVC 定义类你的应用实现的访问器方法的模式和方法签名。
+
+在应用中实现 KVC 兼容的访问是一个重要的设计原则。访问器帮助执行适当的数据封装并促进与其他技术的集成，例如：Key-value observing，Core Data，Cocoa bindings 和 AppleScript。KVC 方法在许多情况下，也被用来简化应用代码。
+
+KVC 的基本方法声明在 NSKeyValueCoding 中，是 Objective-C 的非正式协议，由 NSObject 提供默认实现。
+
+### 6.1 KVC 的用法
+
+#### 6.1.1 访问对象properties
+对象的properties通常分为三类：
+
+- Attributes 
+- To-one relationships
+- To-many realtionships
+
+示例：
+
+```objc
+@interface BankAccount : NSObject
+ 
+@property (nonatomic) NSNumber* currentBalance;              // An attribute
+@property (nonatomic) Person* owner;                         // A to-one relation
+@property (nonatomic) NSArray< Transaction* >* transactions; // A to-many relation
+ 
+@end
+```
+
+通过 Key 获取属性值：
+
+- `valueForKey:`。如果访问的属性不存在，那么该对象会收到一条 `valueForUndefinekey:` 的消息。该方法的默认实现是抛出一个 `NSUndefinedKeyException` 异常，子类可以重写该方法；
+- `valueForKeyPath:`。如果路径上的任何对象出现找不到的情况，都会向上面一样，抛出异常；
+- `dictionaryWithValueForKeys:`。返回包指定 keys 的字典。
+
+通过 Key 设置属性值：
+
+- `setValue:forKey:`。该方法的默认实现，会对 NSNumber 和 NSValue 对象进行默认解封；如果属性为定义，那么该对象会收到一条 `setValue:forUndefinedKey:` 的消息，该方法的默认实现与获取相同，也是抛出 `NSUndefinedKeyException` 异常，同样子类可以重写该方法；
+- `setValue:forKeyPath:`。逻辑与获取相同；
+- `setValuesForKeysWithDictionary:`。与获取逻辑相同，只是如果要设置 nil，请用 NSNull 代替，因为集合类不支持插入 nil。
+
+访问集合类属性的内容：
+
+- `mutableArrayValueForKey:` 和 `mutableArrayValueForKeyPath:`。会返回一个代理对象，行为与 NSMutableArray 相同；
+- `mutableSetValueForKey:` 和 `mutableSetValueForKeyPath:`。同上
+- `mutableOrderedSetValueForKey:` 和 `mutableOrderedSetValueForKeyPath:`。同上。
+
+对返回的代理对象进行插入、修改等操作，也会修改原结合，只是不是在原基础上改，而是现在代理对象上改，之后在想普通的 KVC 赋值一样，赋过去。
+
+通过 KVC 方式取集合的值时，还可以使用集合运算符，格式如下：
+
+![Operator key path format](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/art/keypath.jpg)
+
+集合运算符大致分为三类：
+
+- 聚集操作符：`@avg`，`@count`，`@max`，`@min`，`@sum`；
+- 数组操作符：`@distinctUnionOfObjects`，`@unionOfObjects`;
+- 嵌套操作符：集合中的元素也是集合。`@distinctUnionOfArrays`，`@unionOfArrays`，`@distinctUnionOfSets`。
+
+示例：
+
+```objc
+NSNumber *amountSum = [self.transactions valueForKeyPath:@"@sum.amount"];
+
+NSArray *distinctPayees = [self.transactions valueForKeyPath:@"@distinctUnionOfObjects.payee"];
+
+NSArray* moreTransactions = @[<# transaction data #>];
+NSArray* arrayOfArrays = @[self.transactions, moreTransactions];
+NSArray *collectedDistinctPayees = [arrayOfArrays valueForKeyPath:@"@distinctUnionOfArrays.payee"];
+```
+
+如何适配 KVC？
+
+参考：[《Key-value Coding Programming Guide》](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/index.html#//apple_ref/doc/uid/10000107-SW1)
 
 ### 6.1 KVC 如何实现的？
-模型的性质是通过一个简单的键（通常是个字符串）来指定的。视图和控制器通过键来查找相应的属性值。在一个给定的实体中，同一个属性的所有值具有相同的数据类型。键-值编码技术用于进行这样的查找—它是一种间接访问对象属性的机制。键路径是一个由用点作分隔符的键组成的字符串，用于指定一个连接在一起的对象性质序列。第一个键的性质是由先前的性质决定的，接下来每个键的值也是相对于其前面的性质。键路径使您可以以独立于模型实现的方式指定相关对象的性质。通过键路径，您可以指定对象图中的一个任意深度的路径，使其指向相关对象的特定属性。
-
-### 6.2 Keypath 的集合运算符如何使用？
 
 ### 6.3 KVC 和 KVO 中涉及的 Keypath 一定是属性吗？
 - KVC 实例变量也可以
