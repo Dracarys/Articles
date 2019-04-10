@@ -1,16 +1,9 @@
 # 面试题系列之iOS项目经验
 
 ## Cocoa
+Cocoa 是 Apple 为 Mac 等设备打造的一套框架，以 NextSetp 为基础，所以命名多带有 “NS” 前缀，
 
-
-## CocoaTouch
-#### KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
-
-UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘以及其它非点击相关事件，同一时间只有能一个 KeyWindow。
-
-简单说 UIView 就是 Layer 的 Agent。负责除绘图意外的任务。UIView 继承自 UIResponder，因此它可以对事件进行响应。例如多层级 View 的响应链传递，那都是通过 UIView 的 HitTest 实现的。而 Layer 则直接继承自 NSObject，承担与视图相关的绘制工作，例如修改 View 的大小，背景颜色等最终都是由 Layer 来最终完成。
-
-#### NSTimer准吗？有哪些替代方案
+### NSTimer准吗？有哪些替代方案
 
 不准确，因为 Runloop mode 的切换有可能导致计时器暂停，从而不准确。
 
@@ -22,7 +15,17 @@ UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘
 - CADisplayLink
 - GCD timer
 
-### View 哪些属性时 animatable 的？
+### 实现一个 NSString 类
+
+## CocoaTouch
+CocoaTouch 是 Apple 为 iPhone 等触屏移动设备专门打造的框架，继承了部分 Cocoa 框架的基础，命名多带有 “UI” 前缀。
+### KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
+
+UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘以及其它非点击相关事件，同一时间只有能一个 KeyWindow。
+
+简单说 UIView 就是 Layer 的 Agent。负责除绘图意外的任务。UIView 继承自 UIResponder，因此它可以对事件进行响应。例如多层级 View 的响应链传递，那都是通过 UIView 的 HitTest 实现的。而 Layer 则直接继承自 NSObject，承担与视图相关的绘制工作，例如修改 View 的大小，背景颜色等最终都是由 Layer 来最终完成。
+
+### UIView 的哪些属性是 animatable 的？
 
 - frame
 - bounds
@@ -31,14 +34,14 @@ UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘
 - alpha 透明度
 - contenStrech 拉伸，已弃用。
 
-### LayouSubviews 何时会被调用？
+### UIView 的 LayouSubviews 方法何时会被调用？
 
 - 初始化时不会触发
 - 滚动 UIScrollView 时会触发
 - 旋转 UIScreen 时会触发
 - 当 view 的 frame 发生变化时会触发
 
-### 为什么动画完成后，layer会恢复到原先的状态？
+### 为什么动画完成后，Layer 会恢复到原先的状态？
 
 Layer 和 View 一样存在着一个层级树状结构：
 
@@ -48,7 +51,7 @@ Layer 和 View 一样存在着一个层级树状结构：
 
 了解了这一设计模型后，就可以看到动画只不过是呈现树所展示的一种假象，真正持有 Layer 状态的是模型树，因为呈现树只是一个拷贝，在动画过程中的变化不会影响到模型树，所以当动画结束时，Layer 的属性依然是模型树所记录的状态。
 
-#### 给一个View设置圆角的方法有哪些，各有什么不同？
+### 给一个 View 设置圆角的方法有哪些，各有什么不同？
 
 离屏渲染绘制 layer tree 中的一部分到一个新的缓存里面（这个缓存不是屏幕，是另一个地方），然后再把这个缓存渲染到屏幕上面。一般来说，你需要避免离屏渲染。因为这个开销很大。在屏幕上面直接合成层要比先创建一个离屏缓存然后在缓存上面绘制，最后再绘制缓存到屏幕上面快很多。这里面有 2 个上下文环境的切换（切换到屏幕外缓存环境，和屏幕环境）
 
@@ -57,8 +60,10 @@ Layer 和 View 一样存在着一个层级树状结构：
 - 通过 Core Graphics 绘制带圆角的视图，同样会触发离屏渲染。
 - 设置 View 的背景的 content mode
 
-### 响应链、如何扩大View的响应范围
+### 直接用 UILabel 和自己用 DrawRect 画 UILabel，那个性能好，为什么？那个占用的内存少？为什么？
+直接用更好，调用 coreGraphics 会导致离屏渲染。原因就是解离屏渲染。
 
+### 响应链、如何扩大 View 的响应范围
 重写 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，对那些位于制定范围内的点返回 `YES`，注意潜在的干扰。
 
 ### 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView 和 UIResponse 的关系是什么？
@@ -66,9 +71,6 @@ Layer 和 View 一样存在着一个层级树状结构：
 第一响应者是 KeyWindow，它通过调用 `- (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，返回最远的后代（包括自己），该方法是通过自顶向下的递归调用 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event ` 方法，来确定具体应该是谁来响应点击事件的。
 
 uiview 继承自UIResponse。
-
-### 直接用 UILabel 和自己用 DrawRect 画 UILabel，那个性能好，为什么？那个占用的内存少？为什么？
-直接用更好，调用 coreGraphics 会导致离屏渲染。原因就是解离屏渲染。
 
 ### iOS 的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
 
@@ -81,7 +83,7 @@ uiview 继承自UIResponse。
 ### 自线程中调用 connection 方法，为什么不回调？这个问题很老了，现在已经开始用 URLSession。
 没加入runloop，子线程被销毁了
 
-#### UI框架和CA、CG框架的关系是什么？做过哪些内容？
+### UI框架和CA、CG框架的关系是什么？做过哪些内容？
 
 UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics 和 OpenGL ES 之上。
 
@@ -115,15 +117,6 @@ Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查�
 ### CoreText
 
 ### CoreImage
-
-### 静态库和动态库之间的区别
-
-- 动态库 \*.dylib 和 \*.framework，连接时不复制，程序运行时由系统动态加载到内存，
-- 静态库 \*.a 和 \*.framework。连接时，静态会被复制到输出目标中
-
-### iOS从什么时候开始支持动态库的？
-
-Xcode 6 之后支持创建动态库工程。
 
 ### iOS 的签名机制如何？
 
@@ -171,18 +164,33 @@ Instrument memory 相关测试。
 
 符号表文件，可以通过Xcode解析后，直接定位到问题代码
 
+
+## 项目经验
+
 ### 如果进行网络、内存、性能优化？
 
 ### 如何把异步线程转换成同步任务进行单元测试？
 [参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
 
-### 算法相关
+### 项目组件化用过吗？怎么接耦的？
+[参考](http://www.code4app.com/blog-822715-1562.html)
 
+### 你实现过一个框架或者库以供别人使用么？如果有，请谈一谈构建框架或者库时候的经验；如果没有，请设想和设计框架的 public 的API，并指出大概需要如何做、需要注意一些什么方面，来使别人容易地使用你的框架
 
+### 如果现在要实现一个下载功能，如何设计，每个类都觉题做什么？
 
+### 设计一个监控App启动速度的模块，说下大体的设计思路
 
+### 如何设计一个网络请求库
 
+### 设计一个图片缓存
 
+### 如何捕捉Crash，设计思路。
+[参考](https://blog.csdn.net/skylin19840101/article/details/50955808)
+
+### 设计一个异步渲染的框架
+
+YYAsynicDisplay
 
 [iOS-Developer-and-Designer-Interview-Questions](https://github.com/9magnets/iOS-Developer-and-Designer-Interview-Questions)
 

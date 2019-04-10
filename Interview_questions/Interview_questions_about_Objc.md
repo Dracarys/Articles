@@ -216,12 +216,77 @@ volatile的本意是“易变的”，由于访问寄存器的速度要快过RAM
 2. 如果子类有指定构造器，那么便利构造器必须调用自己的其它构造器（包括制定构造器及其它便利构造器），不能调用supper的普通构造器
 3. 子类如何好实现了指定构造器，那么必须实现所有父类的指定构造器。
 
-## 3. 聊聊 Class extension
+## 3. 指针
 
-- 可以将暴露给外面的只读属性改为读写属性，方便内部使用（但我个人更推荐在内部尽量直接使用变量）
-- 可以添加一些私有的实例变量、私有的属性、私有方法等你不想暴露给外部的内容。
+### 3.1 指针常量、常量指针区别？
 
-### 4. 关于Block
+指针常量：`int * const ptr` 指针本身是一个敞亮。在声明的时候初始化，里面的值（存放的地址）不能更改；
+常量指针：`const int * ptr`指针本身是一个常量，通过常量地址初始化，它可以再指向另一个常量地址。
+
+### 3.2 运行完 Test 函数后会有什么结果
+
+``` C
+void getMemory(char *p) { 
+	p = (char *)malloc(100);
+}
+
+void test(void) {
+	char *str = NULL;
+	getMemory(str);
+	strcpy(str, "hello, world");
+	printf(str);
+}
+```
+*参考答案：程序崩溃，`getMemory()` 指针 p 与 str 指针并不是同一个指针，修改了指针 p，并不影响指针 str，所以 Test 函数中的 str 一直都是 NULL，copy将发生错误，导致崩溃，如果要修正，可以将 p 修改为一个指向指针的指针，这样就可以修改 str 的指向，让它指向已分配的内存 *
+
+另一个
+
+``` C
+char * getMemory(char *p) {
+	char p[] = "hello world";
+	return p;
+}
+
+void test(void) {
+	char *str = NULL;
+	str = getMemory();
+	printf(str);
+}
+```
+*参考答案：可能乱码。因为 `getMemory()` 返回的是 “栈内存” 指针，该指针的地址不是 NULL，但其原先的内容已经被清除了，新内容不可知*。
+
+再一个：
+
+``` C
+void getMemory(char **p, int num) {
+	*p = (char *)malloc(num);
+}
+
+void test(void) {
+	char *str = NULL;
+	getMemory(&str, 100);
+	strcpy(str, "hello");
+	printf(str);
+}
+```
+*参考答案：输出 “hello”，单丝会导致内存泄漏*
+
+还一个：
+
+``` C
+void test(void) {
+	char *str = (char *)malloc(100);
+	strcpy(str, "hello");
+	free(str);
+	if (str != NULL) {
+		strcpy(str, "world");
+		printf(str);
+	}
+}
+```
+参考答案：篡改动态内存区的内容，后果难以预料，非常危险，因为 `free` 之后，str成为野指针，条件语句将不能按预定逻辑运行。
+
+## 4. 关于Block
 
 Block 是通过 structrue 实现的，结构如下：
 
@@ -287,89 +352,91 @@ block 总能修改实例变量，而无需像修改普通局部变量那样，�
 
 ### 4.1 仍然有疑问，就是 __block 到底是如何影响被捕获的变量的？
 
-### 4.2 在 block 里堆数组执行添加操作，这个数组需要声明成 __block吗？同理如果修改的是一个 NSInteger，那么是否需要？
+### 4.2 在 block 里对数组执行添加操作，这个数组需要声明成 __block 吗？同理如果修改的是一个 NSInteger，那么是否需要？
 
 - 在 block 中对一个可变数组进行元素的修改不需要用 `__block`，因为不需要修改指针指向的地址；
 - 修改 NSInteger 则需要，因为它是值类型，（需要结合上一题回答）
 
-### 对于 Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
+## 5. RunLoop
 
+### 5.1 RunLoop 的作用是什么？
+
+### 5.2 RunLoop 有哪些模式？
+
+### 5.3 自己实现一个 Runloop
+
+## 6. KVC
+
+### 6.1 KVC 如何实现的？
+模型的性质是通过一个简单的键（通常是个字符串）来指定的。视图和控制器通过键来查找相应的属性值。在一个给定的实体中，同一个属性的所有值具有相同的数据类型。键-值编码技术用于进行这样的查找—它是一种间接访问对象属性的机制。键路径是一个由用点作分隔符的键组成的字符串，用于指定一个连接在一起的对象性质序列。第一个键的性质是由先前的性质决定的，接下来每个键的值也是相对于其前面的性质。键路径使您可以以独立于模型实现的方式指定相关对象的性质。通过键路径，您可以指定对象图中的一个任意深度的路径，使其指向相关对象的特定属性。
+
+### 6.2 Keypath 的集合运算符如何使用？
+
+### 6.3 KVC 和 KVO 中涉及的 Keypath 一定是属性吗？
+- KVC 实例变量也可以
+- KVO 如果不是自动合成的属性，需要自己手动触发
+
+## 7. KVO
+
+### 7.1 KVO 的基本原理
+
+### 7.2 KVO 的底层实现
+
+### 7.3 KVO 在多线程中的行为如何？
+- KVO 是同步的，一旦对象的属性发生变化，只有用同步的方式，才能保证所有观察者的方法能够执行完成。KVO 监听方法中，不要有太耗时的操作。
+
+- KVO 的方法调用，是在对应的线程中执行的。在子线程修改观察属性时，观察者回调方法将在子线程中执行。
+
+- 在多个线程同时修改一个观察属性的时候，KVO 监听方法中会存在资源抢夺的问题，需要使用互斥锁。如果涉及到多线程，KVO 要特别小心，通常 KVO 只是做一些简单的观察和处理，千万不要搞复杂了，KVO的监听代码，一定要简单。
+
+[参考](http://www.cnblogs.com/QianChia/p/5771074.html)
+
+### 7.4 如何手动触发 KVO？
+首先关闭默认：
+``` Objective-C
++ (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key
+{
+    
+    if ([key isEqualToString:@"想要手动控制的key"])return NO;
+    
+    return [super automaticallyNotifiesObserversForKey:key];
+}
+```
+然后重写 setter ：
+
+``` Objective-C
+- (void)setTmpStr:(NSString *)tmpStr
+{
+    [self willChangeValueForKey:@"tmpStr"];
+    
+    _tmpStr = tmpStr;
+    
+    [self didChangeValueForKey:@"tmpStr"];
+}
+```
+## 10. 其它问题
+
+### 对于 Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
 最大的优点是它的运行时特性，不足是没有命名空间，对于命名冲突，可以使用长命名法或特殊前缀解决，如果是引入的第三方库之间的命名冲突，可以使用OtherLinkFlag 参数来进行设置。
 
-### 实现一个 NSString 类
-
 ### Objective-C 中类方法和实例方法有什么本质的区别和联系？
-
 类方法只能由类来调用，不能访问成员变量，实例方法只能由实例来调用，可以访问成员变量。类方法为该类所有对象共享
 
 实例方法都要通过 isa 指针传递，而类方法则不需要。
 
-### 指针
+### Delegate、Notification、KVO 的区别，优缺点
 
-#### 指针常量、常量指针区别？
+- Delegate 是单向的委托，你只能委托给一个代理对象；
+- Notification 可以一对多的发送消息，但是需要你主动发送，接收方需要注册；
+- KVO 也可以实现一对多，且不需要主动触发，
 
-指针常量：`int * const ptr` 指针本身是一个敞亮。在声明的时候初始化，里面的值（存放的地址）不能更改；
-常量指针：`const int * ptr`指针本身是一个常量，通过常量地址初始化，它可以再指向另一个常量地址。
+### NSNotification 和 KVO 的区别和用法是什么？什么时候应该使用通知，什么时候应该使用KVO，它们的实现上有什么区别吗？如果用 protocol 和delegate（或者 delegate 的 Array）来实现类似的功能可能吗？如果可能，会有什么潜在的问题？如果不能，为什么？
 
-### 运行完 Test 函数后会有什么结果
+1. 观察者和被观察者都必须是 NSObject 的子类，因为 OC 中 KVO 的实现基于 KVC 和 runtime 机制，只有是 NSObject 的子类才能利用这些特性；
+2. 观察的属性需要使用 dynamic 关键字修饰，表示该属性的存取都由 runtime 在运行时来决定，由于 Swift 基于效率的考量默认禁止了动态派发机制，因此要加上该修饰符来开启动态派发。
 
-``` C
-void getMemory(char *p) { 
-	p = (char *)malloc(100);
-}
+### 设计一个方案来检测 KVO 的同步异步问题，willChange 和 didChange 的不同点
 
-void test(void) {
-	char *str = NULL;
-	getMemory(str);
-	strcpy(str, "hello, world");
-	printf(str);
-}
-```
-*参考答案：程序崩溃，`getMemory()` 指针 p 与 str 指针并不是同一个指针，修改了指针 p，并不影响指针 str，所以 Test 函数中的 str 一直都是 NULL，copy将发生错误，导致崩溃，如果要修正，可以将 p 修改为一个指向指针的指针，这样就可以修改 str 的指向，让它指向已分配的内存 *
 
-另一个
 
-``` C
-char * getMemory(char *p) {
-	char p[] = "hello world";
-	return p;
-}
 
-void test(void) {
-	char *str = NULL;
-	str = getMemory();
-	printf(str);
-}
-```
-*参考答案：可能乱码。因为 `getMemory()` 返回的是 “栈内存” 指针，该指针的地址不是 NULL，但其原先的内容已经被清除了，新内容不可知*。
-
-再一个：
-
-``` C
-void getMemory(char **p, int num) {
-	*p = (char *)malloc(num);
-}
-
-void test(void) {
-	char *str = NULL;
-	getMemory(&str, 100);
-	strcpy(str, "hello");
-	printf(str);
-}
-```
-*参考答案：输出 “hello”，单丝会导致内存泄漏*
-
-还一个：
-
-``` C
-void test(void) {
-	char *str = (char *)malloc(100);
-	strcpy(str, "hello");
-	free(str);
-	if (str != NULL) {
-		strcpy(str, "world");
-		printf(str);
-	}
-}
-```
-参考答案：篡改动态内存区的内容，后果难以预料，非常危险，因为 `free` 之后，str成为野指针，条件语句将不能按预定逻辑运行。
