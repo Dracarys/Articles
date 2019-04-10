@@ -118,28 +118,6 @@ id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
 ### 4.2 weak实现机制？为什么对象释放后会自动置为nil？
 运行时会维护一张 weak 哈希表， weak 对象的地址作为 key，该表记录了每个对象的引用计数，当计数为 0 时就会触发销毁机制，
 
-### 4.3 autorealse 如何实现的
-
-这个解释不完善，有待进一步研究
-autoreleasePool 是一个Objective-C的一种内存自动回收机制，它可以延时家如autoreleasePool中的变量释放的时机。
-autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLoop 事件即将结束之前（pop）
-
-### 子线程中需要加 autoreleasepool 吗？什么时间释放？
-每个线程都默认有一个autoreleasepool，在线程即将退出前释放。但是如果该线程会产生大量的内存碎片，那么建议创建runloop以及自己的释放池，以便可以及时释放。
-
-### 如何 hook 一个对象的方法，而不影响其它对象。
-
-methodswazzing，方法替换，有待进一步验证。
-
-### 设计一个检测主线程卡顿的方案
-
-- 基于runloop，验证一个循环是不是在1/60秒内完成；
-- 我们启动一个worker线程，worker线程每隔一小段时间（delta）ping以下主线程（发送一个NSNotification），如果主线程此时有空，必然能接收到这个通知，并pong以下（发送另一个NSNotification），如果worker线程超过delta时间没有收到pong的回复，那么可以推测UI线程必然在处理其他任务了，此时我们执行第二步操作，暂停UI线程，并打印出当前UI线程的函数调用栈
-
-### 渲染 UI 为什么要在主线程
-UIKit 并不是一个 线程安全 的类，UI 操作涉及到渲染访问各种 View 对象的属性，如果异步操作下会存在读写问题，而为其加锁则会耗费大量资源并拖慢运行速度。另一方面因为整个程序的起点 UIApplication 是在主线程进行初始化，所有的用户事件都是在主线程上进行传递（如点击、拖动），所以 view 只能在主线程上才能对事件进行响应。而在渲染方面由于图像的渲染需要以60帧的刷新率在屏幕上 同时 更新，在非主线程异步化的情况下无法确定这个处理过程能够实现同步更新
-
-[参考](https://juejin.im/post/5c406d97e51d4552475fe178)
 
 ### 能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
 
