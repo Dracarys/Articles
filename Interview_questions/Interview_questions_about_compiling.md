@@ -105,3 +105,7 @@ Xcode 6 之后支持创建动态库工程。
 - Objc
 - all_load
 - force_load
+
+### lldb常用调试命令？
+- p
+- watchpoint

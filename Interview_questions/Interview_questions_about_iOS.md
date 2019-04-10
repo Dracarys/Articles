@@ -105,12 +105,7 @@ Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查�
 - Color Hits Green and Misses Red
 如果shouldRasterize被设置成YES，对应的渲染结果会被缓存，如果图层是绿色，就表示这些缓存被复用；如果是红色就表示缓存会被重复创建，这就表示该处存在性能问题了。 
 
-### 应用内如何进行多语言切换？
-
-
-
 ### 如何 hook 一个对象的方法，而不影响其它对象。
-
 methodswazzing，方法替换，有待进一步验证。
 
 ### 渲染 UI 为什么要在主线程
@@ -263,13 +258,9 @@ NSLog(@"lag happen, detail below: \n %@",lagReportString);
 5. 支持 PDF 格式的矢量图
 
 ### 平时是怎么进行测试的，内存方面怎么测试
-
 Instrument memory 相关测试。 
 
-### lldb常用调试命令？
-
-- p
-- watchpoint
+### 应用内如何进行多语言切换？
 
 ### 如何给一款 App 瘦身
 - 支持 AppThinning，启用图片AssetCatalog，以便针对不同设备进行图片的分割；
