@@ -18,11 +18,9 @@
 ## 2. 类别（category）
 
 ### 2.1 什么是 category 
-
-[参考](https://juejin.im/post/5a9d14856fb9a028e52d5568)
-
 下面是 category 的结构体：
-``` C++
+
+```cpp
 typedef struct category_t *Category;
 
 struct category_t {
@@ -66,7 +64,7 @@ struct category_t {
 
 ### 2.4 category 原理
 
-原理非常简单，运行时准备时，会将 category 中的方法循环添加到类的方法列表中去，包括 protocol 列表， property 列表等，也是同理。同名的方法会被覆盖。
+
 
 ### 2.5 使用 runtime Associate 方法关联的对象，需要在主对象 dealloc 的时候释放吗？
 无论在MRC下还是ARC下均不需要在主对象 dealloc 的时候释放，被关联的对象在生命周期内要比对象本身释放的晚很多，它们会在被 NSObject -dealloc 调用的object_dispose()方法中释放。
