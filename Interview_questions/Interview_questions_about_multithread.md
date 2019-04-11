@@ -146,6 +146,59 @@ NSConditionLock 借助 NSCondition 来实现，它的本质就是一个生产者
 
 > 引自：[关于 @synchronized，这儿比你想知道的还要多](http://yulingtianxia.com/blog/2015/11/01/More-than-you-want-to-know-about-synchronized/)
 
+## 3. RunLoop
+RunLoop 是线程的基础。一个 RunLoop 就是一个实现处理循环，以变对工作进行调度并且协调接收到的事件。其目的是，在有工作要做时让线程忙碌，空闲时则进入休眠。
+
+### 3.1 剖析 RunLoop
+RunLoop 对象，在 iOS 中是由 CFRunLoop 实现的。它会监听任务的输入源，一旦就绪就分配控制权以便进行处理。这里的输入源可以是输入设备、网络、周期或延时，以及异步回调。RunLoop 会接受两种类型的输入源：一种是来自另一个线程或不同应用的异步消息；另一种是来自预定时间或周期性的同步事件。
+
+![Structure of a run loop and tis sources](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/Art/runloop.jpg)
+
+![Run Loop 过程 by 戴铭](https://static001.geekbang.org/resource/image/5f/7d/5f51c5e05085badb689f01b1e63e1c7d.png)
+这两种类型的输入源可以分为三种对象：
+
+- sources(CFRunLoopSource)
+- timers(CFRunLoopTimer)
+- observers(CFRunLoopObserver)
+
+要接受当这些对象就绪需要处理的回调，必须先通过 `CFRunLoopAddSource`，`CFRunLoopAddTimer` 或 `CFRunLoopAddObserver` 等方法，将这些对象添加到 RunLoop 中。事后还可以从 RunLoop 中移除（或使其失效），以不在接受它的回调。
+
+### 3.2 Run Loop 模式
+
+每个添加到 RunLoop 中的 source，timer，以及 observer 必须与一种或多种 RunLoop 模式关联。模式用来甄别 RunLoop 正在处理哪种事件。每次 RunLoop 执行，它都运行在一个指定的模式中，此时，它仅处理与次模式相关联的 source，timer，以及 observer。如果把 sources 添加到默认模式（`KCFRunLoopDefaultMode` 常量），那么通常仅当应用（或线程）空闲时才会处理这些事件。系统还定义了其它一些模式，以执行特定的 source，timer，以及 observer。当然由于模式类型只是一个简单的字符串，我们还可以自定自己的模式。
+
+Core Foundation 中定义了一种特殊的“虚”模式，称为 `CommonModes`，允许你管理爱你一个以上的模式，用 `kCFRunLoopCommonModes` 做为对象模式即可。每个 RunLoop 都有自己独立的 common modes，其中默认的事默认模式（kCFRunLoopDefaultMode），可以通过 `CFRunLoopAddCommonMode` 方法向其中添加其它模式。
+
+每个线程都有唯一的一个 RunLoop，你不能创建或销毁它。Core Foundation 会自动创建它。可以通过 `CFRunLoopGetCurrent` 获取它，通过 `CFRunLoopRun` 来启动当前线程的 RunLoop，以运行在默认模式，直至主动通过 `CFRunLoopStop` 停止。此外，还可以通过 `CFRunLoopRunInMode` 方法让当前线程的 RunLoop 运行在特定模式，但是该模式必须至少有一个需要监听的 sources 或 timer。
+
+
+|Mode|Name|Description|
+|:---|:---|:----------|
+|Default|NSDefaultRunLoopMode (Cocoa) kCFRunLoopDefaultMode (Core Foundation)|默认模式用于大多数操作。大多数情况下，你使用该模式来启动你的运行循环并配置你的输入源|
+|Connection|NSConnectionReplyMode (Cocoa)|Cocoa 结合 `NSConnection` 对象使用该模式来监控应答。你自己应该很少需要使用这个模式|
+|Modal|NSModalPanelRunLoopMode (Cocoa)|Cocoa使用该模式来识别用于模态面板的事件|
+|Event tracking|NSEventTrackingRunLoopMode (Cocoa)|Cocoa使用该模式在鼠标拖动期间来限制传入的事件和其他类型用户界面跟踪循环|
+|Common modes|NSRunLoopCommonModes (Cocoa) kCFRunLoopCommonModes (Core Foundation)|只是一个常用模式的可配置组。将输入源与这种模式结合也将它与组中其他模式结合。对于 Cocoa 引用，这组默认包括默认、模态和时间跟踪模式。核心基础包括的只是默认模式。你可以使用 `CFRunLoopAddCommonMode` 函数添加自定义模式|
+
+RunLoop 可以递归嵌套运行。 Cocoa 的应用建立在 CFRunLoop 的基础之上，以实现高级实现循环。
+
+参考：
+
+- [Run Loop](http://www.voidcn.com/article/p-eieycuxz-de.html)
+- [Run Loop 原文](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html#//apple_ref/doc/uid/10000057i-CH16-SW20)
+
+### 3.3 RunLoop处理逻辑流程图
+![RunLoop 流程图](https://user-gold-cdn.xitu.io/2018/4/25/162fb71bddf31b33?imageView2/0/w/1280/h/960/ignore-error/1)
+
+### 3.4 自己实现一个 Runloop
+
+```c
+do {
+
+} while()
+
+```
+
 ### 分别用 C/C++ 和 Objective-C 实现互斥锁、自旋锁。
 
 
