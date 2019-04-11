@@ -414,9 +414,18 @@ KVC 是一种间接访问对象属性的机制，使用字符串识别属性，�
 
 KVC 的基本方法声明在 NSKeyValueCoding 中，是 Objective-C 的非正式协议，由 NSObject 提供默认实现。
 
-### 6.1 KVC 的用法
+### 6.1 KVC 的实现原理
 
-#### 6.1.1 访问对象properties
+#### 6.1.1 `setValue:forKey:`的原理：
+
+![setValue:forKey:](https://user-gold-cdn.xitu.io/2018/12/26/167ea605f5f2c483?imageView2/0/w/1280/h/960/ignore-error/1)
+
+#### 6.1.2 `valueForKey:`的原理：
+
+![valueForKey:](https://user-gold-cdn.xitu.io/2018/12/26/167ea61203a823f5?imageView2/0/w/1280/h/960/ignore-error/1)
+
+### 6.2 KVC 的用法
+#### 6.2.1 访问对象的 properties
 对象的properties通常分为三类：
 
 - Attributes 
@@ -447,7 +456,7 @@ KVC 的基本方法声明在 NSKeyValueCoding 中，是 Objective-C 的非正式
 - `setValue:forKeyPath:`。逻辑与获取相同；
 - `setValuesForKeysWithDictionary:`。与获取逻辑相同，只是如果要设置 nil，请用 NSNull 代替，因为集合类不支持插入 nil。
 
-访问集合类属性的内容：
+#### 6.2.2 访问集合类属性
 
 - `mutableArrayValueForKey:` 和 `mutableArrayValueForKeyPath:`。会返回一个代理对象，行为与 NSMutableArray 相同；
 - `mutableSetValueForKey:` 和 `mutableSetValueForKeyPath:`。同上
@@ -481,15 +490,23 @@ NSArray *collectedDistinctPayees = [arrayOfArrays valueForKeyPath:@"@distinctUni
 
 参考：[《Key-value Coding Programming Guide》](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/index.html#//apple_ref/doc/uid/10000107-SW1)
 
-### 6.1 KVC 如何实现的？
-
 ### 6.3 KVC 和 KVO 中涉及的 Keypath 一定是属性吗？
 - KVC 实例变量也可以
 - KVO 如果不是自动合成的属性，需要自己手动触发
 
 ## 7. KVO
+Key-value Observing，即键值监听，可以用于监听某个对象属性的变化。
 
 ### 7.1 KVO 的基本原理
+利用 Runtime 动态修改 `isa` 指针的指向实现的，当我们通过下面的方法：
+
+    [Object addObserver: forKeyPath:options:context:]
+向一个对象实例添加监听时，Runtime 会动态生成一个 Object 类的子类 `NSKVONotifying_Object`，这个子类会重写 `setter`、`class`、`dealloc` 以及 isKVOA 等相关方法。并修改被监听实例的 `isa` 指针，让其指向这个新生成的子类 `NSKVONotifying_Object`。因为这个新增的子类实现了 KVO 的相关方法，所以当我们再对该实例发送消息时，会通过 `isa` 指针先到这个新的子类中查找相应方法，从而得到通知。
+
+同理，当我们调用下面的方法：
+
+    [Object removeObserver:forKeyPath:]
+移除一个对象实例的监听时，Runtime 会将该实例的 `isa` 指针恢复，同时移除生成的子类。
 
 ### 7.2 KVO 的底层实现
 
