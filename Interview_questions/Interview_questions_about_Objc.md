@@ -487,54 +487,7 @@ NSArray *collectedDistinctPayees = [arrayOfArrays valueForKeyPath:@"@distinctUni
 - KVC 实例变量也可以
 - KVO 如果不是自动合成的属性，需要自己手动触发
 
-## 7. KVO
-Key-value Observing，即键值监听，可以用于监听某个对象属性的变化。
 
-### 7.1 KVO 的基本原理
-利用 Runtime 动态修改 `isa` 指针的指向实现的，当我们通过下面的方法：
-
-    [Object addObserver: forKeyPath:options:context:]
-向一个对象实例添加监听时，Runtime 会动态生成一个 Object 类的子类 `NSKVONotifying_Object`，这个子类会重写 `setter`、`class`、`dealloc` 以及 isKVOA 等相关方法。并修改被监听实例的 `isa` 指针，让其指向这个新生成的子类 `NSKVONotifying_Object`。因为这个新增的子类实现了 KVO 的相关方法，所以当我们再对该实例发送消息时，会通过 `isa` 指针先到这个新的子类中查找相应方法，从而得到通知。
-
-同理，当我们调用下面的方法：
-
-    [Object removeObserver:forKeyPath:]
-移除一个对象实例的监听时，Runtime 会将该实例的 `isa` 指针恢复，同时移除生成的子类。
-
-### 7.2 KVO 的底层实现
-
-### 7.3 KVO 在多线程中的行为如何？
-- KVO 是同步的，一旦对象的属性发生变化，只有用同步的方式，才能保证所有观察者的方法能够执行完成。KVO 监听方法中，不要有太耗时的操作。
-
-- KVO 的方法调用，是在对应的线程中执行的。在子线程修改观察属性时，观察者回调方法将在子线程中执行。
-
-- 在多个线程同时修改一个观察属性的时候，KVO 监听方法中会存在资源抢夺的问题，需要使用互斥锁。如果涉及到多线程，KVO 要特别小心，通常 KVO 只是做一些简单的观察和处理，千万不要搞复杂了，KVO的监听代码，一定要简单。
-
-[参考](http://www.cnblogs.com/QianChia/p/5771074.html)
-
-### 7.4 如何手动触发 KVO？
-首先关闭默认：
-``` Objective-C
-+ (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key
-{
-    
-    if ([key isEqualToString:@"想要手动控制的key"])return NO;
-    
-    return [super automaticallyNotifiesObserversForKey:key];
-}
-```
-然后重写 setter ：
-
-``` Objective-C
-- (void)setTmpStr:(NSString *)tmpStr
-{
-    [self willChangeValueForKey:@"tmpStr"];
-    
-    _tmpStr = tmpStr;
-    
-    [self didChangeValueForKey:@"tmpStr"];
-}
-```
 ## 10. 其它问题
 
 ### 对于 Objective-C，你认为它最大的优点和最大的不足是什么？对于不足之处，现在有没有可用的方法绕过这些不足来实现需求。如果可以的话，你有没有考虑或者实践过重新实现OC的一些功能，如果有，具体会如何做？
