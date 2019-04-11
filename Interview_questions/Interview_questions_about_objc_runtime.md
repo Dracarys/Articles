@@ -93,6 +93,7 @@ id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
 4. 查遍所有直到根类
 
 ### 3.3 类对象也是如此吗：
+>类方法，也就是工厂方法是存放在元类中的，有待验证。
 
 是的，只是实例对象要先通过 isa 指针取得该实例的类，然后就一样了。
 
