@@ -202,14 +202,7 @@ atomic 实际上相当于一个引用计数器，这个大家很熟悉，如果�
 
 [参考](http://www.cnblogs.com/rossoneri/p/5100530.html)
 
-### 2.7 volatile 关键字
-volatile 提醒编译器它后面所定义的变量随时都有可能改变，因此编译后的程序每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据。如果没有volatile关键字，则编译器可能优化读取和存储，可能暂时使用寄存器中的值，如果这个变量由别的程序更新了的话，将出现不一致的现象
-
-volatile的本意是“易变的”，由于访问寄存器的速度要快过RAM，所以编译器一般都会作减少存取外部RAM的优化
-
-[参考](http://www.cnblogs.com/yc_sunniwell/archive/2010/06/24/1764231.html)
-
-### 2.8 designated initializer，怎么用，注意内容？
+### 2.7 designated initializer，怎么用，注意内容？
 即指定构造器，该宏是在 Swift 出现后新增的，用法与 SWift 的指定构造器用法相同：
 
 1. 子类如果有指定构造器，那么该指定构造器必须调用直接父类的指定构造器
