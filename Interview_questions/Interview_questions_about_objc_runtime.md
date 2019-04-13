@@ -118,7 +118,9 @@ Key-value Observing，即键值监听，可以用于监听某个对象属性的�
 一旦我们通过下面的方法：
 
     [person addObserver: forKeyPath: options: context:]
-向实例对象 `person` 添加监听，Runtime 便动态生成一个 `Person` 类的子类 `NSKVONotifying_Person `，这个子类会重写 `setter`、`class`、`dealloc` 以及 isKVOA 等相关方法。并修改被监听实例的 `isa` 指针，让其指向这个新生成的子类 `NSKVONotifying_Person`。因为这个新增的子类实现了 KVO 的相关方法，所以当我们再对该实例发送消息时，会通过 `isa` 指针先到这个新的子类中查找相应方法，从而得到通知。
+向实例对象 `person` 添加监听，Runtime 便动态生成一个 `Person` 类的子类 `NSKVONotifying_Person `，这个子类会重写 `setter`、`class`、`dealloc` 以及 `_isKVOA` 等相关方法（之所以要重写 `Class` 方法是为了尽量保持与原类相同，避免因为替换了类的实现而导致异常）。并修改被监听实例的 `isa` 指针，让其指向这个新生成的子类 `NSKVONotifying_Person`。因为这个新增的子类实现了 KVO 的相关方法，所以当我们再对该实例发送消息时，会通过 `isa` 指针先到这个新的子类中查找相应方法，从而得到通知。
+
+![动态子类的方法查找过程](https://user-gold-cdn.xitu.io/2018/4/21/162e65b0293d6569?imageView2/0/w/1280/h/960/ignore-error/1)
 
 同理，当我们调用下面的方法：
 

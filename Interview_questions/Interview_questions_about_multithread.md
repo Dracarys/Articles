@@ -195,7 +195,7 @@ RunLoop 可以递归嵌套运行。 Cocoa 的应用建立在 CFRunLoop 的基础
 ```c
 do {
 
-} while()
+} while(1)
 
 ```
 
