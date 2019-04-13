@@ -111,15 +111,21 @@ id _Nullable objc_msgSend(id _Nullable self, SEL _Nonnull op, ...)
 Key-value Observing，即键值监听，可以用于监听某个对象属性的变化。
 
 ### 4.1 KVO 的基本原理
-利用 Runtime 动态修改 `isa` 指针的指向实现的，当我们通过下面的方法：
+先上结论：利用 Runtime 动态创建一个支持 KVO 的子类，修改该实例对象的 `isa` 指针，让其指向刚刚创建的子类，从而实现 KVO。
 
-    [Object addObserver: forKeyPath:options:context:]
-向一个对象实例添加监听时，Runtime 会动态生成一个 Object 类的子类 `NSKVONotifying_Object`，这个子类会重写 `setter`、`class`、`dealloc` 以及 isKVOA 等相关方法。并修改被监听实例的 `isa` 指针，让其指向这个新生成的子类 `NSKVONotifying_Object`。因为这个新增的子类实现了 KVO 的相关方法，所以当我们再对该实例发送消息时，会通过 `isa` 指针先到这个新的子类中查找相应方法，从而得到通知。
+下面来看一下具体过程如何。假设我们有一个 `Person` 的实例对象，那么它查找方法的过程如下图所示：
+![原实例方法查找过程](https://user-gold-cdn.xitu.io/2018/4/21/162e65aff55e142f?imageView2/0/w/1280/h/960/ignore-error/1)
+一旦我们通过下面的方法：
+
+    [person addObserver: forKeyPath: options: context:]
+向实例对象 `person` 添加监听，Runtime 便动态生成一个 `Person` 类的子类 `NSKVONotifying_Person `，这个子类会重写 `setter`、`class`、`dealloc` 以及 isKVOA 等相关方法。并修改被监听实例的 `isa` 指针，让其指向这个新生成的子类 `NSKVONotifying_Person`。因为这个新增的子类实现了 KVO 的相关方法，所以当我们再对该实例发送消息时，会通过 `isa` 指针先到这个新的子类中查找相应方法，从而得到通知。
 
 同理，当我们调用下面的方法：
 
-    [Object removeObserver:forKeyPath:]
+    [Object removeObserver: forKeyPath:]
 移除一个对象实例的监听时，Runtime 会将该实例的 `isa` 指针恢复，同时移除生成的子类。
+
+> 关于销毁 KVO 的动态子类还有待进一步研究
 
 ### 4.2 KVO 在多线程中的行为如何？
 - KVO 是同步的，一旦对象的属性发生变化，只有用同步的方式，才能保证所有观察者的方法能够执行完成。KVO 监听方法中，不要有太耗时的操作。

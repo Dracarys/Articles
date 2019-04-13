@@ -277,6 +277,8 @@ Instrument memory 相关测试。
 ### 如何把异步线程转换成同步任务进行单元测试？
 [参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
 
+### 设计一个方案来检测 KVO 的同步异步问题，willChange 和 didChange 的不同点
+
 ### 项目组件化用过吗？怎么接耦的？
 [参考](http://www.code4app.com/blog-822715-1562.html)
 
