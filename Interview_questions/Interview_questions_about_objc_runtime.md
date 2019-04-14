@@ -48,13 +48,10 @@ struct category_t {
  2. 声明私有方法；
 
 ### 2.2 category 的特点
-
 - category 只能给某个已有的类追加方法，不能追加成员变量
-- category 可以追加属性，但只能生成 setter 和 getter 的声明，不能生成 setter 和 getter 的实现即成员变量；
-- 如果 category 中的方法和类已有方法同名，category 中的方法会覆盖掉类中的已有方法；
-- 如果多个 category 中存在同名的方法啊，因为运行时加载时添加的顺序是无法保证的，所以覆盖的顺序也就不能确定，进而导致最终不知道会调用哪个。
-
-参考里说由编译器决定，有待验证，因为这跟 runtime 里的注释不符。
+- category 可以追加属性，但只能生成 setter 和 getter 的声明，不能生成 setter 和 getter 的实现；
+- 如果 category 中的方法和类已有方法同名，category 中的方法会“覆盖”掉类中的已有方法（并不是真的覆盖，而是插入到原有方法之前，所以会被优先查询并返回）；
+- 如果多个 category 中存在同名的方法啊，因为运行时加载时添加的顺序是无法保证的，所以“覆盖”的顺序也就不能确定，进而导致最终不知道会调用哪个。
 
 ### 2.3 category VS extension
 
@@ -63,15 +60,85 @@ struct category_t {
 - category 不能添加成员变量，而 extension 则没这个限制。
 
 ### 2.4 category 原理
+分类的实现原理是将category中的方法，属性，协议数据放在category_t结构体中，然后将结构体内的方法列表拷贝到类对象的方法列表中。
+Category可以添加属性，但是并不会自动生成成员变量及set/get方法。因为category_t结构体中并不存在成员变量。通过之前对对象的分析我们知道成员变量是存放在实例对象中的，并且编译的那一刻就已经决定好了。而分类是在运行时才去加载的。那么我们就无法再程序运行时将分类的成员变量中添加到实例对象的结构体中。因此分类中不可以添加成员变量
 
+> 引自掘金 xx_cc 的[《Category 的本质》](https://juejin.im/post/5aef0a3b518825670f7bc0f3)
 
+### 2.5 category 不能添加成员变量，那么如果要添加有什么办法吗？
+有，两种方式：
 
-### 2.5 使用 runtime Associate 方法关联的对象，需要在主对象 dealloc 的时候释放吗？
-无论在MRC下还是ARC下均不需要在主对象 dealloc 的时候释放，被关联的对象在生命周期内要比对象本身释放的晚很多，它们会在被 NSObject -dealloc 调用的object_dispose()方法中释放。
+- 利用静态变量，category 可以添加属性，通过属性来操作该静态变量。但是这样，即便类被销毁了，该静态变量也持续存在，且依然保留原有的值；
+- 利用关联对象 Associate Object；
 
-### 2.6 关联属性如何显示 weak ？
+### 2.6 如何使用关联对象呢？
+```objc
+-(void)setName:(NSString *)name
+{
+    objc_setAssociatedObject(self, @"name",name, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+-(NSString *)name
+{
+    return objc_getAssociatedObject(self, @"name");    
+}
+```
+添加属性：
 
+```objc
+objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy);
+```
+关联对象的属性设置：
+
+```objc
+typedef OBJC_ENUM(uintptr_t, objc_AssociationPolicy) {
+    OBJC_ASSOCIATION_ASSIGN = 0,  // 指定一个弱引用相关联的对象
+    OBJC_ASSOCIATION_RETAIN_NONATOMIC = 1, // 指定相关对象的强引用，非原子性
+    OBJC_ASSOCIATION_COPY_NONATOMIC = 3,  // 指定相关的对象被复制，非原子性
+    OBJC_ASSOCIATION_RETAIN = 01401,  // 指定相关对象的强引用，原子性
+    OBJC_ASSOCIATION_COPY = 01403     // 指定相关的对象被复制，原子性   
+};
+```
+获取属性：
+
+```objc
+objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy);
+```
+移除属性：
+
+```objc
+- (void)removeAssociatedObjects
+{
+    // 移除所有关联对象
+    objc_removeAssociatedObjects(self);
+}
+
+```
+### 2.7 关联对象原理
+一个实例对象就对应一个 ObjectAssociationMap，而ObjectAssociationMap 中存储着多个此实例对象的关联对象的 key 以及 ObjcAssociation，为 ObjcAssociation 中存储着关联对象的 value 和 policy 策略。
+由此我们可以知道关联对象并不是放在了原来的对象里面，而是自己维护了一个全局的map用来存放每一个对象及其对应关联属性表格
+
+![关联对象原理](https://user-gold-cdn.xitu.io/2018/5/14/1635a628a228e349?imageView2/0/w/1280/h/960/ignore-error/1)
+> 引自掘金 cc_xx [《关联对象实现原理》](https://juejin.im/post/5af86b276fb9a07aa34a59e6)
+
+### 2.8 使用 runtime Associate 方法关联的对象，需要在主对象 dealloc 的时候释放吗？
+无论在 MRC 下还是 ARC 下均不需要在主对象 dealloc 的时候释放，被关联的对象在生命周期内要比对象本身释放的晚很多，它们会在被 NSObject -dealloc 调用的 object_dispose() 方法中释放。
+
+### 2.9 关联属性如何显示 weak ？
 利用中间对象包装一层？？？？
+
+```objc
+-(void)setWeakvalue:(NSObject *)weakvalue {
+    __weak typeof(weakvalue) weakObj = weakvalue;
+    typeof(weakvalue) (^block)() = ^(){
+        return weakObj;
+    };
+    objc_setAssociatedObject(self, weakValueKey, block, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+-(NSObject *)weakvalue {
+    id (^block)() = objc_getAssociatedObject(self, weakValueKey);
+    return block();
+}
+```
 
 ## 3. 消息转发（objc_mgSend）
 
