@@ -1,14 +1,16 @@
 # 面试题系列之数据库
 
-#### CoreData的原理，与SQLite相比优劣？
+## 1. 数据库基础
 
-#### CoreData的6个成员类
+### 索引的作用、优缺点，与主键的区别
 
-#### CoreData 多线程中处理大量数据同步时的操作？
+### 乐观锁VS悲观锁
 
-#### NSpersistentStoreCoordinator，NSManagedObjectContext 和 NSManagedObject 中的哪些需要在线程中创建或者传递？你用过什么样的策略实现的？
+## 2. SQLite
 
-#### SQLite中插入特殊字符的方法和接受的处理方法？
+[深入理解SQLite](https://www.kancloud.cn/kangdandan/sqlite/64326)
+
+### SQLite中插入特殊字符的方法和接受的处理方法？
 
 ```
 public static String sqliteEscape(String keyWord){
@@ -24,15 +26,27 @@ public static String sqliteEscape(String keyWord){
     return keyWord;
 }
 ```
+### SQLite 与 MySQL 区别
 
-#### SQLite 相关内容
+## 3. CoreData
 
-#### SQLite 与 MySQL 区别
+### CoreData的原理，与SQLite相比优劣？
 
-#### 如果不用数据库，只使用普通文件，如何设计亿量级别的日志系统？
+### CoreData的6个成员类
 
-#### 索引的作用、优缺点，与主键的区别
+### CoreData 多线程中处理大量数据同步时的操作？
 
-#### 乐观锁VS悲观锁
+### NSpersistentStoreCoordinator，NSManagedObjectContext 和 NSManagedObject 中的哪些需要在线程中创建或者传递？你用过什么样的策略实现的？
 
-#### 数据库设计、字段设计等项目方案
+
+## 4. MySQL
+
+
+
+
+
+
+## 5. 项目经验
+### 如果不用数据库，只使用普通文件，如何设计亿量级别的日志系统？
+
+### 数据库设计、字段设计等项目方案

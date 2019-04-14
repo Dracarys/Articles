@@ -33,7 +33,7 @@
 [参考一](https://www.jianshu.com/p/847af218b1f0)
 [参考二](https://blog.csdn.net/shihuboke/article/details/73921535)
 
-### 1.2 抽象工程模式在 Cocoa SDK 中的那些类中有体现？
+### 1.2 抽象工厂模式在 Cocoa SDK 中的那些类中有体现？
 
 ### 1.3 单例模式
 
