@@ -79,7 +79,9 @@ TCP 的每个分断都有自己的序号，接受端收到一个分段后会向�
 ### 3.2.3 UDP可以实现一对多吗？怎么实现？
 
 ## 4. HTTP 协议
-超文本传输协议（）
+HTTP协议（HyperTextTransferProtocol，超文本传输协议）是用于从WWW服务器传输超文本到本地浏览器的传输协议
+
+[引用](https://cloud.tencent.com/developer/article/1351472)
 
 **无状态协议**
 
