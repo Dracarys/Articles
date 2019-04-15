@@ -408,20 +408,6 @@ public final class ThreadPool {
 
 一旦提交运行即不可取消，尚未提交执行的可以。
 
-### runloop和线程的关系？各个mode是做什么的？如何实现一个runloop
-
-[参考](http://www.cnblogs.com/superYou/p/4645168.html)
-
-防止线程退出
-
-
-
-```
-do {
-
-} while()
-```
-
 ### 用过NSOperationQueue么？如果用过或者了解的话，为什么要使用 NSOperationQueue，实现了什么？跟 GCD 之间的区别和类似得地方
 
 ### Dispatch_semaphore
