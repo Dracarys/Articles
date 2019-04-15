@@ -1,7 +1,6 @@
 # 面试题系列之数据结构
 
 ## 1. 基础数据结构的实现
-
 ### 1.1 可变数组的实现
 
 ```c
@@ -321,13 +320,11 @@ public class LRUCache<KeyType: Hashable> {
 引自 [Swift Algorithm club](https://github.com/raywenderlich/swift-algorithm-club) by [raywenderlich](https://www.raywenderlich.com)
 
 ## 2. 常用类型的数据结构
-
 ### 2.1 图片在内存的中的数据结构是什么样的？
 
 二维数组，第一维度是每个元素代表一个像素，第二维度的每个元素代表一个像素的信息，通常是颜色空间，即色域，常见有的 YUV、RGB、RGBA 等。
 
 ## 3. 常见底层函数的实现
-
 ### 3.1 malloc 函数如何实现的
 
 初始自己真实太天真，知道看见这个详解介绍。
@@ -375,6 +372,9 @@ void *malloc(size_tsize){
 #### 参考
 
 [浅析malloc（）的几种实现方式](http://lionwq.spaces.eepw.com.cn/articles/article/item/18555)
+
 [Anatomy of a Program in Memory](https://manybutfinite.com/post/anatomy-of-a-program-in-memory/)
+
 [How The Kernel Manages Your Memory](https://manybutfinite.com/post/how-the-kernel-manages-your-memory/)
+
 [GNU的malloc.c](https://repo.or.cz/w/glibc.git/blob/HEAD:/malloc/malloc.c)

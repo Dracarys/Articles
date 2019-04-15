@@ -1,5 +1,5 @@
 # 面试题系列之设计模式
-
+[toc]
 ## 1. 什么是设计模式？
 
 《设计模式》一书中关于设计模式的定义：对定制来解决特定场景下一半设计问题的类和互相通信的对象的描述。简而言之，设计模式时为特定场景下的问题而定制的解决方案。
@@ -86,7 +86,7 @@ MVP（Model View Presenter）架构师从著名的 MVC 架构演变而来的。�
 - View：视图层，仅负责对数据的展示，提供与用户进行交互的窗口；
 - Presenter：它是连接 View 与 Model 的桥梁，并对业务逻辑进行处理。在 MVP 架构中 Model 与 View 无法直接进行交互。所以在 Presenter 中，它会从 Model 层中获得所需的数据，进行适当的处理后交给 View 进行展示。这样通过 Presenter 将 View 与 Model 进行隔离，使得 View 和 Model 之间不存在耦合，同时也将业务逻辑从 View 中抽离。
 
-![MVP架构关系图](https://img-blog.csdn.net/20160522153041711)
+![MVP架构关系图](https://i.stack.imgur.com/vxJf4.png)
 
 ### 2.3 MVVM 架构
 

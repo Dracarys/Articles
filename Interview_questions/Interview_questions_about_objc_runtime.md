@@ -1,7 +1,6 @@
 # 面试题系列之Runtime
 
 ## 1. 运行时基础
-
 ### 1.1 运行时的载入过程如何
 
 1. read all classes in all new images, add them all to unconnected_hashl;
