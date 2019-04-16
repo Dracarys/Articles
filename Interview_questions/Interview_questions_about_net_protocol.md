@@ -145,6 +145,24 @@ HTTP协议（HyperTextTransferProtocol，超文本传输协议）是用于从WWW
 - Content-Length：实体主体的的字节数
 - Content-Range：实体主体的位置范围，一般用于发出部分请求时使用
 
+### 4.2 HTTP 缓存控制
+缓存控制头部：Cache-Control，其值详如下：
+
+- max-stale 缓存可以随意提供过期的文件
+- max-stale=<s> 增加时间秒，改时间内不能过期
+- min-refresh=<s> 至少在未来指定的秒数内要保持新鲜。
+- max-age=<s> 无法返回缓存时间长于 s 秒的文档
+- no-cache 除非在验证，否则不接受缓存
+- no-store 缓存应该尽快从过年存储中删除文档的所有痕迹
+- only-if-cached 只有当缓存中有副本时，才会获取一份副本。
+
+缓存新鲜度验证条件头部：
+
+- If-Modified-Since:<date> 如果从指定日期之后文档被修改过，就执行该方法。可以与 Last-Modified 服务器响应头部配合使用。
+- If-None-Match:<tags> 如果与标签不同，就执行请求方法。
+
+弱验证器，即允许不更新缓存的变化度。
+
 ### 4.2 HTTP请求有哪些方法？如何选择？
 
 - GET 用来向服务器发送请求
