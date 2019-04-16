@@ -149,9 +149,9 @@ HTTP协议（HyperTextTransferProtocol，超文本传输协议）是用于从WWW
 缓存控制头部：Cache-Control，其值详如下：
 
 - max-stale 缓存可以随意提供过期的文件
-- max-stale=<s> 增加时间秒，改时间内不能过期
-- min-refresh=<s> 至少在未来指定的秒数内要保持新鲜。
-- max-age=<s> 无法返回缓存时间长于 s 秒的文档
+- max-stale=\<s\> 增加时间秒，改时间内不能过期
+- min-refresh=\<s\> 至少在未来指定的秒数内要保持新鲜。
+- max-age=\<s\> 无法返回缓存时间长于 s 秒的文档
 - no-cache 除非在验证，否则不接受缓存
 - no-store 缓存应该尽快从过年存储中删除文档的所有痕迹
 - only-if-cached 只有当缓存中有副本时，才会获取一份副本。
@@ -185,20 +185,161 @@ Cookie 的限制。 大多数浏览器支持最大为 4096 字节的 Cookie。�
 
 通过前面的内容，我们了解到Cookie是用于维持服务端会话状态的，通常由服务端写入，在后续请求中，供服务端读取。 下面本文将按这个过程看看Cookie是如何从服务端写入，最后如何传到服务端以及如何读取的。
 
+Cookie 可以笼统的分为两类：
+
+- 会话 cookie 一种临时 cookie，记录用户访问站点是的设置和偏好。推出浏览时要删除
+- 持久 cookie 生存时间更长，存储在硬盘上，即使重启也仍然保留。用于维护用户会周期性访问的站点的配置文件或登录名。
+
+通过下面两个响应头在客户端设置 cookie
+
+- Set-Cookie
+- Set-Cookie2
+
+#### cookie 的域属性
+Cookie 通常是谁创建，才会发送给谁。产生 Cookie 的服务器可以向 Set-Cookie 响应头添加一个 Domain 属性来控制哪些站点可以看到哪个 cookie。例如：
+
+```javascript
+Set-cookie: user="mary17"; domain="airtravelbargains.com"
+```
+
+#### cookie 路径属性
+目的与域类似，只是更细化：
+
+```javascript
+Set-cookie: user="mary17"; domain="airtravelbargains.com"; path=/auto
+```
+
+
+### 网关中的 HTTP 隧道
+
+HTTP/1.1 规范保留了 CONNECT 方法，但没有对其功能进行描述
+
+CONNECT 方法请求隧道网管创建一条到达任意目的服务器和端口的 TCP 连接（隧道），并对客户端和服务器之间的后续数据进行忙转发。
+
+一旦 TCP 连接建立，网关会发送一条 HTTP 200 Connction Established 响应来通知客户端。注意该响应与普通的响应不同，不需要包含 Content-Type 头部。因此此连接针对的是字节流，不是涉及内容。
+
+至此，隧道建立完毕。
+
+在隧道建立之前，可以要求客户端提供认证信息，通过后再予以建立。
+
+### 中继
+HTTP 中继（relay）是没有完全遵循 HTTP 规范的简单 HTTP 代理。中继负责处理 HTTP 中建立连接的部分，然后对字节进行盲转发。
+
+### 客户端识别
+
+头部
+|头部名称|头部类型|描述|
+|:------|:------|:--|
+|From|请求|用户的 E-mail 地址|
+|User-Agent|请求|用户的浏览器软件|
+|Referer|请求|用户是从这个页面上依照连接跳转过来的|
+|Authorization|请求|用户名和密码|
+|Client-IP|请求|扩展（请求）|客户端的 IP 地址|
+|X-Forwarded-For|扩展（请求）|客户端的 IP 地址|
+|Cookie|扩展（请求）|服务器产生的 ID 标签|
+
+### HTTP 认证机制
+
+#### 基本认证
+1. 客户端正常发送请求；
+2. 服务端进行质询，头部带上 WWW-Authenticate，服务器会头部的值中知名需哟啊鉴权的区域，并返回 401 状态码 Unauthorized
+3. 客户端收到响应后，进行授权，头部带上 Authorization：服务指定的密钥
+4. 服务端响应 200 OK，并在头部带上 Authentication-Info
+
+#### 安全域
+安全域（security realm），用于指定可访问的范围。
+
+#### 摘要认证
+基本认证存在明文传输的问题，摘要认证正式要解决该问题。摘要认证的安全程度只是略高于基本认证，更安全的是HTTPS
+
+通常是 摘要+盐
+
+
 ## 5 HTTPS 协议
+[HTTPS加密协议详解](https://www.wosign.com/faq/faq2016-0309-01.htm)
 
 ### 5.1 HTTPS 原理
 HTTPS 在真正开始 HTTP 请求之前，先与服务器进行几次握手验证，以确定双方身份，如图：
 
-![HTTPS SSL 建立流程](https://images2015.cnblogs.com/blog/366784/201601/366784-20160127222221785-258650029.png)
+![HTTPS SSL 建立流程](https://www.wosign.com/News/images/20160309041.png)
 
 验证流程：
 
-1. 客户端发起一个 HTTPS 请求，把自身支持的一系列 Sipher Suite （密钥算法套件，简称 Cipher）发送给服务器；
-2. 服务段收到后，与自己支持的进行比对，如果不支持断开连接，反之总重选择一个加密算法和HASH算法，以证书的形式返回给客户端，证书中包含了公钥、颁证机构、网址、失效日期等等
-3. 客户端收到后，验证证书的合法性，例如，机构是否合法，是否在有效期内，网址是不是一致。验证通过后，或者用户表示可以接受，就会生成一串随机数，然后用证书中的公约加密；然后用之前约定好的hash方式，对握手消息进行hash，让后用 随机数加密“握手消息 + 五首消息hash值（签名）”并一起发送给服务端
-4. 服务端对收到的密文进行解密得到随机数，再用随机数密码解密得到握手消息和hash值，然后在与传过来的hash值进行比较，确认是否一致，然后在用同样的方式发给客户端
-5. 客户端用随机数解密并计算握手消息的HASH，如果与服务端发来的HASH一致，此时握手过程结束，之后所有的通信数据将由之前浏览器生成的随机密码并利用对称加密算法进行加密
+(1).client_hello
+
+客户端发起请求，以明文传输请求信息，包含版本信息，加密套件候选列表，压缩算法候选列表，随机数，扩展字段等信息，相关信息如下：
+
+支持的最高TSL协议版本version，从低到高依次 SSLv2 SSLv3 TLSv1 TLSv1.1 TLSv1.2，当前基本不再使用低于 TLSv1 的版本;
+
+客户端支持的加密套件 cipher suites 列表， 每个加密套件对应前面 TLS 原理中的四个功能的组合：认证算法 Au (身份验证)、密钥交换算法 KeyExchange(密钥协商)、对称加密算法 Enc (信息加密)和信息摘要 Mac(完整性校验);
+
+支持的压缩算法 compression methods 列表，用于后续的信息压缩传输;
+
+随机数 random_C，用于后续的密钥的生成;
+
+扩展字段 extensions，支持协议与算法的相关参数以及其它辅助信息等，常见的 SNI 就属于扩展字段，后续单独讨论该字段作用。
+
+(2).server_hello+server_certificate+sever_hello_done
+
+(a) server_hello, 服务端返回协商的信息结果，包括选择使用的协议版本 version，选择的加密套件 cipher suite，选择的压缩算法 compression method、随机数 random_S 等，其中随机数用于后续的密钥协商;
+
+(b)server_certificates, 服务器端配置对应的证书链，用于身份验证与密钥交换;
+
+(c) server_hello_done，通知客户端 server_hello 信息发送结束;
+
+(3).证书校验
+
+客户端验证证书的合法性，如果验证通过才会进行后续通信，否则根据错误情况不同做出提示和操作，合法性验证包括如下：
+
+证书链的可信性 trusted certificate path，方法如前文所述;
+
+证书是否吊销 revocation，有两类方式离线 CRL 与在线 OCSP，不同的客户端行为会不同;
+
+有效期 expiry date，证书是否在有效时间范围;
+
+域名 domain，核查证书域名是否与当前的访问域名匹配，匹配规则后续分析;
+
+(4).client_key_exchange+change_cipher_spec+encrypted_handshake_message
+
+(a) client_key_exchange，合法性验证通过之后，客户端计算产生随机数字 Pre-master，并用证书公钥加密，发送给服务器;
+
+(b) 此时客户端已经获取全部的计算协商密钥需要的信息：两个明文随机数 random_C 和 random_S 与自己计算产生的 Pre-master，计算得到协商密钥;
+
+enc_key=Fuc(random_C, random_S, Pre-Master)
+
+(c) change_cipher_spec，客户端通知服务器后续的通信都采用协商的通信密钥和加密算法进行加密通信;
+
+(d) encrypted_handshake_message，结合之前所有通信参数的 hash 值与其它相关信息生成一段数据，采用协商密钥 session secret 与算法进行加密，然后发送给服务器用于数据与握手验证;
+
+(5).change_cipher_spec+encrypted_handshake_message
+
+(a) 服务器用私钥解密加密的 Pre-master 数据，基于之前交换的两个明文随机数 random_C 和 random_S，计算得到协商密钥:enc_key=Fuc(random_C, random_S, Pre-Master);
+
+(b) 计算之前所有接收信息的 hash 值，然后解密客户端发送的 encrypted_handshake_message，验证数据和密钥正确性;
+
+(c) change_cipher_spec, 验证通过之后，服务器同样发送 change_cipher_spec 以告知客户端后续的通信都采用协商的密钥与算法进行加密通信;
+
+(d) encrypted_handshake_message, 服务器也结合所有当前的通信参数信息生成一段数据并采用协商密钥 session secret 与算法加密并发送到客户端;
+
+(6).握手结束
+
+客户端计算所有接收信息的 hash 值，并采用协商密钥解密 encrypted_handshake_message，验证服务器发送的数据和密钥，验证通过则握手完成;
+
+(7).加密通信
+
+开始使用协商密钥与算法进行加密通信。
+
+注意：
+
+(a) 服务器也可以要求验证客户端，即双向认证，可以在过程2要发送 client_certificate_request 信息，客户端在过程4中先发送 client_certificate与certificate_verify_message 信息，证书的验证方式基本相同，certificate_verify_message 是采用client的私钥加密的一段基于已经协商的通信信息得到数据，服务器可以采用对应的公钥解密并验证;
+
+(b) 根据使用的密钥交换算法的不同，如 ECC 等，协商细节略有不同，总体相似;
+
+(c) sever key exchange 的作用是 server certificate 没有携带足够的信息时，发送给客户端以计算 pre-master，如基于 DH 的证书，公钥不被证书中包含，需要单独发送;
+
+(d) change cipher spec 实际可用于通知对端改版当前使用的加密通信方式，当前没有深入解析;
+
+(e) alter message 用于指明在握手或通信过程中的状态改变或错误信息，一般告警信息触发条件是连接关闭，收到不合法的信息，信息解密失败，用户取消操作等，收到告警信息之后，通信会被断开或者由接收方决定是否断开连接
 
 ### 5.2 HTTPS 用到的主要加密算法
 非对称加密算法：RSA，DSA/DSS     在客户端与服务端相互验证的过程中用的是对称加密 
