@@ -27,12 +27,26 @@
 - 代理模式
 - 备忘录模式
 
-### 1.1 简单工厂模式、工厂模式以及抽象工厂模式？
+### 1.1 工厂方法模式以及抽象工厂模式？
 
-[参考一](https://www.jianshu.com/p/847af218b1f0)
-[参考二](https://blog.csdn.net/shihuboke/article/details/73921535)
+- 工厂方法模式定义创建对象的接口，让子类决定实例化哪一个类。工厂方法是的一个类的实例化延迟到其子类。
+- 抽象工厂模式提供一个固定的接口，用于创建一系列有关联和相依存的对象，而不必制定其具体类或其创建的细节。客户端与从工厂得到的具体对象之间没有耦合。
 
-### 1.2 抽象工程模式在 Cocoa SDK 中的哪些类中有体现？
+对比：
+
+|工厂方法模式|抽象工厂模式|
+|:---------|:---------|
+|通过类继承创建抽象产品|通过对象组合创建抽象产品|
+|创建一种产品|创建多系列产品|
+|子类话创建者并冲在工厂方法以及创建新产品|必须修改父类的接口才能支持新的产品|
+
+### 1.2 抽象工厂模式在 CocoaTouch 中的哪些类中有体现？
+类簇是基础框架中一种常见的设计模式，基于抽象工厂模式的思想。它将若干相关的私有具体工厂子类集合到一个公有的抽象超类之下。
+
+CocoaTouch 中的类簇：
+
+- `NSNumber`
+- `UIButton`
 
 ### 1.3 单例模式
 
@@ -129,19 +143,24 @@ Swift 已经不需如此处理，它已经从语义上保证只被初始化一�
 ### 3.1 MVC 架构
 
 #### 3.1.1 传统的 MVC 架构
-![传统的MVC架构](https://cdn-images-1.medium.com/max/600/1*E9A5fOrSr0yVmc7Kly5C6A.png)
+![传统的MVC架构](../images/1*E9A5fOrSr0yVmc7Kly5C6A.png)
+
 在上图的情况下，View是无状态的。一旦Model被改变，Controller就会简单地渲染它。例如：网页完全加载后，一旦你按下链接，就导航到其他地方。
 虽然在iOS应用用传统的MVC架构也可以实现，但这并没有多大意义，由于架构问题 ——三个实体是紧耦合的，每个实体和其他两个通信。这大大降低了可重用性——这可不是你希望在你的应用程序看到的
 
 #### 3.1.2 Apple的MVC架构
 **期望**
-![Apple期望的MVC架构](https://cdn-images-1.medium.com/max/600/1*c0aGaDNX41qu6e8E4OEgwQ.png)
+
+![Apple期望的MVC架构](../images/1*c0aGaDNX41qu6e8E4OEgwQ.png)
+
 Controller是View和Model之间的中介，这样他们就解耦了。最小的可重用单元是Controller，这对我们来说是个好消息，因为我们必须有一个来放那些不适合放入Model的复杂业务逻辑的地方。
 
 从理论上讲，它看起来很简单，但你觉得有些地方不对，对吧？你甚至听到有人说MVC全称应该改为Massive View Controller（大量的视图控制器）。此外，为View controller减负也成为iOS开发者面临的一个重要话题。
 
 **实际**
-![Apple实际的MVC架构](https://cdn-images-1.medium.com/max/1200/1*PkWjDU0jqGJOB972cMsrnA.png)
+
+![Apple实际的MVC架构](../images/1*PkWjDU0jqGJOB972cMsrnA.png)
+
 Cocoa MVC鼓励人们编写大规模的视图控制器，而且由于它们涉及View的生命周期，所以很难说它们（View和Controller）是分离的。
 
 虽然你仍有能力将一些业务逻辑和数据转换成Model，但你没办法将View从Controller中分离。在大多数时候所有View的责任是把事件传递给Controller
@@ -163,7 +182,7 @@ MVC 的缺点：
 ### 3.2 MVP 架构
 MVP（Model View Presenter）架构师从著名的 MVC 架构演变而来的。虽然 MVC 很好的将 Mode 和 View 进行了分离，但是也带来一个问题，Model 的变化以及 View 的反馈，这些消息都必须经过 Controller 来进行，随着应用的开发，Controller 也就变得越来越臃肿不堪。
 
-![MVP架构](https://cdn-images-1.medium.com/max/1400/1*hKUCPEHg6TDz6gtOlnFYwQ.png)
+![MVP架构](../images/1*hKUCPEHg6TDz6gtOlnFYwQ.png)
 
 #### 3.2.1 MVP 架构介绍
 从名字便可知，MVP 同样是三层架构：
@@ -178,14 +197,14 @@ MVP（Model View Presenter）架构师从著名的 MVC 架构演变而来的。�
 - 易用性 — 在我们上边不切实际的简单的例子中，代码量是MVC模式的2倍，但同时MVP的概念却非常清晰
 
 #### 3.2.3 监听 Controller 的 MVP
-![监听Controller的MVP](https://cdn-images-1.medium.com/max/1000/1*bkB6Ho_G5De47IkJpaX5XQ.png)
+![监听Controller的MVP](../images/1*bkB6Ho_G5De47IkJpaX5XQ.png)
 
 ### 3.3 MVVM 架构
 
 #### 3.3.1 MVVM 介绍
 MVVM架构是MV(X)系列最新的成员
 
-![MVVM](https://cdn-images-1.medium.com/max/800/1*uhPpTHYzTmHGrAZy8hiM7w.png)
+![MVVM](../images/1*uhPpTHYzTmHGrAZy8hiM7w.png)
 
 它和 MVP 模式看起来很像:
 
@@ -205,7 +224,7 @@ MVVM架构是MV(X)系列最新的成员
 
 #### 3.4.1 VIPER 架构介绍
 
-![VIPER架构](https://cdn-images-1.medium.com/max/800/1*0pN3BNTXfwKbf08lhwutag.png)
+![VIPER架构](../images/1*0pN3BNTXfwKbf08lhwutag.png)
 
 - 交互器（Interactor） — 包括关于数据和网络请求的业务逻辑，例如创建一个实体（Entities），或者从服务器中获取一些数据。为了实现这些功能，需要使用服务、管理器，但是他们并不被认为是VIPER架构内的模块，而是外部依赖。
 - 展示器（Presenter） — 包含UI层面（但UIKit独立）的业务逻辑以及在交互器（Interactor）层面的方法调用。
