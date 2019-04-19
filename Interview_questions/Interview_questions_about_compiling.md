@@ -114,9 +114,41 @@ LLDB 的命令采用从头匹配的方式，只要没有混淆，就可以执行
 - print 简化方式：prin、pri、p，不能简化为 pr，因为会和 process 混淆，
 - expression 表达式命令，改命令最为强大，几乎所有功能都可以通过它来完成，其它命令几乎都是该命令的简化版
 
+大致分类：
+
+- Execution Commands
+- Breakpoint Commands
+- Watchpoint Commands
+- Examining Variables
+- Evaluating Expressons
+- Examining Thread State
+
+> 参考：[《LLDB 8 Documentation》](https://lldb.llvm.org/use/map.html)
+
 #### 3.2.1 print
+格式：print <表达式>
+
+实际上 `print` 是 `expression --` 的简化，会在当前线程执行表达式，并显示返回结果。
+
+该命令同样支持格式化输出：
+
+```shell
+p/x  //!< 以十六进制打印整数
+p/d  //!< 以带符号的十进制打印整数
+p/u  //!< 以无符号的十进制打印整数
+p/o  //!< 以八进制打印整数
+p/t  //!< 以二进制打印整数
+p/a  //!< 以十六进制打印地址
+p/c  //!< 打印字符常量
+p/f  //!< 打印浮点数
+p/s  //!< 打印字符串
+p/r  //!< 格式化打印
+```
 
 #### 3.2.2 watchpoint
+格式：watchpoint <子命令> <子命令选项>
+
+观察点命令，可以对一个地址或某个变量设置观察点，从而可以观察到被观察对象的变化。
 
 #### 3.2.3 memory read 
 格式：memory read 内存地址

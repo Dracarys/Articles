@@ -1,7 +1,6 @@
 # 面试题系列之 - iOS内存管理
 
 ### 引用计数是如何实现的
-
 auto reference counting，
 
 ### 有哪些导致崩溃的常见问题？如何进行预防？
@@ -18,7 +17,14 @@ auto reference counting，
 - 循环引用，添加 weak 中间代理
 
 ### 常用集合类的哪些操作是深拷贝？
+在集合类对象中，对 immutable 对象进行 copy，是指针复制，mutableCopy 是内容复制；对mutable 对象进行 copy 和 mutableCopy 都是内容复制。但是，集合对象的内容复制仅限于对象本身，对象元素仍然是指针复制。用代码简单表示如下：
 
+```objc
+[immutableObject copy] // 浅复制
+[immutableObject mutableCopy] //单层深复制
+[mutableObject copy] //单层深复制
+[mutableObject mutableCopy] //单层深复制
+```
 ### autorealse 如何实现的
 
 这个解释不完善，有待进一步研究
