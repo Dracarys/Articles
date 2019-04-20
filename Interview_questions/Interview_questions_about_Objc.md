@@ -280,75 +280,246 @@ void test(void) {
 参考答案：篡改动态内存区的内容，后果难以预料，非常危险，因为 `free` 之后，str成为野指针，条件语句将不能按预定逻辑运行。
 
 ## 4. 关于Block
-
-Block 是通过 structrue 实现的，结构如下：
+假设有如下代码：
 
 ```c
-struct Descriptor{
-	unsigned long int reserved;
-	unsigned long int size;
-	void (*) (void *, void *) copy;
-	void (*) (void *, void *) dispose;
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        int age = 10;
+        void (^block)(int, int) = ^(int a, int b) {
+            NSLog(@"This is block, a= %d, b = %d", a, b);
+            NSLog(@"This is block, age = %d", age);
+        };
+        block(3, 5);
+    }
+    
+    return 0;
+}
+```
+
+其重写展开后如下：
+
+```c++
+struct __main_block_impl_0 {
+  struct __block_impl impl;
+  struct __main_block_desc_0* Desc;
+  int age;
+  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int _age, int flags=0) : age(_age) {
+    impl.isa = &_NSConcreteStackBlock;
+    impl.Flags = flags;
+    impl.FuncPtr = fp;
+    Desc = desc;
+  }
 };
-	
-struct {
-	void *isa; // 例如 _NSConcreteStackBlock
-	int flags;
-	int  reserved;
-	void (*) (void *, ...) invoke;// 函数指针
-	struct Descriptor *descriptor;
-	// 捕获到的变量
+static void __main_block_func_0(struct __main_block_impl_0 *__cself, int a, int b) {
+  int age = __cself->age; // bound by copy
+
+            NSLog((NSString *)&__NSConstantStringImpl__var_folders__2_jlhfyq854qb4j25pwnx17m1w0000gn_T_main_61a3ee_mi_0, a, b);
+            NSLog((NSString *)&__NSConstantStringImpl__var_folders__2_jlhfyq854qb4j25pwnx17m1w0000gn_T_main_61a3ee_mi_1, age);
+        }
+
+static struct __main_block_desc_0 {
+  size_t reserved;
+  size_t Block_size;
+} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0)};
+int main(int argc, const char * argv[]) {
+    /* @autoreleasepool */ { __AtAutoreleasePool __autoreleasepool; 
+        int age = 10;
+        void (*block)(int, int) = ((void (*)(int, int))&__main_block_impl_0((void *)__main_block_func_0, &__main_block_desc_0_DATA, age));
+        ((void (*)(__block_impl *, int, int))((__block_impl *)block)->FuncPtr)((__block_impl *)block, 3, 5);
+    }
+
+    return 0;
 }
 ```
-block 与函数指针非常类似，可以说是“带有自动变量值的匿名函数”，但 block 可以使实现逻辑看上去更紧凑清晰，节省代码量。
+其中各结构体关系如下图：
 
-- \_NSConcreteGlobalBlock_
-- \_NSConcreteStackBlock_
-- \_NSConcreteMallocBlock_
+![Block 结构体关系图](https://user-gold-cdn.xitu.io/2018/5/20/1637de343b05ffaa?imageView2/0/w/1280/h/960/ignore-error/1)
 
+> 引自：掘金[<探寻block的本质>](https://juejin.im/post/5b0181e15188254270643e88)
 
-如果 block 是定义在栈上的，那么 block 只在定义它的那个范围内有效。例如：
+### 4.1 Block 的变量捕获
+先上结论：
+
+![变量捕获对比图](https://user-gold-cdn.xitu.io/2018/5/20/1637de344d83a2f8?imageView2/0/w/1280/h/960/ignore-error/1)
+
+下面看一些详细解析：
+
+#### 4.1.1 局部变量
+先来看一段代码：
 
 ```c
-void (^block)();
-if (/* some condition */) {
-	block = ^{
-		NSLog(@"Block a");
-	};
-} else {
-	block = ^{
-		NSLog(@"Block b");
-	};
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        auto int a = 10;
+        static int b = 11;
+        void(^block)(void) = ^{
+            NSLog(@"hello, a = %d, b = %d", a,b);
+        };
+        a = 1;
+        b = 2;
+        block();
+    }
+    return 0;
 }
-block();
+// log : block本质[57465:18555229] hello, a = 10, b = 2
+// block 中 a 的值没有被改变而 b 的值随外部变化而变化。
 ```
-上面的两个 block a、b 都分配在栈上。编译器会给每个 block 分配好栈空间，然而等离开了相应的范围后，编译器有可能吧分配给 block 的内存覆盖掉。所以，这两个 block 分别只在对应的语句范围内有效。此代码时而正确，时而错误，完全取决于编译器是否覆盖他们。
+重写展开的代码如下：
 
-可以通过 copy 将其复制到堆上，一旦复制到堆上，那么之后在 copy 将只增加其引用计数，注意 ARC 环境会自动释放。分配在栈上的无此顾虑，编译器已经处理好了。
+```c++
+struct __main_block_impl_0 {
+  struct __block_impl impl;
+  struct __main_block_desc_0* Desc;
+  int a;
+  int *b; // 注意这里对 b 的捕获，声明类一个同名指针
+  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int _a, int *_b, int flags=0) : a(_a), b(_b) {
+    impl.isa = &_NSConcreteStackBlock;
+    impl.Flags = flags;
+    impl.FuncPtr = fp;
+    Desc = desc;
+  }
+};
+static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
+  int a = __cself->a; // bound by copy
+  int *b = __cself->b; // bound by copy
+
+            NSLog((NSString *)&__NSConstantStringImpl__var_folders__2_jlhfyq854qb4j25pwnx17m1w0000gn_T_main_b50e27_mi_0, a,(*b));
+        }
+
+static struct __main_block_desc_0 {
+  size_t reserved;
+  size_t Block_size;
+} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0)};
+int main(int argc, const char * argv[]) {
+    /* @autoreleasepool */ { __AtAutoreleasePool __autoreleasepool; 
+        auto int a = 10;
+        static int b = 11;
+        // 传入的是 b 的地址
+        void(*block)(void) = ((void (*)())&__main_block_impl_0((void *)__main_block_func_0, &__main_block_desc_0_DATA, a, &b));
+        a = 1;
+        b = 2;
+        ((void (*)(__block_impl *))((__block_impl *)block)->FuncPtr)((__block_impl *)block);
+    }
+    return 0;
+}
+```
+因为 a 是局部变量，碍于其生命周期，所以 block 必须对其进行值拷贝，因为它随时可能因为栈地弹出而结束。而 b 是静态变量，即使栈弹出其生命周期依然不会结束，所以这里不需要拷贝，只要生命一个指针，指向其地址即可。也正因为是指针，所以当 b 更新后，block 执行时读取 b 的值也是新值。
+
+#### 4.1.2 全局变量
+再来看一段代码：
+
+```c
+int a = 10;
+static int b = 11;
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        void(^block)(void) = ^{
+            NSLog(@"hello, a = %d, b = %d", a,b);
+        };
+        a = 1;
+        b = 2;
+        block();
+    }
+    return 0;
+}
+// log hello, a = 1, b = 2
+```
+重写展开的代码如下：
+
+```c++
+struct __main_block_impl_0 {
+  struct __block_impl impl;
+  struct __main_block_desc_0* Desc;
+  // 注意这里根本没有对全局变量 a，b 进行捕获
+  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int _a, int *_b, int flags=0) {
+    impl.isa = &_NSConcreteStackBlock;
+    impl.Flags = flags;
+    impl.FuncPtr = fp;
+    Desc = desc;
+  }
+};
+static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
+ 			  // 直接调用 a，b。因为他们的访问范围是全局的，根本不需要捕获
+            NSLog((NSString *)&__NSConstantStringImpl__var_folders__2_jlhfyq854qb4j25pwnx17m1w0000gn_T_main_b50e27_mi_0, a, b);
+        }
+
+static struct __main_block_desc_0 {
+  size_t reserved;
+  size_t Block_size;
+} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0)};
+int main(int argc, const char * argv[]) {
+    /* @autoreleasepool */ { __AtAutoreleasePool __autoreleasepool; 
+        auto int a = 10;
+        static int b = 11;
+        void(*block)(void) = ((void (*)())&__main_block_impl_0((void *)__main_block_func_0, &__main_block_desc_0_DATA));
+        a = 1;
+        b = 2;
+        ((void (*)(__block_impl *))((__block_impl *)block)->FuncPtr)((__block_impl *)block);
+    }
+    return 0;
+}
+
+```
+
+### 4.2 Block 对类对象的捕获
+
+
+### 4.3 Block 的类型
+下面通过代码验证一下：
 
 ```objc
-void (^block)();
-if (/* some condition */) {
-	block = [^{
-		NSLog(@"Block a");
-	} copy];
-} else {
-	block = [^{
-		NSLog(@"Block b");
-	} copy];
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        // 1. 内部没有调用外部变量的block
+        void (^block1)(void) = ^{
+            NSLog(@"Hello");
+        };
+        // 2. 内部调用外部变量的block
+        int a = 10;
+        void (^block2)(void) = ^{
+            NSLog(@"Hello - %d",a);
+        };
+       // 3. 直接调用的block的class
+        NSLog(@"%@ %@ %@", [block1 class], [block2 class], [^{
+            NSLog(@"%d",a);
+        } class]);
+    }
+    return 0;
 }
-block();
 ```
-此外还有一种全局 block，此中 block 不会捕捉任何状态（例如外围的变量等），运行时也无须有状态来参与。block 所使用的内存在编译器就已经确定。全局 block 的拷贝是空操作，因为它不会在运行时被系统回收。相当于单例。
+可以看到输出结果：
 
-block 总能修改实例变量，而无需像修改普通局部变量那样，必须通过添加 `__block` 修饰来实现。但是需要注意如果通过读取或写入捕获了实例变量，那么也会一并将 self 变量捕获，这是因为实例变量是与 self 所指代的实例关联在一起的，所要特别注意“循环持有”的问题。
+```shell
+Block_playground[1154:182941] __NSGlobalBlock__ __NSMallocBlock__ __NSStackBlock__
+Program ended with exit code: 0
+```
+可以看到，跟之前的重写展开的代码貌似不太一样，是不是运行时捣的鬼，有待进一步验证。
 
-### 4.1 仍然有疑问，就是 __block 到底是如何影响被捕获的变量的？
+#### 4.3.1 block 在内存中的存储
 
-### 4.2 在 block 里对数组执行添加操作，这个数组需要声明成 __block 吗？同理如果修改的是一个 NSInteger，那么是否需要？
+![Block在内存中的存储](https://user-gold-cdn.xitu.io/2018/5/20/1637de34c0579805?imageView2/0/w/1280/h/960/ignore-error/1)
+
+由图中可见，不同类型的 Block 存储的内存区域也不尽相同，可以分为三类：
+
+- \_\_NSGlobalBlock__ 全局型，直到程序结束才会回收；
+- \_\_NSStackBlock__ 栈型，从名字可知其最位于栈上，自然生命周期也随栈地弹出而终结；
+- \_\_NSMallocBlock__ 堆型，需要我们自己控制其生命周期。
+
+#### 4.3.2 什么情况下 ARC 自动对 block 进行 copy 操作？
+
+1. block 作为函数返回值时
+2. 将 block 赋值给 __strong 指针时
+3. block 作为 Cocoa API 中方法名含有 UsingBlock 的方法参数时
+4. block 作为 GCD API 的方法参数时
+
+### 4.4 __block 到底是如何影响被捕获的变量的？
+
+#### 4.4.3 在 block 里对数组执行添加操作，这个数组需要声明成 __block 吗？同理如果修改的是一个 NSInteger，那么是否需要？
 
 - 在 block 中对一个可变数组进行元素的修改不需要用 `__block`，因为不需要修改指针指向的地址；
 - 修改 NSInteger 则需要，因为它是值类型，（需要结合上一题回答）
+
 
 ## 6. KVC
 KVC 是一种间接访问对象属性的机制，使用字符串识别属性，而不是通过调用一个 setter/getter 方法或直接访问实例变量。在本质上，KVC 定义类你的应用实现的访问器方法的模式和方法签名。
