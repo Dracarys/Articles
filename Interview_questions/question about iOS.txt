@@ -1,0 +1,127 @@
+给出一个字符串，要求将其按照单词顺序进行反转 33
+类（class）和结构体（struct）有什么区别 81
+Swift是面向对象还是函数式的编程语言 83
+在Swift中，什么是可选型（Optional） 84
+在Swift中，什么是泛型（Generics） 84
+说明并比较关键词：Open，Public，Internal，File-private和Private 85
+说明并比较关键词：Strong，Weak和Unowned 86
+在Swift中，如何理解copy-on-write 87
+什么是属性观察（Property Observer） 87
+在结构体中如何修改成员变量的方法 88
+如何用Swift实现或（II）操作 89
+实现一个函数：输入是任意一个整数，输出为输入的整数 2 89
+实现一个函数：求0~100（包括0和100）中为偶数并且恰好是其他数字平方的
+数字 90
+什么是ARC 91
+什么情况下会出现循环引用 92
+说明并比较关键词：strong，weak，assign和copy 93
+说明并比较关键词：atomatic和nonatomic 94
+atomic是百分之百线程安全的吗 94
+说明并比较关键词：_ _weak和_ _block 95
+什么是block？它和代理的区别是什么 95
+属性声明代码风格考查 96
+架构解耦代码考查 97
+内存管理语法考查 98
+多线程语法考查 99
+以scheduledTimerWithTimeInterval的方式触发的timer，在滑动页面上的列表时，
+timer会暂停，为什么？该如何解决 100
+Swift为什么将String，Array和Dictionary设计成值类型 101
+如何用Swift将协议（protocol）中的部分方法设计成可选（optional） 102
+协议的代码实战 103
+在Swift和Objective-C的混合编程项目中，如何在Swift文件中调用
+Objective-C文件中定义的方法？如何在Objective-C文件中调用Swift
+文件中定义的方法 104
+比较Swift和Objective-C中的初始化方法（init）有什么异同 105
+比较Swift和Objective-C中的协议（protocol）有什么异同 105
+谈谈对Objective-C和Swift动态特性的理解 105
+语言特性的代码实战 107
+message send如果找不到对象，则会如何进行后续处理 108
+什么是method swizzling 108
+Swift和Objective-C的自省（Introspection）有什么不同 109
+能否通过Category给已有的类添加属性（property） 110
+LLDB中p和po有什么区别 112
+Xcode中的Buildtime issues和Runtime issues指什么 113
+App启动时间过长，该怎样优化 114
+如何用Xcode检测代码中的循环引用 115
+怎样解决EXC_BAD_ACCESS 116
+如何在Playground中执行异步操作 117
+在playground中实现一个10行的列表，每行随机显示一个0~100的整数 118
+要在UIView上定义一个Label有哪几种方式 119
+storyboard/xib和纯代码构建UI相比，有哪些优点和缺点 120
+Auto Layout和Frame在UI布局和渲染上有什么区别 121
+UIView和CALayer有什么区别 121
+说明并比较关键词：frame，bounds和center 122
+说明并比较方法：layoutIfNeeded，layoutSubviews和setNeedsLayout 123
+说明并比较关键词：Safe Area，SafeAreaLayoutGuide和SafeAreaInsets 123
+在iOS中实现动画的方式有几种 124
+控制屏幕上的圆形小球，使其水平向右滑动200个point 125
+在iOS开发中，如何保证App的UI在iPhone、iPad及iPad分屏情况下
+依然适用 127
+如何用drag ＆ drop实现图片拖动功能 129
+说明并比较关键词：contentView，contentInset，contentSize和contentOffset 131
+说明UITableViewCell的重用机制 133
+说明并比较协议：UITableViewDataSource和UITableViewDelegate 133
+请说明并比较协议：UICollectionViewDataSource，UICollection- ViewDelegate
+和UICollectionViewDelegateFlowLayout 133
+实现一个10行的列表，每行随机显示一个0~100的整数。用户可以删除、
+移动任何一行，下拉列表中的数字重新刷新 134
+UICollectionView中的Supplementary Views和Decoration Views分别指什么 137
+如果一个列表视图滑动很慢，那么该怎样优化 138
+说一说实现预加载的方法 139
+如何用UICollectionView实现瀑布流界面 140
+说一说HTTP中GET与POST的区别 142
+说一说Session和Cookie的概念 142
+说明并比较网络通信协议：Ajax Polling，Long Polling，WebSockets和
+Sever-Sent Event 143
+在一个HTTPS连接的网站中，输入账号和密码并单击登录按钮后，
+到服务器返回这个请求前，这期间经历了什么 143
+说明并比较类：URLSessionTask，URLSessionDataTask，
+URLSessionUploadTask和URLSessionDownloadTask 144
+什么是Completion Handler 145
+设计一个方法，在给定API的网址的条件下，返回用户数据 146
+在iOS开发中，本地消息通知的流程是怎样的 148
+说一说在iOS开发中，远程消息推送的原理 149
+在iOS开发中，如何实现编码和解码 150
+说一说在iOS开发中数据持久化的方案 151
+在iOS开发中，对于并发操作有哪3种方式 153
+比较关键词：Serial，Concurrent，Sync和Async 153
+串行队列的代码实战 154
+并行队列的代码实战 156
+举例说明iOS并发编程中的三大问题 157
+竞态条件的代码实战 160
+试比较GCD中的方法：dispatch_async，dispatch_after，dispatch_ once
+和dispatch_group 162
+GCD中全局（global）队列有哪几种优先级 164
+试比较Operations中的关键词：Operation，BlockOperation和OperationQueue 164
+如何在OperationQueue中取消某个Operation 166
+在实际开发中，主线程和其他线程有哪些使用场景 168
+说说你平常开发中用到的设计模式 169
+什么是MVC 170
+Objective-C和Swift在单例模式的创建上有什么区别 171
+什么是装饰模式（Decorator） 171
+什么是观察者模式（Observer） 172
+什么是备忘录模式（Memento） 174
+比较苹果官方的MVC架构的优点和缺点 176
+MVC架构的代码实战 177
+MVCS中的S为什么要单独拆分出来 179
+MVP和MVC有什么异同 179
+MVVM中的ViewModel的作用是什么 180
+比较MVC、MVP和MVVM这三种架构 181
+VIPER之间的各个组件是如何交互的 182
+什么是OOP？它在iOS开发中有哪些优点 184
+OOP在iOS开发中有哪些缺点 185
+POP相比OOP有哪些优势 187
+要给一个UIButton增加一个点击后抖动的效果，该怎样实现 189
+POP的代码实战 190
+试用Swift实现二分搜索算法 192
+一个App崩溃了，可能是什么原因造成的 195
+在模拟机上完成所有测试之后，就不需要在真机上再进行测试了吗 196
+为什么在单元测试中引入代码模块要用@testable关键词 197
+单元测试的代码实战 197
+说一说iOS中的性能测试（performance test） 199
+说一说iOS开发中的UI测试 200
+如何检查测试覆盖率 200
+什么是iOS中的App ID 201
+什么是iOS中的Code Signing 202
+什么是iOS中的App Thinning 202
+向App Store提交App时有哪些原因可能被拒 
