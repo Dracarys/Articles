@@ -1,31 +1,31 @@
 # 面试题系列之iOS项目经验
 
-## Cocoa
+## 1。 Cocoa
 Cocoa 是 Apple 为 Mac 等设备打造的一套框架，以 NextSetp 为基础，所以命名多带有 “NS” 前缀，
 
-### NSTimer准吗？有哪些替代方案
+### 1.1 NSTimer准吗？有哪些替代方案
 
 不准确，因为 Runloop mode 的切换有可能导致计时器暂停，从而不准确。
 
 解决方案：
 
-- 将计时器添加到自定义线程，这样就不收 Runloop mode的影响，但是要注意子线程的Timer 回调也是在子线程；
+- 将计时器添加到自定义线程，这样就不受 Runloop mode 切换的影响，但是要注意子线程的Timer 回调也是在子线程；
 - 将计时器添加到特定的 Runloop Mode 中，例如：NSRunLoopCommonMode
 - 另起炉灶，用 `mach_absolute_time()` 来实现更高精度的定时器
 - CADisplayLink
 - GCD timer
 
-### 实现一个 NSString 类
+### 1.2 实现一个 NSString 类
 
-## CocoaTouch
+## 2. CocoaTouch
 CocoaTouch 是 Apple 为 iPhone 等触屏移动设备专门打造的框架，继承了部分 Cocoa 框架的基础，命名多带有 “UI” 前缀。
-### KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
+### 2.1 KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
 
-UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘以及其它非点击相关事件，同一时间只有能一个 KeyWindow。
+UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘以及其它非点击相关事件，同一时间只有能一个激活的 KeyWindow。
 
 简单说 UIView 就是 Layer 的 Agent。负责除绘图意外的任务。UIView 继承自 UIResponder，因此它可以对事件进行响应。例如多层级 View 的响应链传递，那都是通过 UIView 的 HitTest 实现的。而 Layer 则直接继承自 NSObject，承担与视图相关的绘制工作，例如修改 View 的大小，背景颜色等最终都是由 Layer 来最终完成。
 
-### UIView 的哪些属性是 animatable 的？
+### 2.2 UIView 的哪些属性是 animatable 的？
 
 - frame
 - bounds
@@ -34,14 +34,14 @@ UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘
 - alpha 透明度
 - contenStrech 拉伸，已弃用。
 
-### UIView 的 LayouSubviews 方法何时会被调用？
+### 2.3 UIView 的 LayouSubviews 方法何时会被调用？
 
 - 初始化时不会触发
 - 滚动 UIScrollView 时会触发
 - 旋转 UIScreen 时会触发
 - 当 view 的 frame 发生变化时会触发
 
-### 为什么动画完成后，Layer 会恢复到原先的状态？
+### 2.4 为什么动画完成后，Layer 会恢复到原先的状态？
 
 Layer 和 View 一样存在着一个层级树状结构：
 
@@ -51,7 +51,7 @@ Layer 和 View 一样存在着一个层级树状结构：
 
 了解了这一设计模型后，就可以看到动画只不过是呈现树所展示的一种假象，真正持有 Layer 状态的是模型树，因为呈现树只是一个拷贝，在动画过程中的变化不会影响到模型树，所以当动画结束时，Layer 的属性依然是模型树所记录的状态。
 
-### 给一个 View 设置圆角的方法有哪些，各有什么不同？
+### 2.5 给一个 View 设置圆角的方法有哪些，各有什么不同？
 
 离屏渲染绘制 layer tree 中的一部分到一个新的缓存里面（这个缓存不是屏幕，是另一个地方），然后再把这个缓存渲染到屏幕上面。一般来说，你需要避免离屏渲染。因为这个开销很大。在屏幕上面直接合成层要比先创建一个离屏缓存然后在缓存上面绘制，最后再绘制缓存到屏幕上面快很多。这里面有 2 个上下文环境的切换（切换到屏幕外缓存环境，和屏幕环境）
 
@@ -60,19 +60,19 @@ Layer 和 View 一样存在着一个层级树状结构：
 - 通过 Core Graphics 绘制带圆角的视图，同样会触发离屏渲染。
 - 设置 View 的背景的 content mode
 
-### 直接用 UILabel 和自己用 DrawRect 画 UILabel，那个性能好，为什么？那个占用的内存少？为什么？
+### 2.6 直接用 UILabel 和自己用 DrawRect 画 UILabel，那个性能好，为什么？那个占用的内存少？为什么？
 直接用更好，调用 coreGraphics 会导致离屏渲染。原因就是解离屏渲染。
 
-### 响应链、如何扩大 View 的响应范围
+### 2.7 响应链、如何扩大 View 的响应范围
 重写 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，对那些位于制定范围内的点返回 `YES`，注意潜在的干扰。
 
-### 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView 和 UIResponse 的关系是什么？
+### 2.8 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView 和 UIResponse 的关系是什么？
 
 第一响应者是 KeyWindow，它通过调用 `- (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，返回最远的后代（包括自己），该方法是通过自顶向下的递归调用 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event ` 方法，来确定具体应该是谁来响应点击事件的。
 
 uiview 继承自UIResponse。
 
-### iOS 的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
+### 2.9 iOS 的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
 
 可以执行，
 - 自己主动保活，如播放无音音频文件；
@@ -80,14 +80,14 @@ uiview 继承自UIResponse。
 
 可以，有短暂的保存时间。
 
-### 自线程中调用 connection 方法，为什么不回调？这个问题很老了，现在已经开始用 URLSession。
-没加入runloop，子线程被销毁了
+### 2.10 自线程中调用 connection 方法，为什么不回调？这个问题很老了，现在已经开始用 URLSession。
+没加入 runloop，子线程被销毁了
 
-### UI框架和CA、CG框架的关系是什么？做过哪些内容？
+### 2.11 UI框架和CA、CG框架的关系是什么？做过哪些内容？
 
 UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics 和 OpenGL ES 之上。
 
-### 哪些操作会导致离屏渲染
+### 2.12 哪些操作会导致离屏渲染
 设置一下属性时都会触发离屏渲染：
 
 - shouldResterize （光栅化）
@@ -98,24 +98,24 @@ UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics �
 - corner radious
 - Gradient
 
-### 怎么判断是否存在离屏渲染
+### 2.13 怎么判断是否存在离屏渲染
 Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查选项：
 
 - Color Offscreen-Rendered Yellow 开启后会把那些需要离屏渲染的图层高亮成黄色，这就意味着黄色图层可能存在性能问题，模拟器也存在该选项。
 - Color Hits Green and Misses Red
 如果shouldRasterize被设置成YES，对应的渲染结果会被缓存，如果图层是绿色，就表示这些缓存被复用；如果是红色就表示缓存会被重复创建，这就表示该处存在性能问题了。 
 
-### 如何 hook 一个对象的方法，而不影响其它对象。
+### 2.14 如何 hook 一个对象的方法，而不影响其它对象。
 methodswazzing，方法替换，有待进一步验证。
 
-### 渲染 UI 为什么要在主线程
-UIKit 并不是一个 线程安全 的类，UI 操作涉及到渲染访问各种 View 对象的属性，如果异步操作下会存在读写问题，而为其加锁则会耗费大量资源并拖慢运行速度。另一方面因为整个程序的起点 UIApplication 是在主线程进行初始化，所有的用户事件都是在主线程上进行传递（如点击、拖动），所以 view 只能在主线程上才能对事件进行响应。而在渲染方面由于图像的渲染需要以60帧的刷新率在屏幕上 同时 更新，在非主线程异步化的情况下无法确定这个处理过程能够实现同步更新
+### 2.15 渲染 UI 为什么要在主线程
+UIKit 并不是一个线程安全的类，UI 操作涉及到渲染访问各种 View 对象的属性，如果异步操作下会存在读写问题，而为其加锁则会耗费大量资源并拖慢运行速度。另一方面因为整个程序的起点 UIApplication 是在主线程进行初始化，所有的用户事件都是在主线程上进行传递（如点击、拖动），所以 view 只能在主线程上才能对事件进行响应。而在渲染方面由于图像的渲染需要以60帧的刷新率在屏幕上 同时 更新，在非主线程异步化的情况下无法确定这个处理过程能够实现同步更新
 
-[参考](https://juejin.im/post/5c406d97e51d4552475fe178)
+>[参考](https://juejin.im/post/5c406d97e51d4552475fe178)
 
 
 
-## iOS SDK
+## 3. iOS SDK
 
 ### 蓝牙
 
@@ -133,13 +133,34 @@ UIKit 并不是一个 线程安全 的类，UI 操作涉及到渲染访问各种
 
 
 
-## 项目经验
+## 4. 项目经验
 
-### 设计一个监控 app 启动速度的模块，大体的设计思路如何？
+### 4.1 设计一个监控 app 启动速度的模块，大体的设计思路如何？
+目前来看，对 App 启动速度的监控，主要有两种手段：
 
-### 如何检测应用是否卡顿
-检查卡顿分两种方式：一种是利用 Instrument 的 animation 测试；另一种是 监听 RunLoop。这里重点介绍第二种。（该方法的介绍来自 戴铭--如何利用 RunLoop 原理去监控卡顿）
+> 引自：戴铭的博文《App 启动速度怎么做优化与监控》
 
+#### 4.1.1 定时抓取主线程上的方法调用堆栈
+定时抓取主线程上的方法调用堆栈，计算一段时间里各个方法的耗时。Xcode 工具套件里自带的 Time Profiler，采用的就是这种方式。
+
+这种方式的优点是，开发蕾西工具成本不高，能够快速开发后即成到 App 中，以便在真实环境中进行检查。
+
+定时抓取到会遇到的问题：
+
+- 定时间隔设置过长，会漏掉一些方法，导致检查出来的耗时不精准
+- 定的时间间隔过短，抓取太频繁会让抓取方法自身效果太多的资源，导致结果不准确
+
+所以，如果间隔小于所有方法执行的时间（例如 0.002 秒），那么基本就能监听到所有方法。但这样一来，整体的耗时时间就不够准确。一般将这个时间间隔设置为 0.01 秒。如此，对整体耗时的影响小，但也导致很多方法不精准。是为了整体耗时的数据更加精确而做出的妥协。
+
+#### 4.1.2 对 `objc_msgSend` 方法进行 Hook
+为什么要 hook `objc_msgSend` 方法，因为 Objective-C 是一种动态语言，最终所有方法的调用都会经过 `objec_msgSend`，因此 hook 了该方法也就意味着 hook 了所有方法调用。
+
+具体实现：
+
+1. 借助 Facebook 开源项目： [fishhook](https://github.com/facebook/fishhook)，对方法进行 hook
+2. 添加入栈，出栈时间记录方法，从而得到整个方法的调用时间
+
+### 4.2 如何检测应用是否卡顿
 监听 RunLoop，首先要创建一个 CFRunLoopOberverContext 观察者。
 
 ```objc
@@ -185,10 +206,12 @@ dispatch_async(dispatch_get_global_queue(0, 0), ^{
 
 该阈值设定在小于 WatchDog 的时间之余，尽量结合大多数用户的感受而定。
 
-### 如何 dump 堆栈信息
+> 引自：戴铭的博文《如何利用 RunLoop 原理去监控卡顿》
+
+### 4.3 如何 dump 堆栈信息
 第一种：通过系统函数获取
 
-```objc
+```c
 static int s_fatal_signals[] = {
     SIGABRT,
     SIGBUS,
@@ -228,6 +251,8 @@ int main(int argc, char * argv[]) {
     @autoreleasepool {
         InitCrashReport();
         return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+    } 
+}
 
 ```
 另一种：利用三方开源库 PLCrashReporter 来获取，其可以定位到问题代码的具体位置，且性能消耗不大。
@@ -245,52 +270,87 @@ NSLog(@"lag happen, detail below: \n %@",lagReportString);
 
 ```
 
-### 如何编写单元测试，例如测试一个网络库，如何提高覆盖率
+### 4.4 如何编写单元测试，例如测试一个网络库，如何提高覆盖率
+Xcode 7.0 之后引入了 Code Coverage 工具，打开 scheme 开启 Code Coverage 即可，然后在测试报告中会给出覆盖率，对那些覆盖率较低的函数可以查看具体是哪些分支没有被覆盖到，然后有针对性的修改单元测试代码，提高覆盖率。
 
-尽量覆盖方法的每一个分支
+### 4.5 images.xcassetsa 和直接使用图片有什么不一样？
 
-### images.xcassetsa和直接使用图片有什么不一样？
-
-1. 除图标和lancher 外支持多种图片格式
+1. 除图标和 lancher 外支持多种图片格式
 2. 图片支持[UIImage imagedName:""]的方式实例化，不能从 Bundle 加载
 3. 在编译时，Image.xcassets 中的所有文件hi被打包为 Assets.car 文件，再解包取图片相对增加了一点难度。
 4. 减少 App 包的大小
 5. 支持 PDF 格式的矢量图
 
-### 平时是怎么进行测试的，内存方面怎么测试
-Instrument memory 相关测试。 
+### 4.6 平时是怎么进行测试的，内存方面怎么测试
+Instrument memory 相关测试，例如：
 
-### 应用内如何进行多语言切换？
+- Activaty Monitor，监控并分析 CPU，内存，磁盘，网络的使用情况；
+- Allocations，对对象的生命周期进行监控和分析，包括引用计数历史；
+- Leaks，主要是关于内存泄漏的监控和分析，包括 block 导致的泄漏；
+- Zombies，僵尸对象
 
-### 如何给一款 App 瘦身
+### 4.7 应用内如何进行多语言切换？
+
+- 重新设置 rootViewController，优点是：设置简单；缺点：需要记录当前页面，方能在重设后回到当前页面，而且会黑屏用户体验稍差。
+- 设计基础公共组件，然后接受到通知刷新。优点是：不需要记录当前页面，也不会黑屏，设置几乎立即可见；缺点：代码分散，耦合严重。
+- 设置协议，然后接收通知刷新。优点：不需要记录当前页面，也不回黑屏，耦合度低，便于扩展；缺点：代码分散。
+
+### 4.8 如何给一款 App 瘦身
 - 支持 AppThinning，启用图片AssetCatalog，以便针对不同设备进行图片的分割；
 - 去除无用的图片资源，LSUnuserdResources，非常好用的一个工具；
 - 图片资源压缩，利用 TinyPng 或 ImageOptimism 对 Png 资源进行重新压缩，超过100KB的图片可以采用 WebP 格式，但是会增加一倍的 CPU 解码消耗；
 - 通过 AppCode 分析，去除陈旧未使用的类，除了能瘦身还能加快启动速度
 
-### DSYM文件是什么，你是如何分析的？
+### 4.9 DSYM文件是什么，你是如何分析的？
+符号表文件，可以通过 Xcode 解析后，直接定位到问题代码
 
-符号表文件，可以通过Xcode解析后，直接定位到问题代码
+### 4.10 如果进行网络、内存、性能优化？
 
-### 如果进行网络、内存、性能优化？
+#### 4.10.1 网络优化
+初级优化技巧：
 
-### 如何把异步线程转换成同步任务进行单元测试？
+1. 减少带宽消耗：用 JSON 替换 XML；启用 G-zip 压缩（需要服务端支持）；如果是视频或音频数据，更换更好的压缩算法，例如：H.264，aac 等先进编码格式。
+2. 启动 TCP 的管道复用，减少重复建立、断开的带来的延迟（需要后段支持）
+3. 启用缓存，减少不必要的请求（需要后段支持）
+
+高级优化技巧：
+
+1. 建立私有的数据传输格式，进一步减少数据传输量；
+2. 建立 TCP 连接池，弱网情况下减少连接数量，动态调整超时时间等；
+3. IP 直连，初期下载域名列表对应的 IP 地址，测试得到最快的服务器 IP，然后对 URL 地址进行替换，注意对 IPv6 的支持；
+
+> 参考：
+> 
+> [《2016 年携程 App 网络服务通道治理和性能优化实践》](https://www.infoq.cn/article/app-network-service-and-performance-optimization-of-ctrip)
+> 
+> [《美团点评移动网络优化实践》](https://tech.meituan.com/2017/03/17/shark-sdk.html)
+
+#### 4.10.2 内存优化
+
+1. 杜绝内存泄漏问题；
+2. 启用自动释放池，减少内存峰值；
+3. 及时响应内存警告，释放不必要的缓存内容；
+
+#### 4.10.3 性能优化
+启动时间优化：
+
+I/O优化：
+
+图形处理：
+
+算法：
+
+### 4.11 如何把异步线程转换成同步任务进行单元测试？
 [参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
 
 ### 设计一个方案来检测 KVO 的同步异步问题，willChange 和 didChange 的不同点
 
-### 项目组件化用过吗？怎么接耦的？
+### 项目组件化用过吗？怎么解耦的？
 [参考](http://www.code4app.com/blog-822715-1562.html)
 
 ### 你实现过一个框架或者库以供别人使用么？如果有，请谈一谈构建框架或者库时候的经验；如果没有，请设想和设计框架的 public 的API，并指出大概需要如何做、需要注意一些什么方面，来使别人容易地使用你的框架
 
 ### 如果现在要实现一个下载功能，如何设计，每个类都觉题做什么？
-
-### 设计一个监控 App 启动速度的模块，说下大体的设计思路
-
-### 如何设计一个网络请求库
-
-### 设计一个图片缓存
 
 ### 如何捕捉Crash，设计思路。
 [参考](https://blog.csdn.net/skylin19840101/article/details/50955808)
