@@ -1,6 +1,6 @@
-# 面试题系列之iOS项目经验
+# 面试题系列之 iOS 基础与项目经验
 
-## 1。 Cocoa
+## 1. Cocoa 框架
 Cocoa 是 Apple 为 Mac 等设备打造的一套框架，以 NextSetp 为基础，所以命名多带有 “NS” 前缀，
 
 ### 1.1 NSTimer准吗？有哪些替代方案
@@ -17,15 +17,18 @@ Cocoa 是 Apple 为 Mac 等设备打造的一套框架，以 NextSetp 为基础�
 
 ### 1.2 实现一个 NSString 类
 
-## 2. CocoaTouch
+## 2. CocoaTouch 框架
 CocoaTouch 是 Apple 为 iPhone 等触屏移动设备专门打造的框架，继承了部分 Cocoa 框架的基础，命名多带有 “UI” 前缀。
-### 2.1 KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
+
+### 2.1 UIView
+
+#### 2.1.1 KeyWindow、UIWindow、UIView 之间的关系，Layer、UIView 什么关系？
 
 UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘以及其它非点击相关事件，同一时间只有能一个激活的 KeyWindow。
 
 简单说 UIView 就是 Layer 的 Agent。负责除绘图意外的任务。UIView 继承自 UIResponder，因此它可以对事件进行响应。例如多层级 View 的响应链传递，那都是通过 UIView 的 HitTest 实现的。而 Layer 则直接继承自 NSObject，承担与视图相关的绘制工作，例如修改 View 的大小，背景颜色等最终都是由 Layer 来最终完成。
 
-### 2.2 UIView 的哪些属性是 animatable 的？
+#### 2.1.2 UIView 的哪些属性是 animatable 的？
 
 - frame
 - bounds
@@ -34,24 +37,14 @@ UIWindow 继承自 UIView，KeyWindow 指当前处于前端，并能接受键盘
 - alpha 透明度
 - contenStrech 拉伸，已弃用。
 
-### 2.3 UIView 的 LayouSubviews 方法何时会被调用？
+#### 2.1.3 UIView 的 LayouSubviews 方法何时会被调用？
 
 - 初始化时不会触发
 - 滚动 UIScrollView 时会触发
 - 旋转 UIScreen 时会触发
 - 当 view 的 frame 发生变化时会触发
 
-### 2.4 为什么动画完成后，Layer 会恢复到原先的状态？
-
-Layer 和 View 一样存在着一个层级树状结构：
-
-- 模型树：主要用来记录 Layer 的相关属性状态。
-- 呈现树：是对模型树的一份拷贝，记录的是 Layer 动画过程中的属性状态。
-- 渲染树：是私有的，负责渲染相关。
-
-了解了这一设计模型后，就可以看到动画只不过是呈现树所展示的一种假象，真正持有 Layer 状态的是模型树，因为呈现树只是一个拷贝，在动画过程中的变化不会影响到模型树，所以当动画结束时，Layer 的属性依然是模型树所记录的状态。
-
-### 2.5 给一个 View 设置圆角的方法有哪些，各有什么不同？
+#### 2.1.4 给一个 View 设置圆角的方法有哪些，各有什么不同？
 
 离屏渲染绘制 layer tree 中的一部分到一个新的缓存里面（这个缓存不是屏幕，是另一个地方），然后再把这个缓存渲染到屏幕上面。一般来说，你需要避免离屏渲染。因为这个开销很大。在屏幕上面直接合成层要比先创建一个离屏缓存然后在缓存上面绘制，最后再绘制缓存到屏幕上面快很多。这里面有 2 个上下文环境的切换（切换到屏幕外缓存环境，和屏幕环境）
 
@@ -60,60 +53,45 @@ Layer 和 View 一样存在着一个层级树状结构：
 - 通过 Core Graphics 绘制带圆角的视图，同样会触发离屏渲染。
 - 设置 View 的背景的 content mode
 
-### 2.6 直接用 UILabel 和自己用 DrawRect 画 UILabel，那个性能好，为什么？那个占用的内存少？为什么？
+iOS 9.0 之前 UIImageView 跟 UIButton 设置圆角回触发离屏渲染，之后，设置 UIButton 的圆角会触发离屏渲染，但是 UIImageView 里的 png 图片已经不会了，但设置阴影等让然会触发。
+
+#### 2.1.5 直接用 UILabel 和自己用 DrawRect 画 UILabel，那个性能好，为什么？那个占用的内存少？为什么？
+直接使用 UILabel 会更好，
 直接用更好，调用 coreGraphics 会导致离屏渲染。原因就是解离屏渲染。
 
-### 2.7 响应链、如何扩大 View 的响应范围
-重写 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，对那些位于制定范围内的点返回 `YES`，注意潜在的干扰。
+### 2.2 响应链
 
-### 2.8 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？追问 UIView 和 UIResponse 的关系是什么？
+### 2.4 手触碰到屏幕的时候，响应机制是怎样的？第一响应者是谁？
 
 第一响应者是 KeyWindow，它通过调用 `- (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，返回最远的后代（包括自己），该方法是通过自顶向下的递归调用 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event ` 方法，来确定具体应该是谁来响应点击事件的。
 
-uiview 继承自UIResponse。
+#### 2.2.1 UIView 和 UIResponder 的关系
+uiview 继承自 UIResponder。
 
-### 2.9 iOS 的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
+#### 2.2.2 响应链、如何扩大 View 的响应范围
+重写 `- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event` 方法，对那些位于制定范围内的点返回 `YES`，注意潜在的干扰。
 
-可以执行，
-- 自己主动保活，如播放无音音频文件；
-- 通过notification 推送唤醒。
+### 2.3 CALayer 
 
-可以，有短暂的保存时间。
+#### 2.3.1 Layer 和 View 的关系
+View 是 Layer 的代理，Agent，经纪人。View 可以负责记录状态，响应时间；Layer 则专司绘图之职。
 
-### 2.10 自线程中调用 connection 方法，为什么不回调？这个问题很老了，现在已经开始用 URLSession。
-没加入 runloop，子线程被销毁了
+#### 2.3.2 为什么动画完成后，Layer 会恢复到原先的状态？
+Layer 和 View 一样存在着一个层级树状结构：
 
-### 2.11 UI框架和CA、CG框架的关系是什么？做过哪些内容？
+- 模型树：主要用来记录 Layer 的相关属性状态。
+- 呈现树：是对模型树的一份拷贝，记录的是 Layer 动画过程中的属性状态。
+- 渲染树：是私有的，负责渲染相关。
 
-UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics 和 OpenGL ES 之上。
+了解了这一设计模型后，就可以看到动画只不过是呈现树所展示的一种假象，真正持有 Layer 状态的是模型树，因为呈现树只是一个拷贝，在动画过程中的变化不会影响到模型树，所以当动画结束时，Layer 的属性依然是模型树所记录的状态。
 
-### 2.12 哪些操作会导致离屏渲染
-设置一下属性时都会触发离屏渲染：
-
-- shouldResterize （光栅化）
-- masks
-- shadows
-- edge antialiasing （抗锯齿）
-- group opacity （不透明)
-- corner radious
-- Gradient
-
-### 2.13 怎么判断是否存在离屏渲染
-Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查选项：
-
-- Color Offscreen-Rendered Yellow 开启后会把那些需要离屏渲染的图层高亮成黄色，这就意味着黄色图层可能存在性能问题，模拟器也存在该选项。
-- Color Hits Green and Misses Red
-如果shouldRasterize被设置成YES，对应的渲染结果会被缓存，如果图层是绿色，就表示这些缓存被复用；如果是红色就表示缓存会被重复创建，这就表示该处存在性能问题了。 
-
-### 2.14 如何 hook 一个对象的方法，而不影响其它对象。
-methodswazzing，方法替换，有待进一步验证。
-
-### 2.15 渲染 UI 为什么要在主线程
+### 2.3 渲染 UI 为什么要在主线程
 UIKit 并不是一个线程安全的类，UI 操作涉及到渲染访问各种 View 对象的属性，如果异步操作下会存在读写问题，而为其加锁则会耗费大量资源并拖慢运行速度。另一方面因为整个程序的起点 UIApplication 是在主线程进行初始化，所有的用户事件都是在主线程上进行传递（如点击、拖动），所以 view 只能在主线程上才能对事件进行响应。而在渲染方面由于图像的渲染需要以60帧的刷新率在屏幕上 同时 更新，在非主线程异步化的情况下无法确定这个处理过程能够实现同步更新
 
 >[参考](https://juejin.im/post/5c406d97e51d4552475fe178)
 
-
+### 2.4 UI框架和CA、CG框架的关系是什么？做过哪些内容？
+UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics 和 OpenGL ES 之上。 
 
 ## 3. iOS SDK
 
@@ -298,8 +276,21 @@ Instrument memory 相关测试，例如：
 
 
 ## 5. App优化
+App 优化是一个比较大的话题，这里分成 4 个部分进行阐述：
 
 ### 5.1 启动优化
+要对启动进行优化，必须先了解 iOS 应用的启动过程：[程序执行的过程](./Interview_questions_about_operating_systems.md)
+
+优化方法：
+
+1. 优化加载时间：合并动态、静态库，提高加载速度；
+2. Rebase/Binding有化: 缩减 __DATA 指针；缩减 Objective-C 元数据，如：Classes、selectors、categories；缩减 C++ 虚函数；采用 Swift 结构；严格测试机器自动生成的代码，用偏移量代替指针，标记为只读；总之减少不必要的类，越多越慢；
+3. 运行时优化：与 2 相同；
+4. Initializers 优化：尽量用 `+initialize` 代替 `+load`；不要在初始化函数中调用 `dlopen()` 和开辟线程；尽量用 Swift；
+
+总结：
+减少动态库；缩减 Objective-C 类；淘汰静态初始化；多用 Swift。
+
 
 ### 5.2 网络优化
 初级优化技巧：
@@ -325,10 +316,32 @@ Instrument memory 相关测试，例如：
 1. 杜绝内存泄漏问题；
 2. 启用自动释放池，减少内存峰值；
 3. 及时响应内存警告，释放不必要的缓存内容；
+4. 除非必要，否则尽量不使用 `drawRect` 方法，即使什么都不做，也会因为要创建一份屏幕上下文拷贝而带来内存增长；
 
-### 5.4 I/O优化
+### 5.4 显示优化
 
-### 5.5 体积优化
+
+### 2.12 哪些操作会导致离屏渲染
+设置一下属性时都会触发离屏渲染：
+
+- shouldResterize （光栅化）
+- masks
+- shadows
+- edge antialiasing （抗锯齿）
+- group opacity （不透明)
+- corner radious
+- Gradient
+
+### 2.13 怎么判断是否存在离屏渲染
+Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查选项：
+
+- Color Offscreen-Rendered Yellow 开启后会把那些需要离屏渲染的图层高亮成黄色，这就意味着黄色图层可能存在性能问题，模拟器也存在该选项。
+- Color Hits Green and Misses Red
+如果shouldRasterize被设置成YES，对应的渲染结果会被缓存，如果图层是绿色，就表示这些缓存被复用；如果是红色就表示缓存会被重复创建，这就表示该处存在性能问题了。
+
+### 5.5 I/O优化
+
+### 5.6 体积优化
 
 - 支持 AppThinning，启用图片AssetCatalog，以便针对不同设备进行图片的分割；
 - 去除无用的图片资源，LSUnuserdResources，非常好用的一个工具；
@@ -348,6 +361,15 @@ Instrument memory 相关测试，例如：
 
 ### 6.2 如何把异步线程转换成同步任务进行单元测试？
 [参考](https://mp.weixin.qq.com/s?mpshare=1&scene=23&mid=100000048&sn=bafde424579a5cb57d7d88f12fc5791e&idx=1&__biz=MzUyNDM5ODI3OQ%3D%3D&chksm=7a2cba984d5b338ecb16e7c9f374244bdf483a1c5452ce0df7da73d236f4783f906eeeef41c9&srcid=1017YqCOZ1dePfHkgcFDmICp#rd)
+
+### 2.5 如何 hook 一个对象的方法，而不影响其它对象。
+methodswazzing，方法替换，有待进一步验证。
+### 2.6 iOS 的应用程序有几种状态？推到后台代码是否可以执行哦？双击home键，代码是否可以执行
+可以执行，
+- 自己主动保活，如播放无音音频文件；
+- 通过notification 推送唤醒。
+
+可以，有短暂的保存时间。
 
 ### 设计一个方案来检测 KVO 的同步异步问题，willChange 和 didChange 的不同点
 
