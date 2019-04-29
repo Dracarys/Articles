@@ -108,81 +108,9 @@ UIKit 构建在 CoreAnimation 框架之上，CA 框架构建在 Core Graphics �
 [iOS 签名机制](http://www.cocoachina.com/ios/20181221/25913.html)
 
 ## 4. 性能监控
+性能监控的目的是为了分析原因，并有针对性的进行优化，所以如果能看到问题发生时的堆栈信息，那将非常有帮助。
 
-### 4.1 App 启动速度监控设计
-目前来看，对 App 启动速度的监控，主要有两种手段：
-
-> 引自：戴铭的博文《App 启动速度怎么做优化与监控》
-
-#### 4.1.1 定时抓取主线程上的方法调用堆栈
-定时抓取主线程上的方法调用堆栈，计算一段时间里各个方法的耗时。Xcode 工具套件里自带的 Time Profiler，采用的就是这种方式。
-
-这种方式的优点是，开发蕾西工具成本不高，能够快速开发后即成到 App 中，以便在真实环境中进行检查。
-
-定时抓取到会遇到的问题：
-
-- 定时间隔设置过长，会漏掉一些方法，导致检查出来的耗时不精准
-- 定的时间间隔过短，抓取太频繁会让抓取方法自身效果太多的资源，导致结果不准确
-
-所以，如果间隔小于所有方法执行的时间（例如 0.002 秒），那么基本就能监听到所有方法。但这样一来，整体的耗时时间就不够准确。一般将这个时间间隔设置为 0.01 秒。如此，对整体耗时的影响小，但也导致很多方法不精准。是为了整体耗时的数据更加精确而做出的妥协。
-
-#### 4.1.2 对 `objc_msgSend` 方法进行 Hook
-为什么要 hook `objc_msgSend` 方法，因为 Objective-C 是一种动态语言，最终所有方法的调用都会经过 `objec_msgSend`，因此 hook 了该方法也就意味着 hook 了所有方法调用。
-
-具体实现：
-
-1. 借助 Facebook 开源项目： [fishhook](https://github.com/facebook/fishhook)，对方法进行 hook
-2. 添加入栈，出栈时间记录方法，从而得到整个方法的调用时间
-
-### 4.2 卡顿检测
-监听 RunLoop，首先要创建一个 CFRunLoopOberverContext 观察者。
-
-```objc
-CFRunLoopObserverContext context = {0,(__bridge void*)self,NULL,NULL};
-runLoopObserver = CFRunLoopObserverCreate(kCFAllocatorDefault,kCFRunLoopAllActivities,YES,0,&runLoopObserverCallBack,&context);
-```
-
-将创建好的观察者 runLoopObserver 添加到主线程 RunLoop 的 common 模式下观察。然后创建一个持续的子线程专门用来监控主线程的 RunLoop 状态。
-
-一旦发现进入睡眠前的 kCFRunLoopBeforeSources 状态，或者唤醒后的状态 kCFRunLoopAfterWaiting，在设置的时间阈值内一直没有变化，即可判定为卡顿。之后便可 dump 出堆栈的信息，以便进一步分析具体是哪个方法的执行时间过长。
-
-开启子线程监控的代码如下：
-
-```objc
-// 创建子线程监控
-dispatch_async(dispatch_get_global_queue(0, 0), ^{
-    // 子线程开启一个持续的 loop 用来进行监控
-    while (YES) {
-        long semaphoreWait = dispatch_semaphore_wait(dispatchSemaphore, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
-        if (semaphoreWait != 0) {
-            if (!runLoopObserver) {
-                timeoutCount = 0;
-                dispatchSemaphore = 0;
-                runLoopActivity = 0;
-                return;
-            }
-            //BeforeSources 和 AfterWaiting 这两个状态能够检测到是否卡顿
-            if (runLoopActivity == kCFRunLoopBeforeSources || runLoopActivity == kCFRunLoopAfterWaiting) {
-                // 将堆栈信息上报服务器的代码放到这里
-            } //end activity
-        }// end semaphore wait
-        timeoutCount = 0;
-    }// end while
-});
-```
-代码中的 NSEC_PER_SEC， 表示触发卡顿的时间阈值，单位是秒。这里设置成了 3 秒，其依据的是 WatchDog 的机制来确定的。WatchDog 在不同状态下设置的不同时间如下：
-
-- 启动（Launch）20s；
-- 恢复（Resume）10s；
-- 挂起（Suspend）10s；
-- 退出（Quit）6s；
-- 后台（Background）3min（在 iOS 7 之前，每次申请 10min；之后改为每次申请 3min，可连续申请，最多申请 10min）。
-
-该阈值设定在小于 WatchDog 的时间之余，尽量结合大多数用户的感受而定。
-
-> 引自：戴铭的博文《如何利用 RunLoop 原理去监控卡顿》
-
-### 4.3 如何 dump 堆栈信息
+### 4.1 如何 dump 堆栈信息
 第一种：通过系统函数获取
 
 ```c
@@ -243,6 +171,88 @@ NSString *lagReportString = [PLCrashReportTextFormatter stringValueForCrashRepor
 NSLog(@"lag happen, detail below: \n %@",lagReportString);
 
 ```
+
+
+### 4.2 App 启动速度监控设计
+目前来看，对 App 启动速度的监控，主要有两种手段：
+
+> 引自：戴铭的博文《App 启动速度怎么做优化与监控》
+
+#### 4.2.1 定时抓取主线程上的方法调用堆栈
+定时抓取主线程上的方法调用堆栈，计算一段时间里各个方法的耗时。Xcode 工具套件里自带的 Time Profiler，采用的就是这种方式。
+
+这种方式的优点是，开发蕾西工具成本不高，能够快速开发后即成到 App 中，以便在真实环境中进行检查。
+
+定时抓取到会遇到的问题：
+
+- 定时间隔设置过长，会漏掉一些方法，导致检查出来的耗时不精准
+- 定的时间间隔过短，抓取太频繁会让抓取方法自身效果太多的资源，导致结果不准确
+
+所以，如果间隔小于所有方法执行的时间（例如 0.002 秒），那么基本就能监听到所有方法。但这样一来，整体的耗时时间就不够准确。一般将这个时间间隔设置为 0.01 秒。如此，对整体耗时的影响小，但也导致很多方法不精准。是为了整体耗时的数据更加精确而做出的妥协。
+
+#### 4.2.2 对 `objc_msgSend` 方法进行 Hook
+为什么要 hook `objc_msgSend` 方法，因为 Objective-C 是一种动态语言，最终所有方法的调用都会经过 `objec_msgSend`，因此 hook 了该方法也就意味着 hook 了所有方法调用。
+
+具体实现：
+
+1. 借助 Facebook 开源项目： [fishhook](https://github.com/facebook/fishhook)，对方法进行 hook
+2. 添加入栈，出栈时间记录方法，从而得到整个方法的调用时间
+
+### 4.3 卡顿检测
+卡顿要监测的几个问题点：
+
+1. 抢锁耗时:主线程需要访问 DB，而此时某个字线程往 DB 插入大量数据。会导致偶尔卡一阵，过会就恢复了
+2. 主线程大量I/O：为了方便在主线程执行大量 I/O 操作，导致阻塞卡顿；
+3. 主线程大量计算：算法不合理，导致主线程某个函数占用了大量 CPU 时间，导致阻塞卡顿；
+4. 过量绘制任务：复杂的 UI、图文混排等，带来大量的 UI 绘制。
+
+
+监听 RunLoop，首先要创建一个 CFRunLoopOberverContext 观察者。
+
+```objc
+CFRunLoopObserverContext context = {0,(__bridge void*)self,NULL,NULL};
+runLoopObserver = CFRunLoopObserverCreate(kCFAllocatorDefault,kCFRunLoopAllActivities,YES,0,&runLoopObserverCallBack,&context);
+```
+
+将创建好的观察者 runLoopObserver 添加到主线程 RunLoop 的 common 模式下观察。然后创建一个持续的子线程专门用来监控主线程的 RunLoop 状态。
+
+一旦发现进入睡眠前的 kCFRunLoopBeforeSources 状态，或者唤醒后的状态 kCFRunLoopAfterWaiting，在设置的时间阈值内一直没有变化，即可判定为卡顿。之后便可 dump 出堆栈的信息，以便进一步分析具体是哪个方法的执行时间过长。
+
+开启子线程监控的代码如下：
+
+```objc
+// 创建子线程监控
+dispatch_async(dispatch_get_global_queue(0, 0), ^{
+    // 子线程开启一个持续的 loop 用来进行监控
+    while (YES) {
+        long semaphoreWait = dispatch_semaphore_wait(dispatchSemaphore, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
+        if (semaphoreWait != 0) {
+            if (!runLoopObserver) {
+                timeoutCount = 0;
+                dispatchSemaphore = 0;
+                runLoopActivity = 0;
+                return;
+            }
+            //BeforeSources 和 AfterWaiting 这两个状态能够检测到是否卡顿
+            if (runLoopActivity == kCFRunLoopBeforeSources || runLoopActivity == kCFRunLoopAfterWaiting) {
+                // 将堆栈信息上报服务器的代码放到这里
+            } //end activity
+        }// end semaphore wait
+        timeoutCount = 0;
+    }// end while
+});
+```
+代码中的 NSEC_PER_SEC， 表示触发卡顿的时间阈值，单位是秒。这里设置成了 3 秒，其依据的是 WatchDog 的机制来确定的。WatchDog 在不同状态下设置的不同时间如下：
+
+- 启动（Launch）20s；
+- 恢复（Resume）10s；
+- 挂起（Suspend）10s；
+- 退出（Quit）6s；
+- 后台（Background）3min（在 iOS 7 之前，每次申请 10min；之后改为每次申请 3min，可连续申请，最多申请 10min）。
+
+该阈值设定在小于 WatchDog 的时间之余，尽量结合大多数用户的感受而定。
+
+> 引自：戴铭的博文《如何利用 RunLoop 原理去监控卡顿》
 
 ### 4.4 App 崩溃检测
 
@@ -318,7 +328,11 @@ App 优化是一个比较大的话题，这里分成 4 个部分进行阐述：
 3. 及时响应内存警告，释放不必要的缓存内容；
 4. 除非必要，否则尽量不使用 `drawRect` 方法，即使什么都不做，也会因为要创建一份屏幕上下文拷贝而带来内存增长；
 
-### 5.4 显示优化
+### 5.4 流畅性优化
+卡顿产生的原因：
+
+
+卡顿优化：
 
 
 ### 2.12 哪些操作会导致离屏渲染
