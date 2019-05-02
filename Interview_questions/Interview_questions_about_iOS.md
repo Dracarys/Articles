@@ -300,12 +300,70 @@ dispatch_async(dispatch_get_global_queue(0, 0), ^{
 该阈值设定在小于 WatchDog 的时间之余，尽量结合大多数用户的感受而定。
 
 ### 4.4 App 崩溃检测
+崩溃信息主要分为两个来源：
+
+- 系统层，这一层最典型的错误就是 `EXC_BAD_ACCESS(SIGSEGV) `
+- 应用层，主要是语言层面的一些错误导致的；
+
+针对不同来源的崩溃，捕获的方案也是不同的，我们分别来看一下：
+
+**系统层**
+
+系统的崩溃主要是基于系统异常处理和信号传递机制来实现的。我们可以通过指定自己的异常捕获程序和信号处理程序对相应的异常和信号进行捕获。由于异常处理会优先于信号处理发生，如果异常处理过程让程序退出了，那么信号就永远也不会到这个进程了，所以目前主流的崩溃检测框架都是采用“异常+信号”的方式，例如：PLCrashReporter 就是如此。
+
+> 参考：有关 Mach 异常和 Unix 信号相关基础内容，可以参考《深入理解计算机操作系统》的第八章、《深入理解 UNIX 系统内核》的第四章进行了解。
+
+**应用层**
+
 
 #### 4.4.1 崩溃信息抓取
+这里举一个简单的例子说明信号捕获的方式：
 
-[参考](https://blog.csdn.net/skylin19840101/article/details/50955808)
+```objc
+// 代码来自戴铭的《iOS 崩溃千奇百怪，如何全面监控》一文
+void registerSignalHandler(void) {
+    signal(SIGSEGV, handleSignalException);
+    signal(SIGFPE, handleSignalException);
+    signal(SIGBUS, handleSignalException);
+    signal(SIGPIPE, handleSignalException);
+    signal(SIGHUP, handleSignalException);
+    signal(SIGINT, handleSignalException);
+    signal(SIGQUIT, handleSignalException);
+    signal(SIGABRT, handleSignalException);
+    signal(SIGILL, handleSignalException);
+}
+
+void handleSignalException(int signal) {
+    NSMutableString *crashString = [[NSMutableString alloc]init];
+    void* callstack[128];
+    int i, frames = backtrace(callstack, 128);
+    char** traceChar = backtrace_symbols(callstack, frames);
+    for (i = 0; i <frames; ++i) {
+        [crashString appendFormat:@"%s\n", traceChar[i]];
+    }
+}
+```
+
+> ⚠️注意：示例中的代码仅供了解信号捕获的原理，不能用于实际项目，因为它还非常简陋，很多问题没有考虑。
+
+不要以为捕获了异常和信号就能抓取到所有崩溃信息，还有一些崩溃是不会收到异常或信号的。例如：
+
+- 后台任务超时
+- 内存超限
+- 主线程卡死超时
+- 等等
+
+那么这些崩溃怎么信息怎么捕获呢？事实上这些问题引起的崩溃在应用这一层是不能被捕获的，但是可以通过对触发的临界点前到信息进行捕获间接的得到。
+
+- 设置计时，在即将超时时记录运行情况，从而分析出那些任务导致的超时
+- 收到内存警告时，获取当前内存使用情况
 
 #### 4.4.2 崩溃日志分析
+崩溃日志一般要结合符号表进行分析，从而确定问题代码的位置。这里仅列举一些常见的问题：
+
+- 0x8badf00d，表示 App 在一段时间内无响应而被 WatchDog 强杀，通常是因为主线程被卡死导致的。
+- 0xdeadfa11，表示 App 被用户强制退出，这个无需关注。
+- 0xc00010ff，表示 App 因为造成设备温度太高而被杀掉，这个就要结合日志记录到的具体内容分析来，确认是哪些任务导致的。
 
 #### 4.4.3 DSYM 文件是什么，你是如何分析的？
 符号表文件，可以通过 Xcode 解析后，直接定位到问题代码
@@ -328,7 +386,6 @@ Instrument memory 相关测试，例如：
 - Allocations，对对象的生命周期进行监控和分析，包括引用计数历史；
 - Leaks，主要是关于内存泄漏的监控和分析，包括 block 导致的泄漏；
 - Zombies，僵尸对象
-
 
 ## 5. App优化
 App 优化是一个比较大的话题，这里分成 4 个部分进行阐述：
@@ -397,8 +454,6 @@ Instruments 的 Core Animation 工具中有几个和离屏渲染相关的检查�
 - Color Offscreen-Rendered Yellow 开启后会把那些需要离屏渲染的图层高亮成黄色，这就意味着黄色图层可能存在性能问题，模拟器也存在该选项。
 - Color Hits Green and Misses Red
 如果shouldRasterize被设置成YES，对应的渲染结果会被缓存，如果图层是绿色，就表示这些缓存被复用；如果是红色就表示缓存会被重复创建，这就表示该处存在性能问题了。
-
-### 5.5 I/O优化
 
 ### 5.6 体积优化
 
