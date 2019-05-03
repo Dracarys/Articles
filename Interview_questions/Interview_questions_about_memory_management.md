@@ -34,6 +34,10 @@ autoreleasePool在Runloop时间开始之前（push），释放是在一个 RunLo
 ### 子线程中需要加 autoreleasepool 吗？什么时间释放？
 每个线程都默认有一个autoreleasepool，在线程即将退出前释放。但是如果该线程会产生大量的内存碎片，那么建议创建runloop以及自己的释放池，以便可以及时释放。
 
+### autoreleasepool 在 ARC 和 MRC 下有什么区别
+
+### block 在 ARC 和 MRC 下有什么区别，使用注意事项
+
 #### BAD_ACCESS 在什么情况下出现？如何调试？
 
 读取了一个不是你管控的内存地址，通常是读取了一个已释放或者为初始化的指针
