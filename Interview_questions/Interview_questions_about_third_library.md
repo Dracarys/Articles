@@ -3,16 +3,16 @@
 ## 1. 网络库
 
 ### 1.1 AFNetworking，是否支持IPv6
-
 3.0之后支持
 
 ### 1.2 AFNetwoking 为什么添加一条常驻线程？
 网络请求是异步的，这会导致获取到请求数据时，线程已经退出，代理方法没有机会执行。因此，AFN 的做法是使用一个 runloop 来保证线程不死~
 然而频繁的创建线程并启动runloop肯定会造成内存泄露(runloop 无法停止.线程无法退出)
-所以AFN就创建了一个单例线程,并且保证线程不退出
+所以 AFN 就创建了一个单例线程,并且保证线程不退出
 [参考](https://www.jianshu.com/p/7170035a18e8)
 
-### 1.3 AFNetworking 的 reachability是如何检测到网络状态变化的？
+### 1.3 AFNetworking 的 reachability 是如何检测到网络状态变化的？
+创建一个 `SCNetworkReachabilityRef`，并将其添加到主线程的 RunLoop 中，与 `kCFRunLoopCommonModes` 关联。这样当状态发生变化时，就会收到回调。
 
 ### 1.4 AFNetworking 与 MKNetworking 区别，优劣？
 
