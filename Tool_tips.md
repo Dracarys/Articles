@@ -19,3 +19,10 @@
 
 由此可见，Cocoapods 即保证了多人下发版本依赖的一致性，又兼顾了个人的更新需求。
 [参见](https://guides.cocoapods.org/using/pod-install-vs-update.html)
+
+## 3、安装 Network Link Conditioner
+该工具现在包含在 Aditional Tool For Xcode 包中，需登陆开发者网站下载。详情不多讲，这里主要介绍一下安装。
+
+在 macOS Mojava 10.14.4 目前最新的系统上，直接双击是无法安装的，会提示你 “Network Link Conditioner 是跟随系统的，无法被替换”，什么鬼？系统明明没有自带，却告诉我无法安装？直接手动磕，打开目录 `～/Library/PreferencePanes`，直接将 Conditioner 拖进去，重启。Done!
+
+> [参考来源](https://stackoverflow.com/questions/52414375/cannot-install-xcode-10-network-link-conditioner-in-macos-mojave)
