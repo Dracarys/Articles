@@ -188,3 +188,33 @@ z2 = z1.conj();
 - cv::Exception
 - cv::DataType<>
 - cv::InputArray & cv::OutputArray 表示所有支持的序列类型，
+
+## 实用函数
+
+- cv::alignPtr() 按指定字节数对齐指针
+- cv::alignSize() 按指定字节数对齐 buffer size
+- cv::allocate() 创建 C 风格的数组
+- cvCeil() 对 float x 向上取整，不会小于 x
+- cv::cubeRoot() 
+- cv::CV_Asser()
+- CV_Error()
+- CV_Error_()
+- cv::deallocate()
+- cv::error()
+- cv::fastAtan2()
+- cv::fastFree()
+- cv::fastMalloc()
+- cvFloor()
+- cv::format()
+- cv::getCPUTickCount()
+- cv::getNumThreads()
+- cv::getOptimalDFTSize()
+- cv::getThreadNum()
+- cv::getTickCount()
+- cv::getTickFrequency()
+- cvIsInf()
+- cvIsNaN()
+- cvRound()
+- cv::setNumThreads()
+- cv::setUserOptimized()
+- cv::useOptimized()
