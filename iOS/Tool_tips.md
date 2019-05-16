@@ -26,3 +26,38 @@
 在 macOS Mojava 10.14.4 目前最新的系统上，直接双击是无法安装的，会提示你 “Network Link Conditioner 是跟随系统的，无法被替换”，什么鬼？系统明明没有自带，却告诉我无法安装？直接手动磕，打开目录 `～/Library/PreferencePanes`，直接将 Conditioner 拖进去，重启。Done!
 
 > [参考来源](https://stackoverflow.com/questions/52414375/cannot-install-xcode-10-network-link-conditioner-in-macos-mojave)
+
+## 4、App 冷启动过程分析
+WWDC 曾有一个专题讲过这个问题，这里只说明如何开启环境变量，统计启动过程中各阶段的耗时。首先选择对应的工程 Target，然后 Edit Scheme，选择 Run，这时就可以看到环境变量设置了。在环境变量中添加：
+
+```shell
+DYLD_PRINT_STATISTICS = 1 // 注意 Xcode 里是键值模式，这里仅是举例。
+```
+如此，再次运行及可以统计到各个启动阶段的耗时：
+
+```shell
+Total pre-main time: 545.91 milliseconds (100.0%)
+
+         dylib loading time: 184.95 milliseconds (33.8%)
+
+        rebase/binding time:  34.31 milliseconds (6.2%)
+
+            ObjC setup time:  99.27 milliseconds (18.1%)
+
+           initializer time: 227.28 milliseconds (41.6%)
+
+           slowest intializers :
+
+             libSystem.B.dylib :   6.39 milliseconds (1.1%)
+
+                  XxxxXxXxxxV3 : 390.00 milliseconds (71.4%)
+```
+从上面的例子可以看到，71.4% 的时间都耗费在应用上了，其实这对后继者来说是好事，因为可以优化的空间很大。
+
+
+
+
+
+
+
+
