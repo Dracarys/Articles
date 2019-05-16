@@ -252,6 +252,7 @@ Key-value Observing，即键值监听，可以用于监听某个对象属性的�
 
 ### 4.3 如何手动触发 KVO？
 首先关闭默认：
+
 ``` Objective-C
 + (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key
 {
