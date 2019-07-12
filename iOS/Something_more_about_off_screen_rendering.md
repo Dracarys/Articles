@@ -49,7 +49,7 @@ OpenGL 是一种应用程序编程接口，它是一个可以对图形硬件设�
 
 ![UIKit Architecture New](https://github.com/Dracarys/Articles/raw/master/images/ca_architecture_new.png) 
 
-OpenGL 是使用客户端-服务端即C/S的形式实现的，很显然UIKit也采用了这一模式，我们的App可以看作客户端，而Core Animation 提供的 OpenGL/Metal 实现看作服务端。这一模式可通过下图得到验证。
+OpenGL 是使用客户端-服务端即C/S的形式实现的，很显然UIKit也采用了这一模式。我们的App可以看作客户端，而 Core Animation 提供的 OpenGL/Metal 实现看作服务端。这一模式可通过下图得到验证。
 
 ![Core Animation Pipline](https://github.com/Dracarys/Articles/raw/master/images/core_animation_pipline.png)
 
