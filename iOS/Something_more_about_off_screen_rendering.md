@@ -37,6 +37,26 @@ OpenGL 是一种应用程序编程接口，它是一个可以对图形硬件设�
 
 ### 融合（blending）
 
+## UIKit 渲染流程
+
+在介绍之前先来看一下 UIKit 的架构：
+
+**旧架构：**
+
+![UIKit Architecture Old](https://github.com/Dracarys/Articles/raw/master/images/ca_architecture_old.png) 
+
+**新架构：**
+
+![UIKit Architecture New](https://github.com/Dracarys/Articles/raw/master/images/ca_architecture_new.png) 
+
+OpenGL 是使用客户端-服务端即C/S的形式实现的，很显然UIKit也采用了这一模式，我们的App可以看作客户端，而Core Animation 提供的 OpenGL/Metal 实现看作服务端。这一模式可通过下图得到验证。
+
+![Core Animation Pipline](https://github.com/Dracarys/Articles/raw/master/images/core_animation_pipline.png)
+
+
+
+
+> 该小节内容主要引用自 WWDC 2014 “Advanced Graphics and Aniamtions for iOS Apps”，目前该分享的视频在官方网站上暂时搜索不到，但是一个不存在视频网站上有，欲了解详情，请移步。
 
 ## 诱因分析
 ## 透明
