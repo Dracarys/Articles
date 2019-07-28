@@ -1,7 +1,7 @@
 # 面试题系列之 Objective-C
 
 ## 1. Objective-C 对象
-Objective-C 是在 C 基础之上实现的面向对象功能，因此它是一个 C 的超集，通过下面的一些定义可以发现：objc 中所有关于类的实现都是基于结构体的。
+通过对 objc runtime 源码对剖析，可以发现 objc 中所有关于类的实现都是基于结构体的。
 
 下面是 `obj-private.h` 的定义：
 
@@ -98,7 +98,7 @@ public:
 
 ### 1.1 关于 Class 的实现：
 
-在 Objective-C 中 class 是一个指向 objc_class 结构体的指针，而 objc_class 是继承自 objc_object 结构，所以说 Objective-C 的类也是一个对象。
+在 Objective-C 中 class 是一个 objc_class 类型的结构体指针，而 objc_class 是继承自 objc_object 结构，所以说 Objective-C 的类也是一个对象。
 
 下面不是 `objc_class` 的实现：
 
