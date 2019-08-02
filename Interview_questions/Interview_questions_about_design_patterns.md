@@ -143,7 +143,7 @@ Swift 已经不需如此处理，它已经从语义上保证只被初始化一�
 ### 3.1 MVC 架构
 
 #### 3.1.1 传统的 MVC 架构
-![传统的MVC架构](../images/1*E9A5fOrSr0yVmc7Kly5C6A.png)
+![传统的MVC架构](../images/architecture_traditional_mvc.png)
 
 在上图的情况下，View是无状态的。一旦Model被改变，Controller就会简单地渲染它。例如：网页完全加载后，一旦你按下链接，就导航到其他地方。
 虽然在iOS应用用传统的MVC架构也可以实现，但这并没有多大意义，由于架构问题 ——三个实体是紧耦合的，每个实体和其他两个通信。这大大降低了可重用性——这可不是你希望在你的应用程序看到的
@@ -151,7 +151,7 @@ Swift 已经不需如此处理，它已经从语义上保证只被初始化一�
 #### 3.1.2 Apple的MVC架构
 **期望**
 
-![Apple期望的MVC架构](../images/1*c0aGaDNX41qu6e8E4OEgwQ.png)
+![Apple期望的MVC架构](../images/architecture_apple_mvc.png)
 
 Controller是View和Model之间的中介，这样他们就解耦了。最小的可重用单元是Controller，这对我们来说是个好消息，因为我们必须有一个来放那些不适合放入Model的复杂业务逻辑的地方。
 
@@ -159,7 +159,7 @@ Controller是View和Model之间的中介，这样他们就解耦了。最小的�
 
 **实际**
 
-![Apple实际的MVC架构](../images/1*PkWjDU0jqGJOB972cMsrnA.png)
+![Apple实际的MVC架构](../images/architecture_actual_mvc.png)
 
 Cocoa MVC鼓励人们编写大规模的视图控制器，而且由于它们涉及View的生命周期，所以很难说它们（View和Controller）是分离的。
 
@@ -182,7 +182,7 @@ MVC 的缺点：
 ### 3.2 MVP 架构
 MVP（Model View Presenter）架构师从著名的 MVC 架构演变而来的。虽然 MVC 很好的将 Mode 和 View 进行了分离，但是也带来一个问题，Model 的变化以及 View 的反馈，这些消息都必须经过 Controller 来进行，随着应用的开发，Controller 也就变得越来越臃肿不堪。
 
-![MVP架构](../images/1*hKUCPEHg6TDz6gtOlnFYwQ.png)
+![MVP架构](../images/architecture_mvp.png)
 
 #### 3.2.1 MVP 架构介绍
 从名字便可知，MVP 同样是三层架构：
@@ -197,14 +197,15 @@ MVP（Model View Presenter）架构师从著名的 MVC 架构演变而来的。�
 - 易用性 — 在我们上边不切实际的简单的例子中，代码量是MVC模式的2倍，但同时MVP的概念却非常清晰
 
 #### 3.2.3 监听 Controller 的 MVP
-![监听Controller的MVP](../images/1*bkB6Ho_G5De47IkJpaX5XQ.png)
+![监听Controller的MVP](../images/architecture_observing_mvp.png)
 
 ### 3.3 MVVM 架构
 
 #### 3.3.1 MVVM 介绍
 MVVM架构是MV(X)系列最新的成员
 
-![MVVM](../images/1*uhPpTHYzTmHGrAZy8hiM7w.png)
+![MVVM](../images/architecture_mvvm.png
+)
 
 它和 MVP 模式看起来很像:
 
@@ -224,7 +225,7 @@ MVVM架构是MV(X)系列最新的成员
 
 #### 3.4.1 VIPER 架构介绍
 
-![VIPER架构](../images/1*0pN3BNTXfwKbf08lhwutag.png)
+![VIPER架构](../images/architecture_viper.png)
 
 - 交互器（Interactor） — 包括关于数据和网络请求的业务逻辑，例如创建一个实体（Entities），或者从服务器中获取一些数据。为了实现这些功能，需要使用服务、管理器，但是他们并不被认为是VIPER架构内的模块，而是外部依赖。
 - 展示器（Presenter） — 包含UI层面（但UIKit独立）的业务逻辑以及在交互器（Interactor）层面的方法调用。
