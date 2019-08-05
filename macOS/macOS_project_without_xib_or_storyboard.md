@@ -104,6 +104,7 @@ _ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)
 
 - [What does “@UIApplicationMain” mean?
 ](https://stackoverflow.com/questions/24516250/what-does-uiapplicationmain-mean)
+- [How to make a Cocoa application without a .xib file](https://jameshfisher.com/2017/03/17/removing-xib-file/)
 
 
 
