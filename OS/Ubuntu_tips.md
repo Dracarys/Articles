@@ -31,4 +31,6 @@ ID Status  Spawn                Ready       Summary
 sudo snap abort 1
 ```
 
-> 注意命令中 `abort` 的是 id，要与上一条命令的结果中的条目 id 相同。
+注意命令中 `abort` 的是 id，要与上一条命令的结果中的条目 id 相同。
+
+> 如果你跟我一样，对 Snap 不甚了解，那么可以参见这篇文章：[《Ubuntu 18.04及Snap体验》](https://www.linuxidc.com/Linux/2018-06/152993.htm)
