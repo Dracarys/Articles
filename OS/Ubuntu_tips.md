@@ -14,7 +14,7 @@ apt update
 
 
 ## Unable to install "package-name": snap "package-name" has "install-snap" change in progress
-通过 snap store 同时安装多个应用，尤其是在前一个尚未安装完，就安装下一个的时候，往往会出现此错误提示。这是因为安装进程仍在进行中，至少是它认为仍在进行中。
+通过 snap store 安装应用，如果尚未安装完你就去查看了其他应用，之后再次返回时安装进度就很可能会丢失，此时如果你再次选择 “install”，就会得到该错误。这是因为安装进程仍在进行中，至少是它认为仍在进行中。
 
 怎么解决呢？在万能的终端中输入如下命令，查看正在进行的安装：
 
