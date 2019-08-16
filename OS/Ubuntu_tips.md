@@ -12,3 +12,23 @@ apt update
 
 > 注意，很多包都需要 root 权限，注意切换用户。
 
+
+## snap "*" has "install-snap" change in progress
+通过 snap store 同时安装多个应用，尤其是在前一个尚未安装完，就安装下一个的时候，往往会出现此错误提示。这是因为安装进程仍在进行中，至少是它认为仍在进行中。
+
+怎么解决呢？在万能的终端中输入如下命令，查看正在进行的安装：
+
+```shell
+$ snap changes
+
+ID Status  Spawn                Ready       Summary
+1  Doing   today at 11:09 CST   -           Install "AppName" snap
+```
+
+应该能在结果中看到，你想装而装不了的应用，状态为 `Doing`。这就是问题的所在了，接下我来我们只要在终端中终止它就可以了。
+
+```shell
+sudo snap abort 1
+```
+
+> 注意命令中 `abort` 的是 id，要与上一条命令的结果中的条目 id 相同。
