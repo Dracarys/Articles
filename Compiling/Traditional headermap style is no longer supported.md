@@ -1,6 +1,6 @@
 ### Traditional headermap style is no longer supported
 
-在用新的 Xcode 打开旧工程时经常会遇到这个问题，解决办法就是：将相应 Target 的 build setting 设置中 “Always Search User Paths” 选项设置为 “NO”，这样问题就结局了，可以这是为什么呢？
+在用新的 Xcode 打开旧工程时经常会遇到这个问题，解决办法就是：将相应 Target 的 build setting 设置中 “Always Search User Paths” 选项设置为 “NO”，这样问题就解决了，可以这是为什么呢？
 
 该设置已经于 Xcode 8.3 开始被废弃，强烈建议将其设置为“NO”。
 
