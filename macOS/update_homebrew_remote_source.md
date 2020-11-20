@@ -46,3 +46,5 @@ $ git reset --hard origin/master
 # 应用生效:
 $ brew update  
 ```
+
+> 方法引用自：[简书](https://www.jianshu.com/p/b26c7bc14440)
