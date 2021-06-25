@@ -33,8 +33,11 @@ YYCache 采用最近最少使用（Least Recently Used，LRU）算法。它综�
 
 ## 4. 数据库
 
-### 4.1 FMDB 是如何实现同步的
-通过一个 serial queue 实现多线程对数据库的访问。此外如果是只读数据库，还可以通过FMDBdatabasePool 进行访问。
+###  4.1 SQLite 数据的读写特性
+SQLite 支持无限多个读取，但是任一时刻仅支持一个写入，对于多个写入请求是通过队列实现的。此外，SQLite的初衷不是取代或者看齐那些大型 C/S 数据库，而是 `fopen()`。
+
+### 4.2 FMDB 是如何实现同步的
+通过一个 serial queue 实现对数据库的同步访问。此外如果是只读数据库，则可以通过FMDBdatabasePool 进行真正的并发访问。
 
 ## 5. 三方库管理工具
 
