@@ -31,9 +31,14 @@ YYCache 采用最近最少使用（Least Recently Used，LRU）算法。它综�
 ### 3.4 YYImage 图片编解码
 与 SDWebImage 的解码逻辑类似，也是放到后代队列进行预先解码，以避免在赋值后由主线程队列解码。
 
-## 4. 三方库管理工具
+## 4. 数据库
 
-### 4.1 Pod 的工作原理
+### 4.1 FMDB 是如何实现同步的
+通过一个 serial queue 实现多线程对数据库的访问。此外如果是只读数据库，还可以通过FMDBdatabasePool 进行访问。
+
+## 5. 三方库管理工具
+
+### 5.1 Pod 的工作原理
 CocoaPods的工作主要是通过ProjectName.xcworkspace来组织的，在打开ProjectName.xcworkspace文件后，发现Xcode会多出一个Pods工程。
 
 1. 库文件引入及配置：库文件的引入主要由Pods工程中的Pods-ProjectName-frameworks.sh脚本负责，在每次编译的时候，该脚本会帮你把预引入的所有三方库文件打包的成ProjectName.a静态库文件，放在我们原Xcode工程中Framework文件夹下，供工程使用。
@@ -41,7 +46,7 @@ CocoaPods的工作主要是通过ProjectName.xcworkspace来组织的，在打开
 2. Resource文件：Resource资源文件主要由Pods工程中的Pods-ProjectName-resources.sh脚本负责，在每次编译的时候，该脚本会帮你将所有三方库的Resource文件copy到目标目录中。
 3. 依赖参数设置：在Pods工程中的的每个库文件都有一个相应的SDKName.xcconfig，在编译时，CocoaPods就是通过这些文件来设置所有的依赖参数的，编译后，在主工程的Pods文件夹下会生成两个配置文件，Pods-ProjectName.debug.xcconfig、Pods-ProjectName.release.xcconfig。
 
-### 4.2 Pod update和 Pod install 的区别
+### 5.2 Pod update和 Pod install 的区别
 **结论**
 
 - `pod install` 用于向你的工程安装新的 pods，那怕 `Podfile` 已经存在，且已运行过 `pod install`；即使，你仅仅是通过 CocoaPods 对 pods 进行增/删（编辑）。
@@ -63,6 +68,5 @@ CocoaPods的工作主要是通过ProjectName.xcworkspace来组织的，在打开
 
 如果运行时为制定具体依赖，那么它将更新 Podfile 中列明的所有依赖。
 
-## 5. 其它
+## 6. 其它
 
-### 5.1 FB 的 Async 库都做了什么？
